@@ -1,37 +1,71 @@
-import { createRouter, createWebHistory } from 'vue-router';
-// import store from '@/store';
+import { createRouter, createWebHistory } from "vue-router";
+import Dashboard from "../views/Dashboard.vue";
+import Tables from "../views/Tables.vue";
+import Billing from "../views/Billing.vue";
+import VirtualReality from "../views/VirtualReality.vue";
+import RTL from "../views/Rtl.vue";
+import Profile from "../views/Profile.vue";
+import Signup from "../views/Signup.vue";
+import Signin from "../views/Signin.vue";
+import GetEmployee from "../components/GetEmployee.vue"
 
 const routes = [
   {
-    path: "/login",
-    name: "loginView",
-    component: () => import("@/views/auth/loginView.vue")
+    path: "/",
+    name: "/",
+    redirect: "/dashboard",
   },
   {
     path: "/dashboard",
-    name: "dashBoard",
-    component: () => import("@/views/auth/dashBoard.vue")
+    name: "Dashboard",
+    component: Dashboard,
+  },
+  {
+    path: "/tables",
+    name: "Tables",
+    component: Tables,
+  },
+  {
+    path: "/billing",
+    name: "Billing",
+    component: Billing,
+  },
+  {
+    path: "/virtual-reality",
+    name: "Virtual Reality",
+    component: VirtualReality,
+  },
+  {
+    path: "/rtl-page",
+    name: "RTL",
+    component: RTL,
+  },
+  {
+    path: "/profile",
+    name: "Profile",
+    component: Profile,
+  },
+  {
+    path: "/signin",
+    name: "Signin",
+    component: Signin,
+  },
+  {
+    path: "/signup",
+    name: "Signup",
+    component: Signup,
   },
   {
     path: "/employees/:val",
     name: "employees",
-    component: () => import("@/components/getEmployees.vue"),
+    component: GetEmployee,
   },
 ];
 
 const router = createRouter({
-  mode: 'history',
-  history: createWebHistory(),
+  history: createWebHistory(process.env.BASE_URL),
   routes,
+  linkActiveClass: "active",
 });
-
-// router.beforeEach((to, from, next) => {
-//   if (typeof store.state.authToken == 'undefined' || !store.state.authToken){
-//     next('/login')
-//   }
-//   else{
-//     next()
-//   }
-// });
 
 export default router;
