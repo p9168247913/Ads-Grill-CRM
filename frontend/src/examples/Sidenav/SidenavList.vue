@@ -1,7 +1,7 @@
 <template>
-  <div class="collapse navbar-collapse w-auto h-auto h-100" id="sidenav-collapse-main">
+  <div class="collapse navbar-collapse w-auto h-auto h-100" id="sidenav-collapse-main">                                               
     <ul class="navbar-nav">
-      <li class="nav-item">
+      <li class="nav-item" v-if="!isAdmin">
         <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
           <template v-slot:icon>
@@ -17,20 +17,18 @@
         }" :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Employees'" data-toggle="collapse"
           :aria-expanded="isAreaExpended">
           <template v-slot:icon>
-            <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
+            <i class="fas fa-users text-primary text-sm opacity-10"></i>
           </template>
-          <!-- <span class="ml-4"></span> -->
-          <!-- <i class="las la-angle-right iq-arrow-right arrow-active"></i>
-          <i class="las la-angle-down iq-arrow-right arrow-hover"></i> -->
+         
         </sidenav-item>
         <ul id="" class="iq-submenu collapse list-unstyled" :class="{ 'show': isCollapseShow }"
           data-parent="#iq-sidebar-toggle">
-          <li class="nav-item">
+          <li class="nav-item" >
             <sidenav-item class="emp-li" :url="getRoutePath('Development')" :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
               aria-expanded="false">
               <template v-slot:icon>
-                <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
+                <i class="fas fa-code text-info text-sm opacity-10"></i>
               </template>
               <router-link :to="getRoutePath('Development')"> <span class="ml-0">Development</span></router-link>
 
@@ -40,7 +38,7 @@
             <sidenav-item class="emp-li" :url="getRoutePath('sales')" :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Sales'" data-toggle="collapse" aria-expanded="false">
               <template v-slot:icon>
-                <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
+                <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
               </template>
               <router-link :to="getRoutePath('sales')"></router-link>
             </sidenav-item>
@@ -49,45 +47,63 @@
             <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
               <template v-slot:icon>
-                <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
+                <i class="fas fa-clipboard-list text-info text-sm opacity-10"></i>
               </template>
               <router-link :to="getRoutePath('hrms')"></router-link>
             </sidenav-item>
           </li>
         </ul>
       </li>
+      
       <li class="nav-item">
-        <sidenav-item url="investment" :class="getRoute() === 'tables' ? 'active' : ''"
+        <sidenav-item url="/requestaccess" class="requestaccess"
+          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'RequestAccess'">
+          <template v-slot:icon>
+            <i class="fas fa-key text-warning text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+                                         
+      <li class="nav-item">
+        <sidenav-item url="/projects" class="projects"
+          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Projects'">
+          <template v-slot:icon>
+            <i class="fas fa-tasks text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/investment" :class="getRoute() === 'tables' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الجداول' : 'Investment'">
           <template v-slot:icon>
-            <i class="ni ni-calendar-grid-58 text-warning text-sm opacity-10"></i>
+            <i class="fa fa-inr text-primary text-sm opacity-10"></i>
           </template>
           <!-- <router-link :to="investment"> <span class="ml-0">Investment</span></router-link> -->
          
         </sidenav-item>
       </li>
-      <li class="nav-item">
-        <sidenav-item url="sales" :class="getRoute() === 'billing' ? 'active' : ''"
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/sales" :class="getRoute() === 'billing' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الفواتیر' : 'Sales'">
           <template v-slot:icon>
-            <i class="ni ni-credit-card text-success text-sm opacity-10"></i>
+            <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
           </template>
           <!-- <router-link :to="getRoutePath('sales')"> <span class="ml-0">Sales</span></router-link> -->
         </sidenav-item>
       </li>
-      <li class="nav-item">
-        <sidenav-item url="leads" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads'
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/leads" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads'
           ">
           <template v-slot:icon>
-            <i class="ni ni-app text-info text-sm opacity-10"></i>
+            <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
           </template>
           <!-- <router-link :to="getRoutePath('leads')"> <span class="ml-0">Leads</span></router-link> -->
         </sidenav-item>
       </li>
-      <li class="nav-item">
-        <sidenav-item url="profit" :class="getRoute() === 'rtl-page' ? 'active' : ''" navText="Profit">
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/profit" :class="getRoute() === 'profit' ? 'active' : ''" navText="Profit">
           <template v-slot:icon>
-            <i class="ni ni-world-2 text-danger text-sm opacity-10"></i>
+            <i class="fas fa-chart-line text-success text-sm opacity-10"></i>
           </template>
           <!-- <router-link :to="getRoutePath('profit')"> <span class="ml-0">Profit</span></router-link> -->
         </sidenav-item>
@@ -113,37 +129,11 @@
      
     </ul>
   </div>
-  <!-- <div class="pt-3 mx-3 mt-3 sidenav-footer">
-    <sidenav-card :class="cardBg" textPrimary="Need Help?" textSecondary="Please check our docs" />
-  </div> -->
+ 
 </template>
 <script>
 import SidenavItem from "./SidenavItem.vue";
-// import SidenavCard from "./SidenavCard.vue";
 
-// export default {
-// name: "SidenavList",
-// props: {
-//   cardBg: String
-// },
-// data() {
-//   return {
-//     title: "Argon Dashboard 2",
-//     controls: "dashboardsExamples",
-//     isActive: "active"
-//   };
-// },
-// components: {
-//   SidenavItem,
-//   SidenavCard
-// },
-// methods: {
-//   getRoute() {
-//     const routeArr = this.$route.path.split("/");
-//     return routeArr[1];
-//   }
-// }
-// };
 export default {
   name: "SidenavList",
   props: {
@@ -163,6 +153,7 @@ export default {
     }
   },
   methods: {
+
     colapseShowTogeller() {
       this.isCollapseShow = !this.isCollapseShow
     },
@@ -177,6 +168,12 @@ export default {
     getRoute() {
       const routeArr = this.$route.path.split("/");
       return routeArr[1];
+    }
+  },
+  computed: {
+    isAdmin() {
+      const role = localStorage.getItem('role');
+      return role === 'admin';
     }
   }
 }

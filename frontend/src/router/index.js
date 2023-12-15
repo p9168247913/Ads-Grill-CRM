@@ -1,12 +1,14 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Dashboard from "../views/Dashboard.vue";
+import projectView from "../components/projectView.vue";
 import investMent from "../components/investMent.vue";
 import salesView from "../components/salesView";
 import leadsView from "../components/leadsView";
 import profitView from "../components/profitView";
+import requestAccess from "../components/requestAccess";
 import Profile from "../views/Profile.vue";
-import Signup from "../views/Signup.vue";
-import Signin from "../views/Signin.vue";
+ import Signup from "../views/Signup.vue";
+ import Signin from "../views/Signin.vue";
 import GetEmployee from "../components/GetEmployee.vue"
 
 const routes = [
@@ -19,6 +21,16 @@ const routes = [
     path: "/dashboard",
     name: "Dashboard",
     component: Dashboard,
+  },
+  {
+    path: "/requestaccess",
+    name: "requestaccess",
+    component: requestAccess,
+  },
+  {
+    path: "/projects",
+    name: "projects",
+    component: projectView,
   },
   {
     path: "/investment",
