@@ -9,8 +9,7 @@
           </template>
         </sidenav-item>
       </li>
-
-      <li @click="isAreaExpendedTogeller(), colapseShowTogeller()" class="nav-item">
+      <li @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item">
         <sidenav-item url="" :class="{
           'active': getRoute() === '',
           'collapsed': isCollapseShow
@@ -21,21 +20,23 @@
           </template>
          
         </sidenav-item>
-        <ul id="" class="iq-submenu collapse list-unstyled" :class="{ 'show': isCollapseShow }"
+        <ul v-if="isEmploymentDropdownOpen" @click.stop
+          class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled" :class="{ 'show': isCollapseShow }"
           data-parent="#iq-sidebar-toggle">
           <li class="nav-item" >
-            <sidenav-item class="emp-li" :url="getRoutePath('Development')" :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
+            <sidenav-item class="emp-li" :url="getRoutePath('Development')"
+              :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
               aria-expanded="false">
               <template v-slot:icon>
                 <i class="fas fa-code text-info text-sm opacity-10"></i>
               </template>
               <router-link :to="getRoutePath('Development')"> <span class="ml-0">Development</span></router-link>
-
             </sidenav-item>
           </li>
           <li class=" ">
-            <sidenav-item class="emp-li" :url="getRoutePath('sales')" :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
+            <sidenav-item class="emp-li" :url="getRoutePath('sales')"
+              :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Sales'" data-toggle="collapse" aria-expanded="false">
               <template v-slot:icon>
                 <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
@@ -44,7 +45,8 @@
             </sidenav-item>
           </li>
           <li class=" ">
-            <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
+            <sidenav-item class="emp-li" :url="getRoutePath('hrms')"
+              :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
               <template v-slot:icon>
                 <i class="fas fa-clipboard-list text-info text-sm opacity-10"></i>
@@ -78,8 +80,6 @@
           <template v-slot:icon>
             <i class="fa fa-inr text-primary text-sm opacity-10"></i>
           </template>
-          <!-- <router-link :to="investment"> <span class="ml-0">Investment</span></router-link> -->
-         
         </sidenav-item>
       </li>
       <li class="nav-item" v-if="!isAdmin">
@@ -88,7 +88,6 @@
           <template v-slot:icon>
             <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
           </template>
-          <!-- <router-link :to="getRoutePath('sales')"> <span class="ml-0">Sales</span></router-link> -->
         </sidenav-item>
       </li>
       <li class="nav-item" v-if="!isAdmin">
@@ -97,7 +96,6 @@
           <template v-slot:icon>
             <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
           </template>
-          <!-- <router-link :to="getRoutePath('leads')"> <span class="ml-0">Leads</span></router-link> -->
         </sidenav-item>
       </li>
       <li class="nav-item" v-if="!isAdmin">
@@ -105,7 +103,6 @@
           <template v-slot:icon>
             <i class="fas fa-chart-line text-success text-sm opacity-10"></i>
           </template>
-          <!-- <router-link :to="getRoutePath('profit')"> <span class="ml-0">Profit</span></router-link> -->
         </sidenav-item>
       </li>
       <li class="mt-3 nav-item">
@@ -126,7 +123,6 @@
           </template>
         </sidenav-item>
       </li>
-     
     </ul>
   </div>
  
@@ -141,7 +137,6 @@ export default {
   },
   components: {
     SidenavItem,
-    // SidenavCard
   },
   data() {
     return {
@@ -149,37 +144,64 @@ export default {
       isAreaExpended: false,
       title: "Argon Dashboard 2",
       controls: "dashboardsExamples",
-      isActive: "active"
+      isActive: "active",
+      isEmploymentDropdownOpen: false
     }
   },
   methods: {
 
     colapseShowTogeller() {
-      this.isCollapseShow = !this.isCollapseShow
+      this.isCollapseShow = !this.isCollapseShow;
     },
     isAreaExpendedTogeller() {
-      this.isAreaExpended = !this.isAreaExpended
+      this.isAreaExpended = !this.isAreaExpended;
     },
     getRoutePath(val) {
-      const prefixURL = '/employees'
-      let urlP = `${prefixURL}/${val}`
-      return urlP
+      const prefixURL = '/employees';
+      return `${prefixURL}/${val}`;
     },
     getRoute() {
       const routeArr = this.$route.path.split("/");
       return routeArr[1];
+    },
+    toggleEmploymentDropdown() {
+      this.isEmploymentDropdownOpen = true;
+    },
+    closeEmploymentDropdown(event) {
+      if (
+        this.isEmploymentDropdownOpen &&
+        !this.$refs.employmentDropdown.contains(event.target)
+      ) {
+        this.isEmploymentDropdownOpen = false;
+      }
+    },
+    closeDropdownOnSidebarClick() {
+      this.isEmploymentDropdownOpen = false;
     }
   },
   computed: {
     isAdmin() {
       const role = localStorage.getItem('role');
       return role === 'admin';
+    },
+  watch: {
+    $route() {
+      if (this.getRoute() !== "employees") {
+        this.isEmploymentDropdownOpen = false;
+      }
     }
-  }
+  },
+  mounted() {
+    document.addEventListener("click", this.closeEmploymentDropdown);
+  },
+  beforeUnmount() {
+    document.removeEventListener("click", this.closeEmploymentDropdown);
+  },
+}
 }
 </script>
 <style>
-.emp-li{
+.emp-li {
   margin-left: 30px !important;
 }
 </style>

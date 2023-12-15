@@ -6,12 +6,6 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
-
-
-
-
-
-
     <div class="wrapper">
         <div class="content-page">
 
@@ -82,13 +76,56 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-primary">Save Changes</button>
+            <div class="container-fluid">
+                <div style="margin-top: 20px;">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text text-body">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" placeholder="Type here..." />
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
+                            <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
+                                <button class="btn btn-primary mb-2 h-100" type="button"
+                                    style="width: auto; height: 40px !important;" data-bs-toggle="modal"
+                                    data-bs-target="#createRoleModal">Create Role</button>
+                                <button class="btn btn-primary mb-2 h-100" type="button"
+                                    style="width: auto;height: 40px !important;">Create Admin</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal for Create Role -->
+                    <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="roleName" class="form-label">Role Name</label>
+                                            <input type="text" class="form-control" id="roleName"
+                                                placeholder="Enter role name...">
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary">Add</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-
-                <div class="card">
+                <div class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
                         <h6>{{ $route.params.val.toUpperCase() }}</h6>
                     </div>
@@ -101,7 +138,6 @@
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                                             v-for="(head) in headers" :key="head">{{ head }}</th>
                                     </tr>
-
                                 </thead>
                                 <tbody v-for="(user, index) in users" :key="index">
                                     <tr>
@@ -110,7 +146,6 @@
                                                 <div>
                                                     <img src="" class="avatar avatar-sm me-3" alt="user1" />
                                                 </div>
-
                                             </div>
                                         </td>
                                         <td>
@@ -160,7 +195,6 @@
                                         </td>
 
                                     </tr>
-
                                 </tbody>
                             </table>
                         </div>
@@ -171,6 +205,11 @@
         </div>
 
     </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
 </template>
 
 <script>
