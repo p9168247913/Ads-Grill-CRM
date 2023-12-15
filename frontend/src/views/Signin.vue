@@ -6,29 +6,40 @@
   <div class="container top-0 position-sticky z-index-sticky">
     <div class="row">
       <div class="col-12">
-        <navbar isBlur="blur  border-radius-lg my-3 py-2 start-0 end-0 mx-4 shadow" v-bind:darkMode="true"
-          isBtn="bg-gradient-success" />
+        <!-- <navbar isBlur="blur  border-radius-lg my-3 py-2 start-0 end-0 mx-4 shadow" v-bind:darkMode="true"
+          isBtn="bg-gradient-success" /> -->
       </div>
     </div>
   </div>
   <main class="mt-0 main-content">
     <section>
+
       <div class="page-header min-vh-100">
         <div class="container">
           <div class="row">
             <div class="mx-auto col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0">
-              <div class="card card-plain">
+              <div style="margin: auto;">
+                <img src="../assets/img/logos/Adsgrill.png" style=" width: 150px !important;" alt="">
+              </div>
+              <div class="card card-plain" style="margin-top: 20px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;">
                 <div class="pb-0 card-header text-start">
-                  <h4 class="font-weight-bolder">Sign In</h4>
+                  <h4 class="font-weight-bolder"><u>Sign In</u></h4>
                   <p class="mb-0">Enter your email and password to sign in</p>
                 </div>
                 <div class="card-body">
                   <form role="form">
-                    <div class="mb-3">
-                      <input v-model="email" type="email" placeholder="Email" size="lg" />
+                    <div class="col-md-10 col-lg-12 col-sm-12 mb-3">
+                      <div class="input-group">
+                        <input v-model="email" type="email" class="form-control" placeholder="Email.." />
+                      </div><br />
+                      <div class="input-group">
+                        <input v-model="pswd" type="password" class="form-control" placeholder="Password" size="lg" />
+                      </div>
                     </div>
+                    <!-- <div class="mb-3">
+                      <input v-model="email"  placeholder="Email" size="lg" />
+                    </div> -->
                     <div class="mb-3">
-                      <input v-model="pswd" type="password" placeholder="Password" size="lg" />
                     </div>
                     <argon-switch id="rememberMe">Remember me</argon-switch>
 
@@ -38,12 +49,12 @@
                     </div>
                   </form>
                 </div>
-                <div class="px-1 pt-0 text-center card-footer px-lg-2">
+                <!-- <div class="px-1 pt-0 text-center card-footer px-lg-2">
                   <p class="mx-auto mb-4 text-sm">
                     Don't have an account?
                     <a href="javascript:;" class="text-success text-gradient font-weight-bold">Sign up</a>
                   </p>
-                </div>
+                </div> -->
               </div>
             </div>
             <div
@@ -53,9 +64,10 @@
                 style="background-image: url('https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signin-ill.jpg');
           background-size: cover;">
                 <span class="mask bg-gradient-success opacity-6"></span>
-                <h4 class="mt-5 text-white font-weight-bolder position-relative">"Attention is the new currency"</h4>
+                <img src="../assets/img/login/01.png" />
+                <!-- <h4 class="mt-5 text-white font-weight-bolder position-relative">"Attention is the new currency"</h4>
                 <p class="text-white position-relative">The more effortless the writing looks, the more effort the writer
-                  actually put into the process.</p>
+                  actually put into the process.</p> -->
               </div>
             </div>
           </div>
@@ -66,7 +78,7 @@
 </template>
 
 <script>
-import Navbar from "@/examples/PageLayout/Navbar.vue";
+// import Navbar from "@/examples/PageLayout/Navbar.vue";
 // import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonSwitch from "@/components/ArgonSwitch.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
@@ -80,7 +92,7 @@ const body = document.getElementsByTagName("body")[0];
 export default {
   name: "signin",
   components: {
-    Navbar,
+    // Navbar,
     // ArgonInput,
     ArgonSwitch,
     ArgonButton,
@@ -117,15 +129,17 @@ export default {
       if (!this.email) {
         new Noty({
           type: 'warning',
-          text: 'Please enter email jhbhgbvg',
-          timeout: 3000
+          text: 'Please enter email',
+          timeout: 3000,
+          layout: 'topCenter'
         }).show();
       }
       else if (!this.pswd) {
         new Noty({
           type: 'warning',
           text: 'Please enter password',
-          timeout: 3000
+          timeout: 3000,
+          layout: 'topCenter'
         }).show();
       }
       else {
@@ -139,6 +153,7 @@ export default {
               type: 'success',
               text: response.data.message,
               timeout: 500,
+              layout: 'topCenter'
             }).show()
             this.storeAuthToken(response.headers['token'], response.data.user)
             setTimeout(() => {
@@ -149,7 +164,8 @@ export default {
             new Noty({
               type: 'error',
               text: response.data.message,
-              timeout: 3000
+              timeout: 3000,
+              layout: 'topCenter'
             }).show()
           }
         }).catch(() => {

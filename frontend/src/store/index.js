@@ -2,7 +2,7 @@ import { createStore } from "vuex";
 
 export default createStore({
   state: {
-    authToken: localStorage.getItem('token') || null,
+    authToken: localStorage.getItem('token') || '',
     authUser:{
       email: localStorage.getItem('email') || "",
       role:localStorage.getItem('role') || "",
@@ -78,6 +78,10 @@ export default createStore({
       localStorage.removeItem('contact_no')
       localStorage.removeItem('pincode')
       localStorage.removeItem('designation')
+    },
+    clearAuthToken(){
+      localStorage.removeItem("token")
+      this.state.authToken=''
     }
   },
   actions: {
@@ -86,7 +90,7 @@ export default createStore({
     },
     logout({commit}){
       commit('clearAuthUser')
-      commit('setAuthToken', null)
+      commit('clearAuthToken', "")
     }
   },
   getters: {

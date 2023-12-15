@@ -63,9 +63,23 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  history: createWebHistory(),
   routes,
   linkActiveClass: "active",
 });
+
+router.beforeEach((to, from, next) => {
+  const loggedIn = localStorage.getItem('token');
+  if (to.path !== '/signin' && to.path !== '/signup') {
+      if (!loggedIn || loggedIn=="") {
+          next('/signin');
+      } else {
+          next();
+      }
+  } else {
+      next();
+  }
+});
+
 
 export default router;
