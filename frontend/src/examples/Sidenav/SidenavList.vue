@@ -185,17 +185,17 @@ export default {
       return role === 'admin';
     },
   watch: {
-    $route() {
-      if (this.getRoute() !== "employees") {
-        this.isEmploymentDropdownOpen = false;
-      }
-    }
+    // $route() {
+    //   if (this.getRoute() !== "employees") {
+    //     this.isEmploymentDropdownOpen = false;
+    //   }
+    // }
   },
   mounted() {
-    document.addEventListener("click", this.closeEmploymentDropdown);
+    return document.addEventListener("click", this.closeEmploymentDropdown);
   },
   beforeUnmount() {
-    document.removeEventListener("click", this.closeEmploymentDropdown);
+    return document.removeEventListener("click", this.closeEmploymentDropdown);
   },
 }
 }
