@@ -1,0 +1,207 @@
+<template>
+  <div class="collapse navbar-collapse w-auto h-auto h-100" id="sidenav-collapse-main">                                               
+    <ul class="navbar-nav">
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
+          <template v-slot:icon>
+            <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item">
+        <sidenav-item url="" :class="{
+          'active': getRoute() === '',
+          'collapsed': isCollapseShow
+        }" :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Employees'" data-toggle="collapse"
+          :aria-expanded="isAreaExpended">
+          <template v-slot:icon>
+            <i class="fas fa-users text-primary text-sm opacity-10"></i>
+          </template>
+         
+        </sidenav-item>
+        <ul v-if="isEmploymentDropdownOpen" @click.stop
+          class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled" :class="{ 'show': isCollapseShow }"
+          data-parent="#iq-sidebar-toggle">
+          <li class="nav-item" >
+            <sidenav-item class="emp-li" :url="getRoutePath('Development')"
+              :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
+              :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
+              aria-expanded="false">
+              <template v-slot:icon>
+                <i class="fas fa-code text-info text-sm opacity-10"></i>
+              </template>
+              <router-link :to="getRoutePath('Development')"> <span class="ml-0">Development</span></router-link>
+            </sidenav-item>
+          </li>
+          <li class=" ">
+            <sidenav-item class="emp-li" :url="getRoutePath('sales')"
+              :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
+              :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Sales'" data-toggle="collapse" aria-expanded="false">
+              <template v-slot:icon>
+                <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
+              </template>
+              <router-link :to="getRoutePath('sales')"></router-link>
+            </sidenav-item>
+          </li>
+          <li class=" ">
+            <sidenav-item class="emp-li" :url="getRoutePath('hrms')"
+              :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
+              :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
+              <template v-slot:icon>
+                <i class="fas fa-clipboard-list text-info text-sm opacity-10"></i>
+              </template>
+              <router-link :to="getRoutePath('hrms')"></router-link>
+            </sidenav-item>
+          </li>
+        </ul>
+      </li>
+      
+      <li class="nav-item">
+        <sidenav-item url="/requestaccess" class="requestaccess"
+          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'RequestAccess'">
+          <template v-slot:icon>
+            <i class="fas fa-key text-warning text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+                                         
+      <li class="nav-item">
+        <sidenav-item url="/projects" class="projects"
+          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Projects'">
+          <template v-slot:icon>
+            <i class="fas fa-tasks text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/investment" :class="getRoute() === 'tables' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'الجداول' : 'Investment'">
+          <template v-slot:icon>
+            <i class="fa fa-inr text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/sales" :class="getRoute() === 'billing' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'الفواتیر' : 'Sales'">
+          <template v-slot:icon>
+            <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/leads" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads'
+          ">
+          <template v-slot:icon>
+            <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="nav-item" v-if="!isAdmin">
+        <sidenav-item url="/profit" :class="getRoute() === 'profit' ? 'active' : ''" navText="Profit">
+          <template v-slot:icon>
+            <i class="fas fa-chart-line text-success text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+      <li class="mt-3 nav-item">
+        <h6 v-if="this.$store.state.isRTL" class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
+          :class="this.$store.state.isRTL ? 'me-4' : 'ms-2'">
+          صفحات المرافق
+        </h6>
+        <h6 v-else class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
+          :class="this.$store.state.isRTL ? 'me-4' : 'ms-2'">
+          ACCOUNT PAGES
+        </h6>
+      </li>
+      <li class="nav-item">
+        <sidenav-item url="/profile" :class="getRoute() === 'profile' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'حساب تعريفي' : 'Profile'">
+          <template v-slot:icon>
+            <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+    </ul>
+  </div>
+ 
+</template>
+<script>
+import SidenavItem from "./SidenavItem.vue";
+
+export default {
+  name: "SidenavList",
+  props: {
+    cardBg: String
+  },
+  components: {
+    SidenavItem,
+  },
+  data() {
+    return {
+      isCollapseShow: false,
+      isAreaExpended: false,
+      title: "Argon Dashboard 2",
+      controls: "dashboardsExamples",
+      isActive: "active",
+      isEmploymentDropdownOpen: false
+    }
+  },
+  methods: {
+
+    colapseShowTogeller() {
+      this.isCollapseShow = !this.isCollapseShow;
+    },
+    isAreaExpendedTogeller() {
+      this.isAreaExpended = !this.isAreaExpended;
+    },
+    getRoutePath(val) {
+      const prefixURL = '/employees';
+      return `${prefixURL}/${val}`;
+    },
+    getRoute() {
+      const routeArr = this.$route.path.split("/");
+      return routeArr[1];
+    },
+    toggleEmploymentDropdown() {
+      this.isEmploymentDropdownOpen = true;
+    },
+    closeEmploymentDropdown(event) {
+      if (
+        this.isEmploymentDropdownOpen &&
+        !this.$refs.employmentDropdown.contains(event.target)
+      ) {
+        this.isEmploymentDropdownOpen = false;
+      }
+    },
+    closeDropdownOnSidebarClick() {
+      this.isEmploymentDropdownOpen = false;
+    }
+  },
+  computed: {
+    isAdmin() {
+      const role = localStorage.getItem('role');
+      return role === 'admin';
+    },
+  watch: {
+    // $route() {
+    //   if (this.getRoute() !== "employees") {
+    //     this.isEmploymentDropdownOpen = false;
+    //   }
+    // }
+  },
+  mounted() {
+    return document.addEventListener("click", this.closeEmploymentDropdown);
+  },
+  beforeUnmount() {
+    return document.removeEventListener("click", this.closeEmploymentDropdown);
+  },
+}
+}
+</script>
+<style>
+.emp-li {
+  margin-left: 30px !important;
+}
+</style>
