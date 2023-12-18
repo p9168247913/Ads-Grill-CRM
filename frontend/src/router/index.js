@@ -24,7 +24,7 @@ const routes = [
   },
   {
     path: "/requestaccess",
-    name: "requestaccess",
+    name: "Request Access",
     component: requestAccess,
   },
   {
@@ -69,7 +69,7 @@ const routes = [
   },
   {
     path: "/employees/:val",
-    name: "employees",
+    name: 'Employees/',
     component: GetEmployee,
   },
 ];

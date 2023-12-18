@@ -21,7 +21,7 @@
         :class="this.$store.state.isNavFixed ? 'text-dark' : 'text-white'"
         aria-current="page"
       >
-        {{ currentPage }}
+        {{ `${currentPage} ${$route.params.val? $route.params.val : '' }` }}
       </li>
     </ol>
     <h6 class="mb-0 font-weight-bolder" :class="this.$store.state.isNavFixed ? 'text-dark' : 'text-white'">
