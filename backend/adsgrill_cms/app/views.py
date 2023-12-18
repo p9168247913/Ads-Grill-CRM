@@ -6,10 +6,12 @@ from django.core.mail import send_mail
 from .serializers import UserCreateSerializer
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
+from rest_framework.parsers import MultiPartParser
 from django.views import View
 
 class UserCreateView(generics.CreateAPIView):
     serializer_class = UserCreateSerializer
+    parser_classes = (MultiPartParser,)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
