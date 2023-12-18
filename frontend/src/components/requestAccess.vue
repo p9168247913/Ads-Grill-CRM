@@ -3,16 +3,13 @@
     <div class="wrapper">
         <div class="content-page">
 
-            <div class="container-fluid" style="margin-top: 10rem;">
+            <div class="container-fluid" style="margin-top: 2rem;">
                 <div class="col-md-2" data-bs-target="#createRoleModal">
                     <a href="javascript:;" class="btn btn-sm btn-dark float-right" data-bs-toggle="modal"
-                        data-bs-target="#createRoleModal">Request Access</a>
+                        data-bs-target="#createRoleModal"  v-if="!issuperAdmin">Request Access</a>
                 </div>
 
-            </div>
-
-
-
+          
 
             <!-- Modal for Create Role -->
             <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel"
@@ -36,11 +33,7 @@
                                     </select>
                                 </div>
 
-                                <!-- Status Input Box (Disabled) -->
-                                <!-- <div class="mb-3">
-                                    <label for="status" class="form-label">Status</label>
-                                    <input type="text" class="form-control" id="status" name="status" disabled>
-                                </div> -->
+
                             </form>
                         </div>
                         <div class="modal-footer">
@@ -50,15 +43,94 @@
                     </div>
                 </div>
             </div>
-
-
-
-
-
-
-
-
         </div>
+        <div class="card" style="margin-top: 2rem;">
+                <!-- <h1>hello</h1> -->
+                <div class="card-header pb-0">
+                   
+                </div>
+                <div class="card-body px-0 pt-0 pb-2">
+                    <div class="table-responsive p-0">
+                        <table class="table align-items-center mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Profile</th>
+                                      <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Name</th>
+                                      <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Designation</th>
+                                      <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Department</th>
+                                      <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Contact No</th>
+                                      <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Pincode</th>
+                                      <th style="color: #344767 !important;"
+                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                      >Action</th>
+                                      
+                                </tr>
+                            </thead>
+                             <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex px-2 py-1">
+                                            <div>
+                                                <img src="" class="avatar avatar-sm me-3" alt="user1" />
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">ww</h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">ww</h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">yy</h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">jj</h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-0 text-sm">uiui</h6>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle" style="margin-left: 15px !important;">
+                                     
+                                        <!-- <i class="fas fa-pencil-alt text-primary fa-xs pr-4" data-bs-toggle="modal"
+                                            data-bs-target="#edituser"
+                                            style="color: dodgerblue !important; margin-left: 20px"></i> -->
+
+                                      
+                                        <i class="fas fa-trash text-danger m-3 fa-xs " 
+                                            data-toggle="tooltip" data-original-title="Delete user"></i>
+                                    </td>
+
+                                </tr>
+                            </tbody> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
   
@@ -66,17 +138,23 @@
 export default {
     data() {
         return {
-            // showModal: false
+           
         };
     },
     methods: {
-        // click() {
-        //     alert('123')
-        // }
-    }
+     
 
-};
+    },
+    computed: {
+    issuperAdmin() {
+      const role = localStorage.getItem('role');
+      return role === 'super-admin';
+    },
+    }
+}
 </script>
   
-<style>/* Add your styles here */</style>
+<style>
+/* Add your styles here */
+</style>
   
