@@ -11,54 +11,51 @@
         <div class="content-page">
             <div class="container-fluid">
                 <div style="margin-top: 20px;">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
-                                        <div class="input-group">
-                                            <span class="input-group-text text-body">
-                                                <i class="fas fa-search" aria-hidden="true"></i>
-                                            </span>
-                                            <input type="text" class="form-control" placeholder="Type here..." />
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
-                                        <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                                            <button class="btn btn-primary mb-2 h-100" type="button"
-                                                style="width: auto; height: 40px !important;" data-bs-toggle="modal"
-                                                data-bs-target="#createRoleModal">Create Role</button>
-                                            <button class="btn btn-primary mb-2 h-100" type="button"
-                                                style="width: auto;height: 40px !important;">Create Admin</button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text text-body">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" placeholder="Type here..." v-model="searchTerm" />
                             </div>
-                                                        <!-- Modal for Create Role -->
-                                                        <div class="modal fade" id="createRoleModal" tabindex="-1"
-                                aria-labelledby="createRoleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form>
-                                                <div class="mb-3">
-                                                    <label for="roleName" class="form-label">Role Name</label>
-                                                    <input type="text" class="form-control" id="roleName"
-                                                        placeholder="Enter role name...">
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Add</button>
-                                        </div>
-                                    </div>
-                                </div>
+                        </div>
+                        <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
+                            <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
+                                <button class="btn btn-primary mb-2 h-100" type="button"
+                                    style="width: auto; height: 40px !important;" data-bs-toggle="modal"
+                                    data-bs-target="#createRoleModal">Create Role</button>
+                                <button class="btn btn-primary mb-2 h-100" type="button"
+                                    style="width: auto;height: 40px !important;">Create Admin</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal for Create Role -->
+                <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="roleName" class="form-label">Role Name</label>
+                                        <input type="text" class="form-control" id="roleName"
+                                            placeholder="Enter role name...">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Modal for Edit Details -->
                 <div class="modal fade" id="edituser" tabindex="-1" aria-labelledby="edituser" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -227,7 +224,8 @@ export default {
     data() {
         return {
             // showModal: false,
-            name: '', email: '', role: '3', contact_no: '', designation: 'Full stack developer', pincode: '', password: '',
+            searchTerm: '',
+            name: '', email: '', role: '', contact_no: '', designation: '', pincode: '', password: '',
             isToggled: false,
             isAreaModal: false,
             displayToggle: 'none',
@@ -236,7 +234,19 @@ export default {
         }
     },
     computed: {
-        ...mapState(['authUser'])
+        ...mapState(['authUser']),
+        filteredUsers() {
+            return this.users.filter(user => {
+                const searchLowerCase = this.searchTerm.toLowerCase();
+                return (
+                    user.name.toLowerCase().includes(searchLowerCase) ||
+                    user.role.toLowerCase().includes(searchLowerCase) ||
+                    user.designation.toLowerCase().includes(searchLowerCase)||
+                    user.designation.toLowerCase().includes(searchLowerCase)
+                );
+
+            });
+        }
     },
     methods: {
         confirmDelete() {
