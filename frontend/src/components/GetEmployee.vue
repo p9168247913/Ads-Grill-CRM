@@ -11,54 +11,214 @@
         <div class="content-page">
             <div class="container-fluid">
                 <div style="margin-top: 20px;">
-                                <div class="row">
-                                    <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
-                                        <div class="input-group">
-                                            <span class="input-group-text text-body">
-                                                <i class="fas fa-search" aria-hidden="true"></i>
-                                            </span>
-                                            <input type="text" class="form-control" placeholder="Type here..." />
-                                        </div>
-                                    </div>
-                                    <div
-                                        class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
-                                        <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                                            <button class="btn btn-primary mb-2 h-100" type="button"
-                                                style="width: auto; height: 40px !important;" data-bs-toggle="modal"
-                                                data-bs-target="#createRoleModal">Create Role</button>
-                                            <button class="btn btn-primary mb-2 h-100" type="button"
-                                                style="width: auto;height: 40px !important;">Create Admin</button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text text-body">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" class="form-control" placeholder="Type here..." />
                             </div>
-                                                        <!-- Modal for Create Role -->
-                                                        <div class="modal fade" id="createRoleModal" tabindex="-1"
-                                aria-labelledby="createRoleModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                        </div>
+                        <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
+                            <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
+                                <button v-if="authUser.role == 'super-admin'" class="btn btn-primary mb-2 h-100"
+                                    type="button" style="width: auto; height: 40px !important;" data-bs-toggle="modal"
+                                    data-bs-target="#createRoleModal">Create Role</button>
+                                <button v-if="authUser.role == 'super-admin'" class="btn btn-primary mb-2 h-100"
+                                    type="button" style="width: auto;height: 40px !important;" data-bs-toggle="modal"
+                                    data-bs-target="#createAdmin">Create Admin</button>
+                                <button v-if="authUser.role == 'admin'" class="btn btn-primary mb-2 h-100" type="button"
+                                    style="width: auto;height: 40px !important;" data-bs-toggle="modal"
+                                    data-bs-target="#createUser" @click="getUserRole">Create User</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal for Create Role -->
+                <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="roleName" class="form-label">Role Name</label>
+                                        <input type="text" class="form-control" id="roleName"
+                                            placeholder="Enter role name..." v-model="roleName">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    @click="roleName = ''">Close</button>
+                                <button @click="createRole" type="button" class="btn btn-primary">Add</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Modal for Create admin -->
+                <div class="modal fade" id="createAdmin" tabindex="-1" aria-labelledby="createadminLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createadminLabel">Create Admin</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Your form to create role -->
+                                <form>
+
+                                    <!-- First Row -->
+                                    <div class="row">
+                                        <!-- Name Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="name" class="form-label">Name</label>
+                                            <input type="text" class="form-control" v-model="name" required>
                                         </div>
-                                        <div class="modal-body">
-                                            <form>
-                                                <div class="mb-3">
-                                                    <label for="roleName" class="form-label">Role Name</label>
-                                                    <input type="text" class="form-control" id="roleName"
-                                                        placeholder="Enter role name...">
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">Add</button>
+
+                                        <!-- Email Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="form-label">Designation</label>
+                                            <input type="text" class="form-control" v-model="designation" required>
                                         </div>
                                     </div>
-                                </div>
+
+                                    <!-- Second Row -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="text" class="form-control" v-model="email" required>
+                                        </div>
+
+                                        <!-- Contact Number Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" v-model="password" required>
+                                        </div>
+                                    </div>
+                                    <!-- Second Row -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="Pincode" class="form-label">Pincode</label>
+                                            <input type="text" class="form-control" v-model="pincode" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="role" class="form-label">Role</label>
+                                            <input type="text" class="form-control" disabled value="admin">
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="contact_no" class="form-label">Contact No</label>
+                                            <input type="text" class="form-control" v-model="contact_no" required>
+                                        </div>
+                                    </div>
+                                    <!-- Continue adding rows as needed -->
+
+                                </form>
                             </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    @click="resetValues">Close</button>
+                                <button type="button" class="btn btn-primary" @click="createUser">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end -->
+
+                <!-- Modal for Create user -->
+                <div class="modal fade" id="createUser" tabindex="-1" aria-labelledby="createadminLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createadminLabel">Create User</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Your form to create role -->
+                                <form>
+
+                                    <!-- First Row -->
+                                    <div class="row">
+                                        <!-- Name Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="name" class="form-label">Name</label>
+                                            <input type="text" class="form-control" v-model="name" required>
+                                        </div>
+
+                                        <!-- Email Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="desgination" class="form-label">Designation</label>
+                                            <input type="text" class="form-control" v-model="designation" required>
+                                        </div>
+                                    </div>
+
+                                    <!-- Second Row -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="text" class="form-control" v-model="email" required>
+                                        </div>
+
+                                        <!-- Contact Number Field -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" v-model="password" required>
+                                        </div>
+                                    </div>
+                                    <!-- Second Row -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="Pincode" class="form-label">Pincode</label>
+                                            <input type="text" class="form-control" v-model="pincode" required>
+                                        </div>
+                                        <!-- <div class="col-md-6 mb-3">
+                                            <label for="Pincode" class="form-label">Role</label>
+                                            <input type="text" class="form-control" id="role" name="role" v-model="admin" >
+                                        </div> -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="Role" class="form-label">Role</label>
+                                            <select class="form-select" id="role" name="role" v-model="selectedRole"
+                                                required>
+                                                <option value="" disabled selected>Select Role</option>
+                                                <option v-for="(item, index) in userRole" :key="index" :value="item.id"> {{
+                                                    item.name }}</option>
+
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="contactno" class="form-label">Contact No</label>
+                                            <input type="text" class="form-control" v-model="contact_no" required>
+                                        </div>
+                                    </div>
+                                    <!-- Continue adding rows as needed -->
+
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                    @click="resetValues()">Close</button>
+                                <button type="button" class="btn btn-primary" @click="createUser"
+                                    data-bs-dismiss="modal">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end -->
+
                 <!-- Modal for Edit Details -->
                 <div class="modal fade" id="edituser" tabindex="-1" aria-labelledby="edituser" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
@@ -187,17 +347,19 @@
                                         <!-- <a href="" class="text-secondary font-weight-bold text-xs"
                                                 data-bs-toggle="modal" data-bs-target="#createRoleModal" style="color: dodgerblue !important">Edit
                                             </a> -->
-                                        <i class="fas fa-pencil-alt text-primary fa-xs pr-4" data-bs-toggle="modal"
-                                            data-bs-target="#edituser"
-                                            style="color: dodgerblue !important; margin-left: 20px"></i>
+                                        <i v-if="authUser.role == 'admin'" class="fas fa-pencil-alt text-primary fa-xs pr-4"
+                                            data-bs-toggle="modal" data-bs-target="#edituser"
+                                            style="color: dodgerblue !important; margin-left: 20px; cursor: pointer;"
+                                            @click="handleEditClick"></i>
+                                        <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
+                                            style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
 
-                                        <!-- <a href="javascript:;" class="text-secondary font-weight-bold text-xs p-2"
-                                                @click="confirmDelete" data-toggle="tooltip"
-                                                data-original-title="Delete user" style="color: red !important;">
-                                                Delete
-                                            </a> -->
-                                        <i class="fas fa-trash text-danger m-3 fa-xs " @click="confirmDelete"
-                                            data-toggle="tooltip" data-original-title="Delete user"></i>
+                                        <!-- Delete Icon -->
+                                        <i v-if="authUser.role == 'admin'" class="fas fa-trash text-danger m-3 fa-xs"
+                                            style="cursor: pointer;" @click="deleteUser" data-toggle="tooltip"
+                                            data-original-title="Delete user"></i>
+                                        <i v-else class="fas fa-trash text-danger m-3 fa-xs"
+                                            style="cursor: not-allowed;"></i>
                                     </td>
 
                                 </tr>
@@ -210,11 +372,6 @@
         </div>
 
     </div>
-    <!-- </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
 </template>
 
 <script>
@@ -227,19 +384,64 @@ export default {
     data() {
         return {
             // showModal: false,
-            name: '', email: '', role: '3', contact_no: '', designation: 'Full stack developer', pincode: '', password: '',
+            name: '', email: '', role: '', contact_no: '', designation: '', pincode: '', password: '',
             isToggled: false,
             isAreaModal: false,
             displayToggle: 'none',
             users: [],
-            headers: ['Profile', 'Name', 'Designation', 'Department', 'Contact No.', 'Pincode', 'Actions']
+            headers: ['Profile', 'Name', 'Designation', 'Department', 'Contact No.', 'Pincode', 'Actions'],
+            roleName: '',
+            createadminRole: 'admin',
+            userRole: [],
+            selectedRole: ''
         }
     },
     computed: {
-        ...mapState(['authUser'])
+        ...mapState(['authUser']),
     },
     methods: {
-        confirmDelete() {
+        resetValues() {
+            this.closeModal
+            this.email = ''
+            this.name = ''
+            this.contact_no = ''
+            this.designation = ''
+            this.password = ''
+            this.pincode = ''
+            this.role = ''
+            this.selectedRole = ''
+        },
+        getUserRole() {
+            axios.get('http://127.0.0.1:8000/api/roles/').then((res => {
+                this.userRole = res.data.roles
+                // console.log(this.userRole);
+            }))
+        },
+        createRole() {
+            if (!this.roleName) {
+                Swal.fire({
+                    title: 'Please enter role name',
+                    // text: 'You won\'t be able to revert this!',
+                    icon: 'warning',
+                })
+            }
+            else {
+                axios.post(`http://127.0.0.1:8000/api/roles/?role=${this.roleName}`
+                ).then((r => {
+                    // console.log(r)
+                    if (r.status == 201) {
+                        new Noty({
+                            type: 'success',
+                            text: 'Role Created Successfully',
+                            timeout: 500,
+                        }).show()
+                        this.roleName = ''
+                    }
+                }))
+            }
+
+        },
+        async deleteUser() {
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'You won\'t be able to revert this!',
@@ -248,41 +450,65 @@ export default {
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
+            }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Perform your delete action here
-                    // You can use axios or any other method to send a request to delete the user.
-                    Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                    try {
+                        // Make an HTTP DELETE request to delete the user
+                        await axios.delete('http://127.0.0.1:8000/api/users/', {
+                            params: {
+                                userID: ''
+                            }
+                        });
+                        Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                    } catch (error) {
+                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                    }
                 }
             });
-
         },
         openModal() {
             this.displayToggle = 'block';
             this.isToggled = !this.isToggled;
         },
         createUser() {
-            const requestData = {
-                email: this.email,
-                name: this.name,
-                role: this.role,
-                contact_no: this.contact_no,
-                designation: this.designation,
-                pincode: this.pincode,
-                password: this.password
+            if (!this.email || !this.name || !this.contact_no || !this.designation || !this.pincode || !this.password || !this.selectedRole) {
+                Swal.fire({
+                    title: 'Please fill all Fields',
+                    icon: 'warning',
+                })
             }
-            axios.post('http://127.0.0.1:8000/api/create/user/', requestData).then((r) => {
-                // console.log(r.status)
-                if (r.status == 201) {
-                    new Noty({
-                        type: 'success',
-                        text: 'user Created Successfully',
-                        timeout: 500,
-                    }).show()
+            else {
+                let requestData = {
+                    email: this.email,
+                    name: this.name,
+                    role: '',
+                    contact_no: this.contact_no,
+                    designation: this.designation,
+                    pincode: this.pincode,
+                    password: this.password
                 }
-                this.getUsers
-                this.closeModal
-            })
+                if (this.authUser.role == 'admin') {
+                    requestData.role = this.selectedRole
+                }
+                else if (this.authUser.role == 'super-admin') {
+                    requestData.role = 'admin'
+                }
+
+                axios.post('http://127.0.0.1:8000/api/create/user/', requestData).then((r) => {
+                    // console.log(r.status)
+                    if (r.status == 201) {
+
+                        new Noty({
+                            type: 'success',
+                            text: 'user Created Successfully',
+                            timeout: 500,
+                        }).show()
+                        this.getUsers(this.$route.params.val);
+                        this.resetValues
+
+                    }
+                })
+            }
         },
         closeModal() {
             this.displayToggle = 'none';
@@ -296,9 +522,8 @@ export default {
                 this.users = r.data.users
                 // console.log(this.users, 'userData')
             })
-        }
+        },
     },
-
     watch: {
         '$route.params.val': 'getUsers'
     },
