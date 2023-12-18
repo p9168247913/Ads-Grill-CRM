@@ -241,10 +241,8 @@ export default {
                 return (
                     user.name.toLowerCase().includes(searchLowerCase) ||
                     user.role.toLowerCase().includes(searchLowerCase) ||
-                    user.designation.toLowerCase().includes(searchLowerCase)||
                     user.designation.toLowerCase().includes(searchLowerCase)
                 );
-
             });
         }
     },
