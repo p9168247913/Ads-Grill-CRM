@@ -495,7 +495,7 @@ export default {
                 }
 
                 axios.post('http://127.0.0.1:8000/api/create/user/', requestData).then((r) => {
-                    // console.log(r.status)
+                    //  .log(r.status)
                     if (r.status == 201) {
 
                         new Noty({
