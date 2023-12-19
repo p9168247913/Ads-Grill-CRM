@@ -8,8 +8,9 @@ class RolesSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    profile_pic = serializers.FileField(required=False)
     # role = RolesSerializer()
     class Meta:
         model = Users
-        fields = ('name', 'designation', 'role', 'contact_no', 'pincode', 'password', 'email')
+        fields = ('name', 'designation', 'role', 'contact_no', 'pincode', 'password', 'email', 'profile_pic')
         extra_kwargs = {'password': {'write_only': True}}
