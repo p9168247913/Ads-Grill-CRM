@@ -17,14 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from custom_auth import urls as custom_auth_urls
-from micro_services import urls as users_urls
+from micro_services import urls as micro_services_urls
 from app import views
 from django.conf import settings
 from django.conf.urls.static import static
 
 API_URLS = [
     path("", include(custom_auth_urls)),
-    path("", include(users_urls))
+    path("", include(micro_services_urls))
 ]
 
 urlpatterns = [
