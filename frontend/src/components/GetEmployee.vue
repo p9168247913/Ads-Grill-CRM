@@ -182,10 +182,7 @@
                                             <label for="Pincode" class="form-label">Pincode</label>
                                             <input type="text" class="form-control" v-model="pincode" required>
                                         </div>
-                                        <!-- <div class="col-md-6 mb-3">
-                                            <label for="Pincode" class="form-label">Role</label>
-                                            <input type="text" class="form-control" id="role" name="role" v-model="admin" >
-                                        </div> -->
+                                     
                                         <div class="col-md-6 mb-3">
                                             <label for="Role" class="form-label">Role</label>
                                             <select class="form-select" id="role" name="role" v-model="selectedRole"
@@ -339,14 +336,7 @@
                                         </div>
                                     </td>
                                     <td class="align-middle" style="margin-left: 15px !important;">
-                                        <!-- <a href="" class="text-secondary font-weight-bold text-xs"
-                                                data-toggle="tooltip" data-original-title="Edit user" @click="showModal = true">Edit
-                                            </a> -->
-
-
-                                        <!-- <a href="" class="text-secondary font-weight-bold text-xs"
-                                                data-bs-toggle="modal" data-bs-target="#createRoleModal" style="color: dodgerblue !important">Edit
-                                            </a> -->
+                                      
                                         <i v-if="authUser.role == 'admin'" class="fas fa-pencil-alt text-primary fa-xs pr-4"
                                             data-bs-toggle="modal" data-bs-target="#edituser"
                                             style="color: dodgerblue !important; margin-left: 20px; cursor: pointer;"
@@ -533,3 +523,6 @@ export default {
 
 }
 </script>
+<style>
+
+</style>
