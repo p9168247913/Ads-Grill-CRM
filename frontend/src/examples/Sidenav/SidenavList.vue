@@ -1,7 +1,7 @@
 <template>
-  <div class="collapse navbar-collapse w-auto h-auto h-100" id="sidenav-collapse-main">                                               
+  <div class="collapse navbar-collapse w-auto h-auto h-100" id="sidenav-collapse-main">
     <ul class="navbar-nav">
-      <li class="nav-item" v-if="!isAdmin">
+      <li class="nav-item">
         <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
           <template v-slot:icon>
@@ -9,7 +9,8 @@
           </template>
         </sidenav-item>
       </li>
-      <li @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item">
+      <li v-if="authUser.role !== 'leads'"
+        @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item">
         <sidenav-item url="" :class="{
           'active': getRoute() === '',
           'collapsed': isCollapseShow
@@ -18,12 +19,12 @@
           <template v-slot:icon>
             <i class="fas fa-users text-primary text-sm opacity-10"></i>
           </template>
-         
+
         </sidenav-item>
         <ul v-if="isEmploymentDropdownOpen" @click.stop
           class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled" :class="{ 'show': isCollapseShow }"
           data-parent="#iq-sidebar-toggle">
-          <li class="nav-item" >
+          <li class="nav-item">
             <sidenav-item class="emp-li" :url="getRoutePath('Development')"
               :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
@@ -56,8 +57,8 @@
           </li>
         </ul>
       </li>
-      
-      <li class="nav-item">
+
+      <li v-if="authUser.role !== 'leads'" class="nav-item">
         <sidenav-item url="/requestaccess" class="requestaccess"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'RequestAccess'">
           <template v-slot:icon>
@@ -65,16 +66,15 @@
           </template>
         </sidenav-item>
       </li>
-                                         
-      <li class="nav-item">
-        <sidenav-item url="/projects" class="projects"
-          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Projects'">
+
+      <li v-if="authUser.role !== 'leads'" class="nav-item">
+        <sidenav-item url="/projects" class="projects" :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Projects'">
           <template v-slot:icon>
             <i class="fas fa-tasks text-primary text-sm opacity-10"></i>
           </template>
         </sidenav-item>
       </li>
-      <li class="nav-item" v-if="!isAdmin">
+      <li v-if="authUser.role !== 'admin' && authUser.role !== 'leads'" class="nav-item">
         <sidenav-item url="/investment" :class="getRoute() === 'tables' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الجداول' : 'Investment'">
           <template v-slot:icon>
@@ -82,7 +82,7 @@
           </template>
         </sidenav-item>
       </li>
-      <li class="nav-item" v-if="!isAdmin">
+      <li v-if="authUser.role !== 'admin' && authUser.role !== 'leads'" class="nav-item">
         <sidenav-item url="/sales" :class="getRoute() === 'billing' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الفواتیر' : 'Sales'">
           <template v-slot:icon>
@@ -90,7 +90,8 @@
           </template>
         </sidenav-item>
       </li>
-      <li class="nav-item" v-if="!isAdmin">
+      <!--Leads-->
+      <li class="nav-item" v-if="authUser.role !== 'admin'">
         <sidenav-item url="/leads" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads'
           ">
           <template v-slot:icon>
@@ -98,7 +99,8 @@
           </template>
         </sidenav-item>
       </li>
-      <li class="nav-item" v-if="!isAdmin">
+      <!-- Profit-->
+      <li class="nav-item" v-if="authUser.role !== 'admin' && authUser.role !== 'leads'">
         <sidenav-item url="/profit" :class="getRoute() === 'profit' ? 'active' : ''" navText="Profit">
           <template v-slot:icon>
             <i class="fas fa-chart-line text-success text-sm opacity-10"></i>
@@ -125,10 +127,10 @@
       </li>
     </ul>
   </div>
- 
 </template>
 <script>
 import SidenavItem from "./SidenavItem.vue";
+import { mapState } from 'vuex'
 
 export default {
   name: "SidenavList",
@@ -180,24 +182,25 @@ export default {
     }
   },
   computed: {
-    isAdmin() {
-      const role = localStorage.getItem('role');
-      return role === 'admin';
+    ...mapState(['authUser']),
+    // isAdmin() {
+    //   const role = localStorage.getItem('role');
+    //   return role === 'admin';
+    // },
+    watch: {
+      // $route() {
+      //   if (this.getRoute() !== "employees") {
+      //     this.isEmploymentDropdownOpen = false;
+      //   }
+      // }
     },
-  watch: {
-    // $route() {
-    //   if (this.getRoute() !== "employees") {
-    //     this.isEmploymentDropdownOpen = false;
-    //   }
-    // }
-  },
-  mounted() {
-    return document.addEventListener("click", this.closeEmploymentDropdown);
-  },
-  beforeUnmount() {
-    return document.removeEventListener("click", this.closeEmploymentDropdown);
-  },
-}
+    mounted() {
+      return document.addEventListener("click", this.closeEmploymentDropdown);
+    },
+    beforeUnmount() {
+      return document.removeEventListener("click", this.closeEmploymentDropdown);
+    },
+  }
 }
 </script>
 <style>

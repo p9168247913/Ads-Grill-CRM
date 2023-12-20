@@ -24,32 +24,32 @@ const routes = [
   },
   {
     path: "/requestaccess",
-    name: "requestaccess",
+    name: "Request Access",
     component: requestAccess,
   },
   {
     path: "/projects",
-    name: "projects",
+    name: "Projects",
     component: projectView,
   },
   {
     path: "/investment",
-    name: "investment",
+    name: "Investment",
     component: investMent,
   },
   {
     path: "/leads",
-    name: "leads",
+    name: "Leads",
     component: leadsView,
   },
   {
     path: "/sales",
-    name: "sales",
+    name: "Sales",
     component: salesView,
   },
   {
     path: "/profit",
-    name: "profit",
+    name: "Profit",
     component: profitView,
   },
   {
@@ -69,7 +69,7 @@ const routes = [
   },
   {
     path: "/employees/:val",
-    name: "employees",
+    name: 'Employees/',
     component: GetEmployee,
   },
 ];

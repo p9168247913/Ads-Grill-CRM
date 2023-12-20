@@ -6,8 +6,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
-    <div class="wrapper">
-        <!-- <h1>hhh</h1> -->
+    <div class="wrapper" style="margin-bottom: 80px; ">
         <div class="content-page">
             <div class="container-fluid">
                 <div style="margin-top: 20px;">
@@ -17,7 +16,8 @@
                                 <span class="input-group-text text-body">
                                     <i class="fas fa-search" aria-hidden="true"></i>
                                 </span>
-                                <input type="text" class="form-control" placeholder="Type here..." />
+                                <input type="text" v-model="searchTerm" @change="filterUsers" class="form-control"
+                                    placeholder="Type here..." />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
@@ -62,7 +62,6 @@
                     </div>
                 </div>
 
-
                 <!-- Modal for Create admin -->
                 <div class="modal fade" id="createAdmin" tabindex="-1" aria-labelledby="createadminLabel"
                     aria-hidden="true">
@@ -73,32 +72,23 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <!-- Your form to create role -->
                                 <form>
-
-                                    <!-- First Row -->
                                     <div class="row">
-                                        <!-- Name Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="name" class="form-label">Name</label>
                                             <input type="text" class="form-control" v-model="name" required>
                                         </div>
-
-                                        <!-- Email Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Designation</label>
                                             <input type="text" class="form-control" v-model="designation" required>
                                         </div>
                                     </div>
-
                                     <!-- Second Row -->
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Email</label>
                                             <input type="text" class="form-control" v-model="email" required>
                                         </div>
-
-                                        <!-- Contact Number Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="password" class="form-label">Password</label>
                                             <input type="password" class="form-control" v-model="password" required>
@@ -114,7 +104,6 @@
                                             <label for="role" class="form-label">Role</label>
                                             <input type="text" class="form-control" disabled value="admin">
                                         </div>
-
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -122,8 +111,6 @@
                                             <input type="text" class="form-control" v-model="contact_no" required>
                                         </div>
                                     </div>
-                                    <!-- Continue adding rows as needed -->
-
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -145,44 +132,32 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <!-- Your form to create role -->
                                 <form>
-
-                                    <!-- First Row -->
                                     <div class="row">
-                                        <!-- Name Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="name" class="form-label">Name</label>
                                             <input type="text" class="form-control" v-model="name" required>
                                         </div>
-
-                                        <!-- Email Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="desgination" class="form-label">Designation</label>
                                             <input type="text" class="form-control" v-model="designation" required>
                                         </div>
                                     </div>
-
-                                    <!-- Second Row -->
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Email</label>
                                             <input type="text" class="form-control" v-model="email" required>
                                         </div>
-
-                                        <!-- Contact Number Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="password" class="form-label">Password</label>
                                             <input type="password" class="form-control" v-model="password" required>
                                         </div>
                                     </div>
-                                    <!-- Second Row -->
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="Pincode" class="form-label">Pincode</label>
                                             <input type="text" class="form-control" v-model="pincode" required>
                                         </div>
-                                     
                                         <div class="col-md-6 mb-3">
                                             <label for="Role" class="form-label">Role</label>
                                             <select class="form-select" id="role" name="role" v-model="selectedRole"
@@ -190,10 +165,8 @@
                                                 <option value="" disabled selected>Select Role</option>
                                                 <option v-for="(item, index) in userRole" :key="index" :value="item.id"> {{
                                                     item.name }}</option>
-
                                             </select>
                                         </div>
-
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -201,8 +174,6 @@
                                             <input type="text" class="form-control" v-model="contact_no" required>
                                         </div>
                                     </div>
-                                    <!-- Continue adding rows as needed -->
-
                                 </form>
                             </div>
                             <div class="modal-footer">
@@ -214,7 +185,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- end -->
 
                 <!-- Modal for Edit Details -->
                 <div class="modal fade" id="edituser" tabindex="-1" aria-labelledby="edituser" aria-hidden="true">
@@ -225,63 +195,46 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <!-- Your form to edit details -->
                                 <form>
-
-                                    <!-- First Row -->
                                     <div class="row">
-                                        <!-- Name Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="name" class="form-label">Name</label>
                                             <input type="text" class="form-control" id="name" name="name">
                                         </div>
-
-                                        <!-- Email Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Email</label>
                                             <input type="email" class="form-control" id="email" name="email">
                                         </div>
                                     </div>
-
-                                    <!-- Second Row -->
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="Role" class="form-label">Role</label>
                                             <select class="form-select" id="role" name="role">
                                                 <option value="select">Select...</option>
                                                 <option value="option1">Option 1</option>
-
                                             </select>
                                         </div>
-
-                                        <!-- Contact Number Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="contactNo" class="form-label">Contact Number</label>
                                             <input type="tel" class="form-control" id="contactNo" name="contactNo">
                                         </div>
                                     </div>
-                                    <!-- Second Row -->
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="Pincode" class="form-label">Pincode</label>
                                             <input type="text" class="form-control" id="pincode" name="pincode">
                                         </div>
-
-                                        <!-- Contact Number Field -->
                                         <div class="col-md-6 mb-3">
                                             <label for="Designation" class="form-label">Designation</label>
                                             <input type="text" class="form-control" id="designation" name="designation">
                                         </div>
                                     </div>
-                                    <!-- Continue adding rows as needed -->
-
                                 </form>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="button" class="btn btn-primary">Save Changes</button>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -301,7 +254,7 @@
                                         v-for="(head) in headers" :key="head">{{ head }}</th>
                                 </tr>
                             </thead>
-                            <tbody v-for="(user, index) in users" :key="index">
+                            <tbody v-for="(user, index) in paginatedUsers" :key="index">
                                 <tr>
                                     <td>
                                         <div class="d-flex px-2 py-1">
@@ -336,7 +289,6 @@
                                         </div>
                                     </td>
                                     <td class="align-middle" style="margin-left: 15px !important;">
-                                      
                                         <i v-if="authUser.role == 'admin'" class="fas fa-pencil-alt text-primary fa-xs pr-4"
                                             data-bs-toggle="modal" data-bs-target="#edituser"
                                             style="color: dodgerblue !important; margin-left: 20px; cursor: pointer;"
@@ -355,12 +307,12 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage"
+                            :filteredUsers="filteredUsers" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
                     </div>
                 </div>
             </div>
-            <!-- Page end  -->
         </div>
-
     </div>
 </template>
 
@@ -369,11 +321,14 @@ import axios from 'axios'
 import Noty from 'noty'
 import { mapState } from 'vuex'
 import Swal from 'sweetalert2';
-// import { timestamp } from 'public/assets/vendor/tui-calendar/tui-code-snippet/src/js/tricks';
+import PaginationComponent from './Paginator/PaginatorComponent.vue';
 export default {
+    components: {
+        PaginationComponent,
+    },
     data() {
         return {
-            // showModal: false,
+            searchTerm: '',
             name: '', email: '', role: '', contact_no: '', designation: '', pincode: '', password: '',
             isToggled: false,
             isAreaModal: false,
@@ -383,13 +338,48 @@ export default {
             roleName: '',
             createadminRole: 'admin',
             userRole: [],
-            selectedRole: ''
+            selectedRole: '',
+            currentPage: 1,
+            itemsPerPage: 5,
         }
     },
     computed: {
         ...mapState(['authUser']),
+        filteredUsers() {
+            console.log(this.searchTerm);
+            return this.users.filter(user => {
+                const searchLowerCase = this.searchTerm.toLowerCase() || ''
+                return (
+                    user.name.toLowerCase().includes(searchLowerCase) ||
+                    user.role.toLowerCase().includes(searchLowerCase) ||
+                    user.designation.toLowerCase().includes(searchLowerCase) ||
+                    user.contact_no.toLowerCase().includes(searchLowerCase)
+                );
+            });
+        },
+        paginatedUsers() {
+            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+            return this.filteredUsers.slice(startIndex, startIndex + this.itemsPerPage);
+        }
     },
     methods: {
+        nextPage() {
+            if (this.currentPage * this.itemsPerPage < this.filteredUsers.length) {
+                this.currentPage++;
+            }
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        goToPage(page) {
+            this.currentPage = page;
+            const startIndex = (page - 1) * this.itemsPerPage;
+            const endIndex = startIndex + this.itemsPerPage;
+            this.displayedUsers = this.filteredUsers.slice(startIndex, endIndex);
+        },
+        filterUsers() { },
         resetValues() {
             this.closeModal
             this.email = ''
@@ -404,14 +394,12 @@ export default {
         getUserRole() {
             axios.get('http://127.0.0.1:8000/api/roles/').then((res => {
                 this.userRole = res.data.roles
-                // console.log(this.userRole);
             }))
         },
         createRole() {
             if (!this.roleName) {
                 Swal.fire({
                     title: 'Please enter role name',
-                    // text: 'You won\'t be able to revert this!',
                     icon: 'warning',
                 })
             }
@@ -523,6 +511,16 @@ export default {
 
 }
 </script>
-<style>
 
+<style>
+.table-responsive {
+    overflow-x: auto;
+    max-height: 350px;
+}
+
+.scrollable-body {
+    display: block;
+    max-height: inherit;
+    overflow-y: auto;
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="py-4 container-fluid">
-    <div class="row">
+    <!-- <div class="row">
       <div class="col-lg-12">
         <div class="row">
           <div class="col-lg-3 col-md-6 col-12">
@@ -51,7 +51,6 @@
         </div>
         <div class="row">
           <div class="col-lg-7 mb-lg">
-            <!-- line chart -->
             <div class="card z-index-2">
               <gradient-line-chart />
             </div>
@@ -112,14 +111,31 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
+
+    <dashboard-client v-if="authUser.role === 'client'" />
+    <dashboard-admin v-if="authUser.role === 'admin'" />
+    <dashboard-super-admin v-if="authUser.role === 'super-admin'" />
+    <dashboard-development v-if="authUser.role === 'Development'" />
+    <dashboard-leads v-if="authUser.role === 'leads'" />
+    <dashboard-sales v-if="authUser.role === 'sales'" />
+    <dashboard-hrms v-if="authUser.role === 'hrms'" />
   </div>
 </template>
 <script>
-import Card from "@/examples/Cards/Card.vue";
-import GradientLineChart from "@/examples/Charts/GradientLineChart.vue";
-import Carousel from "./components/Carousel.vue";
-import CategoriesCard from "./components/CategoriesCard.vue";
+import DashboardClient from "./Dashboards/DashboardClient.vue";
+import DashboardAdmin from "./Dashboards/DashboardAdmin.vue";
+import DashboardSuperAdmin from "./Dashboards/DashboardSuperAdmin.vue";
+import DashboardDevelopment from "./Dashboards/DashboardDevelopment.vue";
+import DashboardLeads from "./Dashboards/DashboardLeads.vue";
+import DashboardSales from "./Dashboards/DashboardSales.vue";
+import DashboardHrms from "./Dashboards/DashboardHrms.vue";
+import { mapState } from 'vuex'
+
+// import Card from "@/examples/Cards/Card.vue";
+// import GradientLineChart from "@/examples/Charts/GradientLineChart.vue";
+// import Carousel from "./components/Carousel.vue";
+// import CategoriesCard from "./components/CategoriesCard.vue";
 
 import US from "@/assets/img/icons/flags/US.png";
 import DE from "@/assets/img/icons/flags/DE.png";
@@ -128,6 +144,7 @@ import BR from "@/assets/img/icons/flags/BR.png";
 
 export default {
   name: "dashboard-default",
+
   data() {
     return {
       stats: {
@@ -198,10 +215,16 @@ export default {
     };
   },
   components: {
-    Card,
-    GradientLineChart,
-    Carousel,
-    CategoriesCard,
+    DashboardClient,
+    DashboardAdmin,
+    DashboardSuperAdmin,
+    DashboardDevelopment,
+    DashboardLeads,
+    DashboardSales,
+    DashboardHrms,
+  },
+  computed: {
+    ...mapState(['authUser'])
   },
 };
 </script>
