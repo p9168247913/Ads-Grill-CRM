@@ -29,27 +29,27 @@ const routes = [
   },
   {
     path: "/projects",
-    name: "projects",
+    name: "Projects",
     component: projectView,
   },
   {
     path: "/investment",
-    name: "investment",
+    name: "Investment",
     component: investMent,
   },
   {
     path: "/leads",
-    name: "leads",
+    name: "Leads",
     component: leadsView,
   },
   {
     path: "/sales",
-    name: "sales",
+    name: "Sales",
     component: salesView,
   },
   {
     path: "/profit",
-    name: "profit",
+    name: "Profit",
     component: profitView,
   },
   {
