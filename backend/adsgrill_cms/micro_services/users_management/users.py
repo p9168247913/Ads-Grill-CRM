@@ -11,8 +11,9 @@ class UsersView(APIView):
         if request.method == 'GET':
             try:
                 role = request.GET.get('role')
-                requestedUsers = Users.objects.filter(role__name=role)
+                requestedUsers = Users.objects.filter(role__name=role).order_by('-created_at')
                 user_data = [{
+                    'id':user.pk,
                     'name': user.name,
                     'designation': user.designation,
                     'role': user.role.name,
