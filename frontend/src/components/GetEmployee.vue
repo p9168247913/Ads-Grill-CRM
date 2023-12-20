@@ -17,7 +17,7 @@
                                     <i class="fas fa-search" aria-hidden="true"></i>
                                 </span>
                                 <input type="text" v-model="searchTerm" @change="filterUsers" class="form-control"
-                                    placeholder="Type here..." />
+                                    placeholder="Search by name, role, designation or number..." />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
@@ -31,7 +31,7 @@
                                 <button v-if="authUser.role == 'admin'" class="btn btn-primary mb-2 h-100" type="button"
                                     style="width: auto;height: 40px !important;" data-bs-toggle="modal"
                                     data-bs-target="#createUser" @click="getUserRole">Create User</button>
-                            </div>
+                            </div>    
                         </div>
                     </div>
                 </div>

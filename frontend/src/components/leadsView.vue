@@ -25,8 +25,11 @@
                                 <button class="btn btn-primary mb-2 h-100" type="button"
                                     style="width: auto; height: 40px !important;" data-bs-toggle="modal"
                                     data-bs-target="#createLead">Create Lead</button>
+                                <button class="btn btn-primary mb-2 h-100" type="button"
+                                    style="width: auto; height: 40px !important;" data-bs-toggle="modal"
+                                    data-bs-target="#createLead"><i class="fas fa-download"></i>&nbsp;&nbsp;Lead Format</button>
                             </div>
-                        </div>
+                        </div>  
                     </div>
                 </div>
                 <!-- Modal for Create Lead -->
@@ -107,7 +110,8 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                     @click="resetValues">Close</button>
-                                <button type="button" data-bs-dismiss="modal" class="btn btn-primary" @click="createLeads(), resetValues()">Create</button>
+                                <button type="button" data-bs-dismiss="modal" class="btn btn-primary"
+                                    @click="createLeads(), resetValues()">Create</button>
                             </div>
                         </div>
                     </div>
