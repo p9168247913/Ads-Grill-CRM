@@ -4,6 +4,7 @@ import projectView from "../components/projectView.vue";
 import investMent from "../components/investMent.vue";
 import salesView from "../components/salesView";
 import leadsView from "../components/leadsView";
+import LeadInfo from "../components/LeadInfo.vue"
 import profitView from "../components/profitView";
 import requestAccess from "../components/requestAccess";
 import Profile from "../views/Profile.vue";
@@ -41,6 +42,11 @@ const routes = [
     path: "/leads",
     name: "Leads",
     component: leadsView,
+  },
+  {
+    path: "/leadinfo",
+    name: "Lead Info",
+    component: LeadInfo,
   },
   {
     path: "/sales",

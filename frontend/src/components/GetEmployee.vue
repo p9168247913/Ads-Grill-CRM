@@ -307,11 +307,15 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage"
-                            :filteredUsers="filteredUsers" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
+                        
                     </div>
+                    
                 </div>
+
+                <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage"
+                            :filteredUsers="filteredUsers" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
             </div>
+            
         </div>
     </div>
 </template>
@@ -340,7 +344,7 @@ export default {
             userRole: [],
             selectedRole: '',
             currentPage: 1,
-            itemsPerPage: 5,
+            itemsPerPage: 10,
         }
     },
     computed: {
@@ -515,7 +519,7 @@ export default {
 <style>
 .table-responsive {
     overflow-x: auto;
-    max-height: 350px;
+    max-height: 50vh; 
 }
 
 .scrollable-body {
