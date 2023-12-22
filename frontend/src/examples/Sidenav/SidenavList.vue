@@ -99,6 +99,14 @@
           </template>
         </sidenav-item>
       </li>
+      <li class="nav-item" v-if="authUser.role !== 'admin'">
+        <sidenav-item url="/leadinfo" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads Info'
+          ">
+          <template v-slot:icon>
+            <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
       <!-- Profit-->
       <li class="nav-item" v-if="authUser.role !== 'admin' && authUser.role !== 'leads'">
         <sidenav-item url="/profit" :class="getRoute() === 'profit' ? 'active' : ''" navText="Profit">
