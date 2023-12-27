@@ -106,7 +106,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'adsgrill_cms',
         'USER': 'postgres',
-        'PASSWORD': '123',
+        'PASSWORD': '1911',
         'HOST': 'localhost',
         'PORT': '5432', 
     }

@@ -22,7 +22,7 @@ class LeadView(APIView):
         if val =='post':
             try:
                 with transaction.atomic():
-                    user_instance, _ = Users.objects.get(pk=lead_data.get('userID'))
+                    user_instance = Users.objects.get(pk=lead_data.get('userID'))
                     source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
                     tag_instance, _ = Tag.objects.get_or_create(name=lead_data.get('tag'))
                     status_instance, _ = LeadStatus.objects.get_or_create(name=lead_data.get('status'))
@@ -46,48 +46,83 @@ class LeadView(APIView):
                 return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
             return JsonResponse({'message':'Lead Created Successfully'},status=status.HTTP_201_CREATED)
         
-        # if val =='bulkUpload':
-        #     parser_class = (FileUploadParser,)
-        #     up_file = request.FILES.get('file')
-        #     upload_folder = 'uploads/leads'
-        #     if not os.path.exists(upload_folder):
-        #         os.makedirs(upload_folder)
+        if val =='bulkUpload':
+            parser_class = (FileUploadParser,)
+            up_file = request.FILES.get('file')
+            upload_folder = 'uploads/leads'
+            if not os.path.exists(upload_folder):
+                os.makedirs(upload_folder)
                                                                                                          
-        #     destination_path = os.path.join(upload_folder, up_file.name)
-        #     with open(destination_path, "wb") as destination:
-        #         for i, chunk in enumerate(up_file.chunks()):
-        #             destination.write(chunk)
-        #     df = pd.read_excel(destination_path)
-        #     rowList = df.values.tolist()
-        #     empty_cols = []
-        #     try:
-        #         with transaction.atomic():
-        #             for (ind, col) in enumerate(rowList):
-        #                 xl_sale_man, xl_source, xl_tag, xl_status, xl_cl_name, xl_email, xl_contact_no, xl_country, xl_state, xl_city = col[0], col[1], col[2], col[3], col[4], col[5], col[6], col[7], col[8], col[9]
-        #                 if pd.isna(xl_sale_man):
-        #                     empty_cols.append(xl_sale_man)
-        #                 if pd.isna(xl_source):
-        #                     empty_cols.append(xl_source)
-        #                 if pd.isna(xl_tag):
-        #                     empty_cols.append(xl_tag)
-        #                 if pd.isna(xl_status):
-        #                     empty_cols.append(xl_status)
-        #                 if pd.isna(xl_cl_name):
-        #                     empty_cols.append(xl_cl_name)
-        #                 if pd.isna(xl_email):
-        #                     empty_cols.append(xl_email)
-        #                 if pd.isna(xl_contact_no):
-        #                     empty_cols.append(xl_contact_no)
-        #                 if pd.isna(xl_country):
-        #                     empty_cols.append(xl_country)
-        #                 if pd.isna(xl_state):
-        #                     empty_cols.append(xl_state)
-        #                 if pd.isna(xl_city):
-        #                     empty_cols.append(xl_city)
-        #         print(empty_cols)
+            destination_path = os.path.join(upload_folder, up_file.name)
+            with open(destination_path, "wb") as destination:
+                for i, chunk in enumerate(up_file.chunks()):
+                    destination.write(chunk)
+            df = pd.read_excel(destination_path, dtype=str)
+            df = df.dropna(how='all')
+            rowList = df.values.tolist()
+            rowList = rowList[:-1]
+            print(rowList) 
+            empty_cols = []
+            try:
+                for (ind, col) in enumerate(rowList):
+                    xl_sale_man, xl_source, xl_tag, xl_status, xl_cl_name, xl_email, xl_contact_no, xl_country, xl_state, xl_city = col[0], col[1], col[2], col[3], col[4], col[5], col[6], col[7], col[8], col[9]
+                    xl_cl_name = str(xl_cl_name)
+                    if pd.isna(xl_sale_man) or not str(xl_sale_man):
+                        empty_cols.append('sales_Manager')
+                    if pd.isna(xl_source) or not str(xl_source):
+                        empty_cols.append('source')
+                    if pd.isna(xl_tag) or not str(xl_tag):
+                        empty_cols.append('tag')
+                    if pd.isna(xl_status) or not str(xl_status):
+                        empty_cols.append('status')
+                    if pd.isna(xl_cl_name) or not str(xl_cl_name):
+                        empty_cols.append('client_name')
+                    if pd.isna(xl_email) or not str(xl_email):
+                        empty_cols.append('email')
+                    if pd.isna(xl_contact_no) or not str(xl_contact_no):
+                        empty_cols.append('contact_no')
+                    if pd.isna(xl_country) or not str(xl_country):
+                        empty_cols.append('country')
+                    if pd.isna(xl_state) or not str(xl_state):
+                        empty_cols.append('state')
+                    if pd.isna(xl_city) or not str(xl_city):
+                        empty_cols.append('city')
+                    if empty_cols:
+                        col_name = ', '.join(empty_cols)
+                        raise Exception(f'Empty fields in columns: {col_name}, Row {ind+2}')
 
-        #     except:
-        #         pass        
+                    else:
+                        with transaction.atomic():
+                            user_instance = Users.objects.get(email = xl_sale_man.lower())
+                            source_instance, _ = Source.objects.get_or_create(name=xl_source)
+                            tag_instance, _ = Tag.objects.get_or_create(name=xl_tag)
+                            status_instance, _ = LeadStatus.objects.get_or_create(name=xl_status)
+                            create_lead = Lead.objects.create(
+                                user=user_instance,
+                                source=source_instance,
+                                tag=tag_instance,
+                                status=status_instance,
+                                client_name=xl_cl_name,
+                                contact_no=xl_contact_no,
+                                email=xl_email,
+                                country=xl_country,
+                                state=xl_state,
+                                city=xl_city,
+                                # file=lead_data.get('file'),
+                            )
+                            create_lead.save()
+
+            except IntegrityError as i:
+                return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+            
+            except ObjectDoesNotExist:
+                return JsonResponse({'message':f"No Sale's Manager Found At Row: {ind+2}"})
+
+            except Exception as exc:
+            # import traceback
+            # traceback.print_exc()
+                return JsonResponse({'message': str(exc)}, status=400, safe=False)
+            return JsonResponse({'message':f'{up_file.name} Uploaded Successfully',}, status=status.HTTP_201_CREATED)
     
     def get(self, request):
         try:
@@ -120,7 +155,7 @@ class LeadView(APIView):
         try:
             with transaction.atomic():
                 updateLead = Lead.objects.get(pk=lead_data.get('id'))
-                user_instance, _ = Users.objects.get(pk=lead_data.get('userID'))
+                user_instance = Users.objects.get(pk=lead_data.get('userID'))
                 source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
                 tag_instance, _ = Tag.objects.get_or_create(name=lead_data.get('tag'))
                 status_instance, _ = LeadStatus.objects.get_or_create(name=lead_data.get('status'))
@@ -180,7 +215,7 @@ class LeadInfo(APIView):
                 return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
             
         if val == 'source':
-            try:
+            try: 
                 with transaction.atomic():
                     leadSourceInstance = Source.objects.create(name=name)
                     leadSourceInstance.save()
