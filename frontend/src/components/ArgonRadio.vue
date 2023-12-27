@@ -2,7 +2,7 @@
   <div class="form-check">
     <input class="form-check-input" type="radio" :name="name" :id="id" :checked="checked" />
     <label class="custom-control-label" :for="id">
-      <slot />
+      <slot ></slot>
     </label>
   </div>
 </template>

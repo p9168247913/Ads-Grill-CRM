@@ -31,7 +31,7 @@
                                 <button v-if="authUser.role == 'admin'" class="btn btn-primary mb-2 h-100" type="button"
                                     style="width: auto;height: 40px !important;" data-bs-toggle="modal"
                                     data-bs-target="#createUser" @click="getUserRole">Create User</button>
-                            </div>    
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form>
+                                <form @submit="createUser($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="name" class="form-label">Name</label>
@@ -111,12 +111,12 @@
                                             <input type="text" class="form-control" v-model="contact_no" required>
                                         </div>
                                     </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                            @click="resetValues">Close</button>
+                                        <button type="submit" class="btn btn-primary">Send</button>
+                                    </div>
                                 </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                    @click="resetValues">Close</button>
-                                <button type="button" class="btn btn-primary" @click="createUser">Send</button>
                             </div>
                         </div>
                     </div>
@@ -239,8 +239,8 @@
                     </div>
                 </div>
             </div>
+            <!--Table-->
             <div class="card" style="margin-top: 2rem;">
-                <!-- <h1>hello</h1> -->
                 <div class="card-header pb-0">
                     <h6>{{ $route.params.val.toUpperCase() }}</h6>
                 </div>
@@ -289,33 +289,28 @@
                                         </div>
                                     </td>
                                     <td class="align-middle" style="margin-left: 15px !important;">
-                                        <i v-if="authUser.role == 'admin'" class="fas fa-pencil-alt text-primary fa-xs pr-4"
+                                        <i v-if="authUser.role == 'admin'"
+                                            class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                                             data-bs-toggle="modal" data-bs-target="#edituser"
-                                            style="color: dodgerblue !important; margin-left: 20px; cursor: pointer;"
-                                            @click="handleEditClick"></i>
+                                            style="margin-left: 20px; cursor: pointer;" @click="handleEditClick"></i>
                                         <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
                                             style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
 
                                         <!-- Delete Icon -->
-                                        <i v-if="authUser.role == 'admin'" class="fas fa-trash text-danger m-3 fa-xs"
-                                            style="cursor: pointer;" @click="deleteUser" data-toggle="tooltip"
-                                            data-original-title="Delete user"></i>
+                                        <i v-if="authUser.role == 'admin'"
+                                            class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"
+                                            @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
                                             style="cursor: not-allowed;"></i>
                                     </td>
-
                                 </tr>
                             </tbody>
                         </table>
-                        
                     </div>
-                    
                 </div>
-
-                <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage"
-                            :filteredUsers="filteredUsers" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
+                <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage" :filteredUsers="filteredUsers"
+                    :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
             </div>
-            
         </div>
     </div>
 </template>
@@ -326,6 +321,8 @@ import Noty from 'noty'
 import { mapState } from 'vuex'
 import Swal from 'sweetalert2';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
+import { BASE_URL } from '../config/apiConfig';
+
 export default {
     components: {
         PaginationComponent,
@@ -395,12 +392,19 @@ export default {
             this.role = ''
             this.selectedRole = ''
         },
-        getUserRole() {
-            axios.get('http://127.0.0.1:8000/api/roles/').then((res => {
-                this.userRole = res.data.roles
-            }))
+        async getUserRole() {
+            try {
+                const response = await axios.get(`${BASE_URL}api/roles/`);
+                this.userRole = response.data.roles
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
+            }
         },
-        createRole() {
+        async createRole() {
             if (!this.roleName) {
                 Swal.fire({
                     title: 'Please enter role name',
@@ -408,20 +412,23 @@ export default {
                 })
             }
             else {
-                axios.post(`http://127.0.0.1:8000/api/roles/?role=${this.roleName}`
-                ).then((r => {
-                    // console.log(r)
-                    if (r.status == 201) {
-                        new Noty({
-                            type: 'success',
-                            text: 'Role Created Successfully',
-                            timeout: 500,
-                        }).show()
+                try {
+                    const response = await axios.post(`${BASE_URL}api/roles/?role=${this.roleName}`)
+                    if (response.status == 201) {
+                        Swal.fire({
+                            title: `${response.data.message}`,
+                            icon: 'success',
+                        })
                         this.roleName = ''
                     }
-                }))
+                } catch (error) {
+                    new Noty({
+                        type: 'error',
+                        text: error.response.data.message,
+                        timeout: 500,
+                    }).show()
+                }
             }
-
         },
         async deleteUser() {
             Swal.fire({
@@ -435,8 +442,7 @@ export default {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        // Make an HTTP DELETE request to delete the user
-                        await axios.delete('http://127.0.0.1:8000/api/users/', {
+                        await axios.delete(`${BASE_URL}api/users/`, {
                             params: {
                                 userID: ''
                             }
@@ -452,58 +458,63 @@ export default {
             this.displayToggle = 'block';
             this.isToggled = !this.isToggled;
         },
-        createUser() {
-            if (!this.email || !this.name || !this.contact_no || !this.designation || !this.pincode || !this.password || !this.selectedRole) {
-                Swal.fire({
-                    title: 'Please fill all Fields',
-                    icon: 'warning',
-                })
+        async createUser(e) {
+            e.preventDefault()
+            let requestData = {
+                email: this.email,
+                name: this.name,
+                role: '',
+                contact_no: this.contact_no,
+                designation: this.designation,
+                pincode: this.pincode,
+                password: this.password
             }
-            else {
-                let requestData = {
-                    email: this.email,
-                    name: this.name,
-                    role: '',
-                    contact_no: this.contact_no,
-                    designation: this.designation,
-                    pincode: this.pincode,
-                    password: this.password
-                }
-                if (this.authUser.role == 'admin') {
-                    requestData.role = this.selectedRole
-                }
-                else if (this.authUser.role == 'super-admin') {
-                    requestData.role = 'admin'
-                }
-
-                axios.post('http://127.0.0.1:8000/api/create/user/', requestData).then((r) => {
-                    //  .log(r.status)
-                    if (r.status == 201) {
-
-                        new Noty({
-                            type: 'success',
-                            text: 'user Created Successfully',
-                            timeout: 500,
-                        }).show()
-                        this.getUsers(this.$route.params.val);
-                        this.resetValues
-
+            if (this.authUser.role == 'admin') {
+                requestData.role = this.selectedRole
+            }
+            else if (this.authUser.role == 'super-admin') {
+                requestData.role = '8'
+            }
+            try {
+                const response = await axios.post(`${BASE_URL}api/create/user/`, requestData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
                     }
                 })
+                console.log(response.data);
+                if (response.status == 201) {
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    })
+                    this.getUsers(this.$route.params.val);
+                    this.resetValues
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.message,
+                    timeout: 500,
+                }).show()
             }
         },
         closeModal() {
             this.displayToggle = 'none';
             this.isToggled = !this.isToggled;
         },
-        getUsers(role) {
-            // console.log(role)
-            axios.get('http://127.0.0.1:8000/api/users/', {
-                params: { role: role }
-            }).then((r) => {
-                this.users = r.data.users
-                // console.log(this.users, 'userData')
-            })
+        async getUsers(role) {
+            try {
+                const response = await axios.get(`${BASE_URL}api/users/`, {
+                    params: { role: role }
+                })
+                this.users = response.data.users
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
+            }
         },
     },
     watch: {
@@ -512,19 +523,40 @@ export default {
     created() {
         this.getUsers(this.$route.params.val)
     }
-
 }
 </script>
 
 <style>
 .table-responsive {
     overflow-x: auto;
-    max-height: 50vh; 
+    max-height: 50vh;
 }
 
 .scrollable-body {
     display: block;
     max-height: inherit;
     overflow-y: auto;
+}
+
+.delete-icon {
+    transition: background-color 0.3s, color 0.3s;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.delete-icon:hover {
+    background-color: #ff0000;
+    color: white !important;
+}
+
+.edit-icon {
+    transition: background-color 0.3s, color 0.3s;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.edit-icon:hover {
+    background-color: dodgerblue;
+    color: rgb(251, 251, 251) !important;
 }
 </style>
