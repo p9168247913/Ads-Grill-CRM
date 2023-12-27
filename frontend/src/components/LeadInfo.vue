@@ -1,11 +1,13 @@
-<template>
+<template >
     <div class="container">
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Tag</h6>
-                <div class="col-md-4 mb-3" style="display: flex; gap: 10px;">
-                    <input type="text" class="form-control" v-model="newTag" placeholder="Enter Tag" />
-                    <button class="btn btn-primary" @click="addTag">Add</button>
+                <div class="col-md-4 mb-3">
+                    <form @submit="addLeadInfo($event, 'tag')" style="display: flex; gap: 10px;">
+                        <input required type="text" class="form-control" v-model="newLeadInfo" placeholder="Enter Tag" />
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
                 </div>
                 <table class="table">
                     <thead>
@@ -23,11 +25,15 @@
                     </thead>
                     <tbody>
                         <tr v-for="(tag, index) in tags" :key="index">
-                            <td style="padding-left: 25px;" class="text-start align-middle" scope="row">{{ index + 1 }}</td>
-                            <td style="padding-left: 25px;" class="text-start align-middle">{{ tag }}</td>
+                            <td style="padding-left: 25px;" class="text-start align-middle" scope="row">
+                                <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                            </td>
                             <td style="padding-left: 25px;" class="text-start align-middle">
-                                <i class="fas fa-trash text-danger m-3 fa-xs" @click="deleteTag(index)"
-                                    style="cursor: pointer"></i>
+                                <h6 class="mb-0 text-sm">{{ tag.name }}</h6>
+                            </td>
+                            <td style="padding-left: 25px;" class="text-start align-middle">
+                                <i class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                                    @click="deleteLeadInfo('tag', tag.id)" style="cursor: pointer"></i>
                             </td>
                         </tr>
                     </tbody>
@@ -37,9 +43,11 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Source</h6>
-                <div class="col-md-4 mb-3" style="display: flex; gap: 10px;">
-                    <input type="text" class="form-control" v-model="newSource" placeholder="Enter Source" />
-                    <button class="btn btn-primary" @click="addSource">Add</button>
+                <div class="col-md-4 mb-3">
+                    <form @submit="addLeadInfo($event, 'source')" style="display: flex; gap: 10px;">
+                        <input required type="text" class="form-control" v-model="newLeadInfo" placeholder="Enter Source" />
+                        <button type="submit" class="btn btn-primary">Add</button>
+                    </form>
                 </div>
                 <table class="table">
                     <thead>
@@ -57,11 +65,15 @@
                     </thead>
                     <tbody>
                         <tr v-for="(source, index) in sources" :key="index">
-                            <td style="padding-left: 25px;" class="text-start align-middle" scope="row">{{ index + 1 }}</td>
-                            <td style="padding-left: 25px;" class="text-start align-middle">{{ source }}</td>
+                            <td style="padding-left: 25px;" class="text-start align-middle" scope="row">
+                                <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                            </td>
                             <td style="padding-left: 25px;" class="text-start align-middle">
-                                <i class="fas fa-trash text-danger m-3 fa-xs" @click="deleteSource(index)"
-                                    style="cursor: pointer"></i>
+                                <h6 class="mb-0 text-sm">{{ source.name }}</h6>
+                            </td>
+                            <td style="padding-left: 25px;" class="text-start align-middle">
+                                <i class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                                    @click="deleteLeadInfo('source', source.id)" style="cursor: pointer"></i>
                             </td>
                         </tr>
                     </tbody>
@@ -71,9 +83,11 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Status</h6>
-                <div class="col-md-4 mb-3" style="display: flex; gap: 10px;">
-                    <input type="text" class="form-control" v-model="newStatus" placeholder="Enter Status" />
-                    <button class="btn btn-primary" @click="addStatus">Add</button>
+                <div class="col-md-4 mb-3" >
+                    <form @submit="addLeadInfo($event, 'status')" style="display: flex; gap: 10px;">
+                        <input required type="text" class="form-control" v-model="newLeadInfo" placeholder="Enter Status" />
+                        <button type="submit" class="btn btn-primary" >Add</button>
+                    </form>
                 </div>
                 <table class="table">
                     <thead>
@@ -91,11 +105,15 @@
                     </thead>
                     <tbody>
                         <tr v-for="(status, index) in statuses" :key="index">
-                            <td style="padding-left: 25px;" class="text-start align-middle" scope="row">{{ index + 1 }}</td>
-                            <td style="padding-left: 25px;" class="text-start align-middle">{{ status }}</td>
+                            <td style="padding-left: 25px;" class="text-start align-middle" scope="row">
+                                <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                            </td>
                             <td style="padding-left: 25px;" class="text-start align-middle">
-                                <i class="fas fa-trash text-danger m-3 fa-xs" @click="deleteStatus(index)"
-                                    style="cursor: pointer"></i>
+                                <h6 class="mb-0 text-sm">{{ status.name }}</h6>
+                            </td>
+                            <td style="padding-left: 25px;" class="text-start align-middle">
+                                <i class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                                    @click="deleteLeadInfo('status', status.id)" style="cursor: pointer"></i>
                             </td>
                         </tr>
                     </tbody>
@@ -106,56 +124,90 @@
 </template>
   
 <script>
+import axios from 'axios';
+import Noty from 'noty';
+import Swal from 'sweetalert2';
+import { BASE_URL } from '../config/apiConfig';
+
 export default {
     data() {
         return {
-            newTag: '',
-            newSource: '',
-            newStatus: '',
+            newLeadInfo: '',
             tags: [],
             sources: [],
             statuses: [],
         };
     },
     methods: {
-        addTag() {
-            if (this.newTag.trim() !== '') {
-                this.tags.push(this.newTag.trim());
-                this.newTag = '';
+        async getLeadsInfo() {
+            try {
+                const response = await axios.get(`${BASE_URL}api/leadinfo/`)
+                this.tags = response.data.leadInfoData['leadTag']
+                this.sources = response.data.leadInfoData['leadSource']
+                this.statuses = response.data.leadInfoData['leadStatus']
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.message,
+                    timeout: 500,
+                }).show()
             }
         },
-        deleteTag(index) {
-            this.tags.splice(index, 1);
-        },
-        addStatus() {
-            if (this.newStatus.trim() !== '') {
-                this.statuses.push(this.newStatus.trim());
-                this.newStatus = '';
+        async addLeadInfo(e, infoName) {
+            e.preventDefault()
+            try {
+                const response = await axios.post(`${BASE_URL}api/leadinfo/?key=${infoName}&name=${this.newLeadInfo}`)
+                if (response.status === 201) {
+                    Swal.fire({
+                        title: `${response.data.message}`,
+                        icon: 'success',
+                    })
+                    this.getLeadsInfo();
+                    this.newLeadInfo = ""
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
             }
         },
-        addSource() {
-            if (this.newSource.trim() !== '') {
-                this.sources.push(this.newSource.trim());
-                this.newSource = '';
-            }
-        },
-        deleteSource(index) {
-            this.sources.splice(index, 1);
-        },
-        deleteStatus(index) {
-            this.statuses.splice(index, 1);
+        async deleteLeadInfo(infoName, newLeadInfoId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await axios.delete(`${BASE_URL}api/leadinfo/?key=${infoName}&id=${newLeadInfoId}`)
+                        this.getLeadsInfo();
+                        Swal.fire('Deleted!', response.data.message, 'success');
+                    } catch (error) {
+                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                    }
+                }
+            });
         },
     },
+    mounted() {
+        this.getLeadsInfo();
+    }
 };
 </script>
   
 <style scoped>
 .container {
     margin-top: 30px;
+    padding-bottom: 80px !important;
 }
 
 .block {
-    /* border: 1px solid red; */
     background-color: white;
     border-radius: 10px;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -170,7 +222,17 @@ export default {
 .form-control,
 .btn-primary {
     height: 38px;
-    /* Adjust as needed */
+}
+
+.delete-icon {
+    transition: background-color 0.3s, color 0.3s;
+    padding: 8px;
+    border-radius: 50%;
+}
+
+.delete-icon:hover {
+    background-color: #ff0000;
+    color: white !important;
 }
 </style>
   
