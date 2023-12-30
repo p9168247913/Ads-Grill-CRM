@@ -1,3 +1,4 @@
+from app.models import Users
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.conf import settings
@@ -16,6 +17,9 @@ class UserCreateView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        if Users.objects.filter(email=email, is_deleted=False):
+            return JsonResponse({'message':'User with this email already exists'})
         send_password = serializer.validated_data['password']
         self.perform_create(serializer)
 

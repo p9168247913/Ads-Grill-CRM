@@ -30,6 +30,12 @@
                                     style="width: auto; height: 40px !important;"
                                     href="http://127.0.0.1:8000/api/leadExcelFormat/" download><i
                                         class="fas fa-download"></i>&nbsp;&nbsp;Lead Format</a>
+                                <input @change="leadsBulkUpload" type="file" class="btn btn-primary mb-2 h-100"
+                                    style="width: auto; height: 40px !important; display: none;" id="fileInput" accept=".xlsx, .xls">
+
+                                <label for="fileInput" class="btn btn-primary mb-2 h-100"
+                                    style="width: auto; height: 40px !important;">
+                                    <i class="fas fa-upload"></i>&nbsp;&nbsp;Bulk Upload</label>
                             </div>
                         </div>
                     </div>
@@ -124,7 +130,8 @@
                     </div>
                 </div>
                 <!-- Modal for Edit Lead -->
-                <div class="modal fade" ref="editLeadModal" id="edituser" tabindex="-1" @hidden="updateLead" aria-labelledby="edituser" aria-hidden="true">
+                <div class="modal fade" ref="editLeadModal" id="edituser" tabindex="-1" @hidden="updateLead"
+                    aria-labelledby="edituser" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content" style="padding: 30px;">
                             <div class="modal-header">
@@ -221,7 +228,7 @@
                     </div>
                 </div>
                 <!--Leads Table-->
-                <div class="card" style="margin-top: 2rem;">
+                <div class="card" style="margin-top: 2rem; margin-bottom:4rem">
                     <div class="card-header pb-0">
                         <h6>LEADS</h6>
                     </div>
@@ -299,8 +306,8 @@
                                             <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                                                 data-bs-toggle="modal" data-bs-target="#edituser" @click="editModal(lead)"
                                                 style=" cursor: pointer;"></i>
-                                            <i v-if="authUser.role === 'super-admin'" class="fas fa-trash text-danger m-3 fa-xs"
-                                                style="cursor: not-allowed"></i>
+                                            <i v-if="authUser.role === 'super-admin'"
+                                                class="fas fa-trash text-danger m-3 fa-xs" style="cursor: not-allowed"></i>
                                             <i v-else class="fas fa-trash text-danger m-3 fa-xs delete-icon"
                                                 @click="deleteLead(lead.id)" style="cursor: pointer"></i>
                                         </td>
@@ -482,7 +489,7 @@ export default {
                     },
                 })
                 this.resetValues()
-                if(response.status===200){
+                if (response.status === 200) {
                     this.getLeads();
                     this.resetValues();
                     this.$refs.editLeadModal.classList.remove('show');
@@ -517,6 +524,41 @@ export default {
                 }).show()
             }
         },
+        async leadsBulkUpload(event){
+            let file = event.target.files[0]
+            if (!file){
+                new Noty({
+                    type:'error',
+                    text:'Please select a file',
+                    timeout:500
+                }).show()
+            }
+            else{
+                const formData = new FormData();
+                formData.append('key', 'bulkUpload');
+                formData.append('file', file);
+                await axios.post(`${BASE_URL}api/leads/`, formData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                    },
+                }).then((r=>{
+                    if(r.status == 201){
+                        Swal.fire({
+                        title: `${r.data.message}`,
+                        icon: 'success',
+                    })
+                    this.getLeads()
+                    }
+                })).catch(e=>{
+                    console.log('error',e)
+                    new Noty({
+                        type:'error',
+                        text:e,
+                        timeout:500
+                    }).show()
+                })
+            }
+        },
         async deleteLead(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -548,7 +590,7 @@ export default {
     
 <style>
 .modalBody {
-    max-height: calc(100vh - 310px);
+    max-height: calc(100vh - 150px);
     overflow-y: auto;
 }
 
