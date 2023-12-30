@@ -47,6 +47,7 @@ class LeadView(APIView):
             return JsonResponse({'message':'Lead Created Successfully'},status=status.HTTP_201_CREATED)
         
         if val =='bulkUpload':
+            print('post')
             parser_class = (FileUploadParser,)
             up_file = request.FILES.get('file')
             upload_folder = 'uploads/leads'
@@ -125,6 +126,7 @@ class LeadView(APIView):
             return JsonResponse({'message':f'{up_file.name} Uploaded Successfully',}, status=status.HTTP_201_CREATED)
     
     def get(self, request):
+        print('get')
         try:
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')

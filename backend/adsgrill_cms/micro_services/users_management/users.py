@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from app.models import Users
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 import json
 from django.db import transaction
 
@@ -11,7 +11,7 @@ class UsersView(APIView):
         if request.method == 'GET':
             try:
                 role = request.GET.get('role')
-                requestedUsers = Users.objects.filter(role__name=role).order_by('-created_at')
+                requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
                 user_data = [{
                     'id':user.pk,
                     'name': user.name,
@@ -33,7 +33,8 @@ class UsersView(APIView):
                 with transaction.atomic():
                     userID = request.GET.get('userID')
                     deleteUser = Users.objects.filter(pk = userID)
-                    deleteUser.delete()
+                    deleteUser.is_deleted=True
+                    deleteUser.save()
             except Users.DoesNotExist:
                 return JsonResponse({"message": "Something went wrong! Can't Delete User"}, status=500)
             return JsonResponse({'message': 'User Deleted Successfully'}, status=204)
