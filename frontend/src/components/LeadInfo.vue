@@ -5,7 +5,7 @@
                 <h6 class="text-uppercase">Add Tag</h6>
                 <div class="col-md-4 mb-3">
                     <form @submit="addLeadInfo($event, 'tag')" style="display: flex; gap: 10px;">
-                        <input required type="text" class="form-control" v-model="newLeadInfo" placeholder="Enter Tag" />
+                        <input required type="text" class="form-control" v-model="newLeadInfoTag" placeholder="Enter Tag" />
                         <button type="submit" class="btn btn-primary">Add</button>
                     </form>
                 </div>
@@ -45,7 +45,8 @@
                 <h6 class="text-uppercase">Add Source</h6>
                 <div class="col-md-4 mb-3">
                     <form @submit="addLeadInfo($event, 'source')" style="display: flex; gap: 10px;">
-                        <input required type="text" class="form-control" v-model="newLeadInfo" placeholder="Enter Source" />
+                        <input required type="text" class="form-control" v-model="newLeadInfoSource"
+                            placeholder="Enter Source" />
                         <button type="submit" class="btn btn-primary">Add</button>
                     </form>
                 </div>
@@ -83,10 +84,11 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Status</h6>
-                <div class="col-md-4 mb-3" >
+                <div class="col-md-4 mb-3">
                     <form @submit="addLeadInfo($event, 'status')" style="display: flex; gap: 10px;">
-                        <input required type="text" class="form-control" v-model="newLeadInfo" placeholder="Enter Status" />
-                        <button type="submit" class="btn btn-primary" >Add</button>
+                        <input required type="text" class="form-control" v-model="newLeadInfoStatus"
+                            placeholder="Enter Status" />
+                        <button type="submit" class="btn btn-primary">Add</button>
                     </form>
                 </div>
                 <table class="table">
@@ -132,6 +134,10 @@ import { BASE_URL } from '../config/apiConfig';
 export default {
     data() {
         return {
+            isLoading: false,
+            newLeadInfoTag: '',
+            newLeadInfoSource: '',
+            newLeadInfoStatus: '',
             newLeadInfo: '',
             tags: [],
             sources: [],
@@ -141,21 +147,34 @@ export default {
     methods: {
         async getLeadsInfo() {
             try {
+                this.$store.commit('showLoader') 
                 const response = await axios.get(`${BASE_URL}api/leadinfo/`)
                 this.tags = response.data.leadInfoData['leadTag']
                 this.sources = response.data.leadInfoData['leadSource']
                 this.statuses = response.data.leadInfoData['leadStatus']
+                this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
                     text: error.message,
                     timeout: 500,
                 }).show()
+                this.$store.commit('hideLoader')
             }
         },
         async addLeadInfo(e, infoName) {
             e.preventDefault()
+            if (infoName === 'tag') {
+                this.newLeadInfo = this.newLeadInfoTag
+            }
+            else if (infoName === 'source') {
+                this.newLeadInfo = this.newLeadInfoSource
+            }
+            else if (infoName === 'status') {
+                this.newLeadInfo = this.newLeadInfoStatus
+            }
             try {
+                this.$store.commit('showLoader')
                 const response = await axios.post(`${BASE_URL}api/leadinfo/?key=${infoName}&name=${this.newLeadInfo}`)
                 if (response.status === 201) {
                     Swal.fire({
@@ -163,14 +182,18 @@ export default {
                         icon: 'success',
                     })
                     this.getLeadsInfo();
-                    this.newLeadInfo = ""
+                    this.newLeadInfoTag = ''
+                    this.newLeadInfoSource = ''
+                    this.newLeadInfoStatus = ''
                 }
+                this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message,
                     timeout: 500,
                 }).show()
+                this.$store.commit('hideLoader')
             }
         },
         async deleteLeadInfo(infoName, newLeadInfoId) {
@@ -185,11 +208,14 @@ export default {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
+                        this.$store.commit('showLoader')
                         const response = await axios.delete(`${BASE_URL}api/leadinfo/?key=${infoName}&id=${newLeadInfoId}`)
                         this.getLeadsInfo();
                         Swal.fire('Deleted!', response.data.message, 'success');
+                        this.$store.commit('hideLoader')
                     } catch (error) {
                         Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        this.$store.commit('hideLoader')
                     }
                 }
             });

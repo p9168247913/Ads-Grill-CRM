@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
+    <!-- <LoaderComponent v-if="isLoading" /> -->
     <div class="wrapper" style="margin-bottom: 80px; ">
         <div class="content-page">
             <div class="container-fluid">
@@ -37,7 +38,7 @@
                 </div>
                 <!-- Modal for Create Role -->
                 <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel"
-                    aria-hidden="true">
+                    aria-hidden="true"  @hidden="createRole">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -45,26 +46,26 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form>
+                                <form @submit="createRole($event)">
                                     <div class="mb-3">
                                         <label for="roleName" class="form-label">Role Name</label>
                                         <input type="text" class="form-control" id="roleName"
                                             placeholder="Enter role name..." v-model="roleName">
                                     </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                            @click="roleName = ''">Close</button>
+                                        <button type="button" class="btn btn-primary">Add</button>
+                                    </div>
                                 </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                    @click="roleName = ''">Close</button>
-                                <button @click="createRole" type="button" class="btn btn-primary">Add</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Modal for Create admin -->
-                <div class="modal fade" id="createAdmin" tabindex="-1" aria-labelledby="createadminLabel"
-                    aria-hidden="true">
+                <div class="modal fade" id="createAdmin" tabindex="-1" aria-labelledby="createadminLabel" aria-hidden="true"
+                    @hidden="createUser">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -72,7 +73,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form @submit="createUser($event)">
+                                <form @submit="createUser($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="name" class="form-label">Name</label>
@@ -124,15 +125,15 @@
                 <!-- end -->
 
                 <!-- Modal for Create user -->
-                <div class="modal fade" id="createUser" tabindex="-1" aria-labelledby="createadminLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
+                <div class="modal fade" id="createUser" tabindex="-1" aria-labelledby="createadminLabel" aria-hidden="true" @hidden="createUser">
+                    <div class="modal-dialog modal-dialog-centered" >
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create User</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form>
+                                <form @submit="createUser($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="name" class="form-label">Name</label>
@@ -174,14 +175,14 @@
                                             <input type="text" class="form-control" v-model="contact_no" required>
                                         </div>
                                     </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                            @click="resetValues()">Close</button>
+                                        <button type="submit" class="btn btn-primary">Create</button>
+                                    </div>
                                 </form>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                    @click="resetValues()">Close</button>
-                                <button type="button" class="btn btn-primary" @click="createUser"
-                                    data-bs-dismiss="modal">Send</button>
-                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -238,87 +239,90 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--Table-->
-            <div class="card" style="margin-top: 2rem;">
-                <div class="card-header pb-0">
-                    <h6>{{ $route.params.val.toUpperCase() }}</h6>
-                </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr>
-                                    <th style="color: #344767 !important;"
-                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
-                                        v-for="(head) in headers" :key="head">{{ head }}</th>
-                                </tr>
-                            </thead>
-                            <tbody v-for="(user, index) in paginatedUsers" :key="index">
-                                <tr>
-                                    <td>
-                                        <div class="d-flex px-2 py-1">
-                                            <div>
-                                                <img src="" class="avatar avatar-sm me-3" alt="user1" />
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.name }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.designation }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.role }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.contact_no }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.pincode }}</h6>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle" style="margin-left: 15px !important;">
-                                        <i v-if="authUser.role == 'admin'"
-                                            class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
-                                            data-bs-toggle="modal" data-bs-target="#edituser"
-                                            style="margin-left: 20px; cursor: pointer;" @click="handleEditClick"></i>
-                                        <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
-                                            style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
 
-                                        <!-- Delete Icon -->
-                                        <i v-if="authUser.role == 'admin'"
-                                            class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"
-                                            @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
-                                        <i v-else class="fas fa-trash text-danger m-3 fa-xs"
-                                            style="cursor: not-allowed;"></i>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!--Table-->
+                <div class="card" style="margin-top: 2rem;">
+                    <div class="card-header pb-0">
+                        <h6>{{ $route.params.val.toUpperCase() }}</h6>
                     </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="color: #344767 !important;"
+                                            class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                            v-for="(head) in headers" :key="head">{{ head }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody v-for="(user, index) in paginatedUsers" :key="index">
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex px-2 py-1">
+                                                <div>
+                                                    <img src="" class="avatar avatar-sm me-3" alt="user1" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user.name }}</h6>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user.designation }}</h6>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user.role }}</h6>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user.contact_no }}</h6>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ user.pincode }}</h6>
+                                            </div>
+                                        </td>
+                                        <td class="align-middle" style="margin-left: 15px !important;">
+                                            <i v-if="authUser.role == 'admin'"
+                                                class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
+                                                data-bs-toggle="modal" data-bs-target="#edituser"
+                                                style="margin-left: 20px; cursor: pointer;" @click="handleEditClick"></i>
+                                            <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
+                                                style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
+
+                                            <!-- Delete Icon -->
+                                            <i v-if="authUser.role == 'admin'"
+                                                class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                                                style="cursor: pointer;" @click="deleteUser(user.id)" data-toggle="tooltip"
+                                                data-original-title="Delete user"></i>
+                                            <i v-else class="fas fa-trash text-danger m-3 fa-xs"
+                                                style="cursor: not-allowed;"></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <PaginationComponent v-if="users.length > 10" :currentPage="currentPage"
+                        :itemsPerPage="itemsPerPage" :filteredUsers="filteredUsers" :prevPage="prevPage"
+                        :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
-                <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage" :filteredUsers="filteredUsers"
-                    :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import axios from 'axios'
-import Noty from 'noty'
-import { mapState } from 'vuex'
+import axios from 'axios';
+import Noty from 'noty';
+import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import { BASE_URL } from '../config/apiConfig';
@@ -329,6 +333,7 @@ export default {
     },
     data() {
         return {
+            isLoading: false,
             searchTerm: '',
             name: '', email: '', role: '', contact_no: '', designation: '', pincode: '', password: '',
             isToggled: false,
@@ -347,7 +352,6 @@ export default {
     computed: {
         ...mapState(['authUser']),
         filteredUsers() {
-            console.log(this.searchTerm);
             return this.users.filter(user => {
                 const searchLowerCase = this.searchTerm.toLowerCase() || ''
                 return (
@@ -394,17 +398,21 @@ export default {
         },
         async getUserRole() {
             try {
+                this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/roles/`);
                 this.userRole = response.data.roles
+                this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message,
                     timeout: 500,
                 }).show()
+                this.$store.commit('hideLoader')
             }
         },
-        async createRole() {
+        async createRole(e) {
+            e.preventDefault()
             if (!this.roleName) {
                 Swal.fire({
                     title: 'Please enter role name',
@@ -413,24 +421,27 @@ export default {
             }
             else {
                 try {
+                    this.$store.commit('showLoader')
                     const response = await axios.post(`${BASE_URL}api/roles/?role=${this.roleName}`)
                     if (response.status == 201) {
                         Swal.fire({
-                            title: `${response.data.message}`,
+                            title: response.data.message,
                             icon: 'success',
                         })
                         this.roleName = ''
                     }
+                    this.$store.commit('hideLoader')
                 } catch (error) {
                     new Noty({
                         type: 'error',
                         text: error.response.data.message,
                         timeout: 500,
                     }).show()
+                    this.$store.commit('hideLoader')
                 }
             }
         },
-        async deleteUser() {
+        async deleteUser(id) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'You won\'t be able to revert this!',
@@ -442,14 +453,19 @@ export default {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        await axios.delete(`${BASE_URL}api/users/`, {
+                        this.$store.commit('showLoader')
+                        const response = await axios.delete(`${BASE_URL}api/users/`, {
                             params: {
-                                userID: ''
+                                userID: id
                             }
                         });
-                        Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                        if(response.status===201){
+                            Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                        }
+                        this.$store.commit('hideLoader')
                     } catch (error) {
                         Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        this.$store.commit('hideLoader')
                     }
                 }
             });
@@ -476,26 +492,28 @@ export default {
                 requestData.role = '8'
             }
             try {
+                this.$store.commit('showLoader')
                 const response = await axios.post(`${BASE_URL}api/create/user/`, requestData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
                     }
                 })
-                console.log(response.data);
                 if (response.status == 201) {
                     Swal.fire({
-                        title: response.data.message,
+                        title: 'Created successfully!',
                         icon: 'success',
                     })
                     this.getUsers(this.$route.params.val);
                     this.resetValues
                 }
+                this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message,
                     timeout: 500,
                 }).show()
+                this.$store.commit('hideLoader')
             }
         },
         closeModal() {
@@ -504,16 +522,20 @@ export default {
         },
         async getUsers(role) {
             try {
+                this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/users/`, {
                     params: { role: role }
                 })
                 this.users = response.data.users
+                this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message,
                     timeout: 500,
                 }).show()
+                this.$store.commit('hideLoader')
+
             }
         },
     },
@@ -529,7 +551,7 @@ export default {
 <style>
 .table-responsive {
     overflow-x: auto;
-    max-height: 50vh;
+    max-height: 60vh;
 }
 
 .scrollable-body {
