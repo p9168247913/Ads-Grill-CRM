@@ -88,6 +88,7 @@ import { mapMutations } from "vuex";
 import { mapState } from "vuex";
 import router from "@/router";
 const body = document.getElementsByTagName("body")[0];
+import { BASE_URL } from "../config/apiConfig";
 
 export default {
   name: "signin",
@@ -124,7 +125,6 @@ export default {
   methods: {
     ...mapMutations(['setAuthToken', 'setAuthUser']),
     doLogin(e) {
-      console.log("email", this.email);
       e.preventDefault();
       if (!this.email) {
         new Noty({
@@ -144,7 +144,7 @@ export default {
       }
       else {
         // this.loading = true
-        axios.post('http://127.0.0.1:8000/api/login/', {
+        axios.post(`${BASE_URL}api/login/`, {
           "username": this.email,
           "password": this.pswd
         }).then((response) => {

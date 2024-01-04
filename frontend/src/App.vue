@@ -13,6 +13,7 @@ Coded by www.creative-tim.com
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 -->
 <template>
+  <LoaderComponent v-if="isLoading" />
   <div
     v-show="this.$store.state.layout === 'landing'"
     class="landing-bg h-100 bg-gradient-primary position-fixed w-100"
@@ -38,7 +39,7 @@ Coded by www.creative-tim.com
       v-if="this.$store.state.showNavbar"
     />
     <router-view />
-    <app-footer v-show="this.$store.state.showFooter" />
+    <!-- <app-footer v-show="this.$store.state.showFooter" /> -->
     <configurator
       :toggle="toggleConfigurator"
       :class="[
@@ -52,8 +53,10 @@ Coded by www.creative-tim.com
 import Sidenav from "./examples/Sidenav";
 import Configurator from "@/examples/Configurator.vue";
 import Navbar from "@/examples/Navbars/Navbar.vue";
-import AppFooter from "@/examples/Footer.vue";
+// import AppFooter from "@/examples/Footer.vue";
 import { mapMutations } from "vuex";
+import { mapState } from "vuex";
+import LoaderComponent from './components/Loader/LoaderComponent.vue'
 
 export default {
   name: "App",
@@ -61,12 +64,14 @@ export default {
     Sidenav,
     Configurator,
     Navbar,
-    AppFooter
+    LoaderComponent,
+    // AppFooter
   },
   methods: {
-    ...mapMutations(["toggleConfigurator", "navbarMinimize"])
+    ...mapMutations(["toggleConfigurator", "navbarMinimize"]),
   },
   computed: {
+    ...mapState(['isLoading']),
     navClasses() {
       return {
         "position-sticky bg-white left-auto top-2 z-index-sticky":

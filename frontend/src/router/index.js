@@ -11,6 +11,10 @@ import Profile from "../views/Profile.vue";
  import Signup from "../views/Signup.vue";
  import Signin from "../views/Signin.vue";
 import GetEmployee from "../components/GetEmployee.vue"
+import IssuesPage from '../components/Issues/IssuesPage.vue'
+import Backlogs from '../components/Backlogs/BackLogs.vue'
+import ActiveSprint from '../components/ActiveSprint/ActiveSprint.vue'
+import ClientSignin from '.././views/ClientSignin.vue'
 
 const routes = [
   {
@@ -59,6 +63,21 @@ const routes = [
     component: profitView,
   },
   {
+    path: "/issues",
+    name: "Issues",
+    component: IssuesPage,
+  },
+  {
+    path: "/backlogs",
+    name: "Backlogs",
+    component: Backlogs,
+  },
+  {
+    path: "/active-sprints",
+    name: "Active Sprint",
+    component: ActiveSprint,
+  },
+  {
     path: "/profile",
     name: "Profile",
     component: Profile,
@@ -67,6 +86,11 @@ const routes = [
     path: "/signin",
     name: "Signin",
     component: Signin,
+  },
+  {
+    path: "/client-signin",
+    name: "Cient Signin",
+    component: ClientSignin,
   },
   {
     path: "/signup",
@@ -88,14 +112,21 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('token');
-  if (to.path !== '/signin' && to.path !== '/signup') {
-      if (!loggedIn || loggedIn=="") {
-          next('/signin');
+  const role = localStorage.getItem('role');
+  
+  // Redirect to the appropriate sign-in page based on user role after logout
+  if (to.path !== '/signin' && to.path !== '/signup' && to.path !== '/client-signin') {
+    if (!loggedIn || loggedIn === "") {
+      if (role !== "client") {
+        next('/signin');
       } else {
-          next();
+        next('/client-signin');
       }
-  } else {
+    } else {
       next();
+    }
+  } else {
+    next();
   }
 });
 

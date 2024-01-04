@@ -1,4 +1,11 @@
 <template>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Webkit | Responsive Bootstrap 4 Admin Dashboard Template</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+  </head>
   <main>
     <div class="container-fluid">
       <div class="page-header min-height-300" style="
@@ -18,8 +25,8 @@
             </div>
             <div class="col-auto my-auto">
               <div class="h-100">
-                <h5 class="mb-1">Sayo Kravits</h5>
-                <p class="mb-0 font-weight-bold text-sm">Public Relations</p>
+                <h5 class="mb-1">{{ authUser.name }}</h5>
+                <p class="mb-0 font-weight-bold text-sm">{{ authUser.email }}</p>
               </div>
             </div>
             <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0">
@@ -27,7 +34,8 @@
                 <ul class="p-1 bg-transparent nav nav-pills" role="tablist">
                   <li class="nav-item col-lg-auto col-md-auto col-sm-auto w-100" style="width: 200px !important;"
                     @click="doLogout">
-                    <button style="width: 150px !important; height: 35px !important;" class="btn btn-sm btn-dark float-right mb-0 px-2 py-1 mb-0 nav-link active">
+                    <button style="width: 150px !important; height: 35px !important;"
+                      class="btn btn-sm btn-dark float-right mb-0 px-2 py-1 mb-0 nav-link active">
                       <span class="ms-1" style="color: white;">Logout</span>
                     </button>
                   </li>
@@ -45,63 +53,66 @@
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
                 <p class="mb-0">Edit Profile</p>
-                <argon-button color="success" size="sm" class="ms-auto">Save</argon-button>
+                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()">Save</argon-button>
               </div>
             </div>
             <div class="card-body">
               <p class="text-uppercase text-sm">User Information</p>
+              <div class="mb-3 col-md-6">
+                <label for="profileImage" class="form-label">Profile Picture</label>
+                <input type="file" class="form-control" id="profileImage" @change="onImageChange" />
+              </div>
               <div class="row">
                 <div class="col-md-6">
-                  <label for="example-text-input" class="form-control-label">Username</label>
-                  <argon-input type="text" value="lucky.jesse" />
+                  <label for="name" class="form-control-label">Name</label>
+                  <input class="form-control" type="text" v-model="userData.name" />
                 </div>
                 <div class="col-md-6">
-                  <label for="example-text-input" class="form-control-label">Email address</label>
-                  <argon-input type="email" value="jesse@example.com" />
+                  <label for="email" class="form-control-label">Email address</label>
+                  <input class="form-control" disabled type="email" v-model="userData.email" />
                 </div>
                 <div class="col-md-6">
-                  <label for="example-text-input" class="form-control-label">First name</label>
-                  <input class="form-control" type="text" value="Jesse" />
+                  <label for="example-text-input" class="form-control-label">Designation</label>
+                  <input class="form-control" disabled type="text" v-model="userData.designation" />
                 </div>
                 <div class="col-md-6">
-                  <label for="example-text-input" class="form-control-label">Last name</label>
-                  <argon-input type="text" value="Lucky" />
+                  <label for="example-text-input" class="form-control-label">Role</label>
+                  <input class="form-control" disabled type="text" v-model="userData.role" />
                 </div>
               </div>
               <hr class="horizontal dark" />
               <p class="text-uppercase text-sm">Contact Information</p>
               <div class="row">
-                <div class="col-md-12">
-                  <label for="example-text-input" class="form-control-label">Address</label>
-                  <argon-input type="text" value="Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09" />
-                </div>
                 <div class="col-md-4">
-                  <label for="example-text-input" class="form-control-label">City</label>
-                  <argon-input type="text" value="New York" />
-                </div>
-                <div class="col-md-4">
-                  <label for="example-text-input" class="form-control-label">Country</label>
-                  <argon-input type="text" value="United States" />
+                  <label for="example-text-input" class="form-control-label">Mobile Number</label>
+                  <input class="form-control" type="text" v-model="userData.contact_no" />
                 </div>
                 <div class="col-md-4">
                   <label for="example-text-input" class="form-control-label">Postal code</label>
-                  <argon-input type="text" value="437300" />
+                  <input class="form-control" type="text" v-model="userData.pincode" />
+                </div>
+              </div>
+              <p class="text-uppercase text-sm" style="margin-top: 30px;">Change Password</p>
+              <div class="row">
+                <div class="col-md-4">
+                  <label for="example-text-input" class="form-control-label">Old Password</label>
+                  <input class="form-control" type="password" v-model="userData.oldPassword" />
+                </div>
+                <div class="col-md-4">
+                  <label for="example-text-input" class="form-control-label">New Password</label>
+                  <input class="form-control" type="password" :disabled="!userData.oldPassword"
+                    v-model="userData.newPassword" />
+                </div>
+                <div class="col-md-4">
+                  <label for="example-text-input" class="form-control-label">Confirm Password</label>
+                  <input class="form-control" type="password" :disabled="!userData.oldPassword"
+                    v-model="userData.confirmPassword" />
                 </div>
               </div>
               <hr class="horizontal dark" />
-              <p class="text-uppercase text-sm">About me</p>
-              <div class="row">
-                <div class="col-md-12">
-                  <label for="example-text-input" class="form-control-label">About me</label>
-                  <argon-input type="text" value="A beautiful Dashboard for Bootstrap 5. It is Free and Open Source." />
-                </div>
-              </div>
             </div>
           </div>
         </div>
-        <!-- <div class="col-md-4">
-          <profile-card />
-        </div> -->
       </div>
     </div>
   </main>
@@ -110,13 +121,12 @@
 <script>
 import setNavPills from "@/assets/js/nav-pills.js";
 import setTooltip from "@/assets/js/tooltip.js";
-// import ProfileCard from "./components/ProfileCard.vue";
-import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
 import { mapState, mapMutations, mapActions } from "vuex";
 import axios from "axios";
 import Noty from "noty";
 import router from "@/router";
+import { BASE_URL } from "../config/apiConfig";
 
 const body = document.getElementsByTagName("body")[0];
 
@@ -128,12 +138,23 @@ export default {
   },
   data() {
     return {
-      showMenu: false
+      showMenu: false,
+      userData: {
+        name: '',
+        email: '',
+        designation: '',
+        role: '',
+        contact_no: '',
+        pincode: '',
+        password: '',
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      }
     };
   },
   components: {
-    // ProfileCard, 
-    ArgonInput, ArgonButton
+    ArgonButton
   },
   methods: {
     ...mapActions(["logout"]),
@@ -144,28 +165,59 @@ export default {
       this.isFixedNavbar = window.scrollY > 1
     },
     doLogout() {
-      axios.get('http://127.0.0.1:8000/api/logout/').
+      const role = localStorage.getItem('role')
+      axios.get(`${BASE_URL}api/logout/`).
         then((r) => {
           if (r.status == 200) {
             new Noty({
               type: 'success',
               text: r.data.message,
-              timeout: 500,
+              timeout: 1000,
               layout: 'topCenter'
             }).show()
-            this.logout()
-            // window.location.reload();
-            setTimeout(() => {
+            if (role === 'client') {
+              router.push('/client-signin')
+            } else {
               router.push('/signin')
-            }, 1000)
+            }
+            this.logout()
           }
         })
     },
+    async saveChanges() {
+      if (this.userData.newPassword && this.userData.newPassword !== this.confirmPassword) {
+        new Noty({
+          type: 'error',
+          text: "Confirm Password should be the same as New Password!",
+          timeout: 1000,
+          layout: 'topCenter'
+        }).show();
+        return;
+      }
+      // console.log(this.userData);
+      // try {
+      //   const response =  await axios.put(`${BASE_URL}api/user`, this.userData)
+      //   console.log(response.data);
+      // } catch (error) {
+      //   console.log(error);
+      // }
+    },
+    onImageChange(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          this.userData.profileImage = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
   },
   mounted() {
     this.$store.state.isAbsolute = true;
     setNavPills();
     setTooltip();
+    this.userData = { ...this.authUser };
   },
   beforeMount() {
     this.$store.state.imageLayout = "profile-overview";
@@ -184,3 +236,5 @@ export default {
   }
 };
 </script>
+<style>
+</style>

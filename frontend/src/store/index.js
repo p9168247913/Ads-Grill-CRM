@@ -2,6 +2,12 @@ import { createStore } from "vuex";
 
 export default createStore({
   state: {
+    isLoading:false,
+    authClient:{
+      email: localStorage.getItem('email') || "",
+      role:localStorage.getItem('role') || "",
+      name: localStorage.getItem('name') || "",
+    },
     authToken: localStorage.getItem('token') || '',
     authUser:{
       email: localStorage.getItem('email') || "",
@@ -67,6 +73,22 @@ export default createStore({
       localStorage.setItem('pincode', user.pincode)
       localStorage.setItem('designation', user.designation)
     },
+    setAuthClient(state, user) {
+      state.authClient = user
+      localStorage.setItem('email', user.email)
+      localStorage.setItem('role', user.role)
+      localStorage.setItem('name', user.name)
+    },
+    clearAuthClient(state){
+      state.authClient = {
+        email: "",
+        role: "",
+        name:''
+      };
+      localStorage.removeItem('email')
+      localStorage.removeItem('role')
+      localStorage.removeItem('name')
+    },
     clearAuthUser(state){
       state.authUser = {
         email: "",
@@ -82,6 +104,12 @@ export default createStore({
     clearAuthToken(){
       localStorage.removeItem("token")
       this.state.authToken=''
+    },
+    showLoader(state){
+      state.isLoading = true
+    },
+    hideLoader(state){
+      state.isLoading=false
     }
   },
   actions: {
