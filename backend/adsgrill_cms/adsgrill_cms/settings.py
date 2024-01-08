@@ -27,6 +27,8 @@ SECRET_KEY = 'django-insecure-(2l!o^)n)khr1ie=v-+5=&cd0r8ub+9tn5@m%$wmn-gqw26rfl
 DEBUG = True
 
 ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS.append("*")
 
 
 # Application definition
@@ -43,11 +45,18 @@ INSTALLED_APPS = [
     'app',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'custom_auth.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -58,6 +67,13 @@ CORS_ALLOWED_ORIGINS = [
      "http://localhost:8080",
      "http://localhost:8081",
  ]
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:8081',
+    'http://localhost:8000',
+    'http://143.110.181.132',
+    'http://143.110.181.132:8000',
+]
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -180,6 +196,8 @@ EMAIL_HOST_PASSWORD = 'hhsk opst mwtc pspa'
 DEFAULT_FROM_EMAIL = 'shantanu.adsgrill@gmail.com'
 
 # Dajngo session settings
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_COOKIE_AGE = 8640
+# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600 * 24 * 7
+SESSION_SAVE_EVERY_REQUEST = False
 

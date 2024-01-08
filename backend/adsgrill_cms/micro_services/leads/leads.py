@@ -1,4 +1,5 @@
 from app.models import Users, Lead, Source, Tag, LeadStatus
+from braces.views import CsrfExemptMixin
 from rest_framework.views import APIView
 from django.http import JsonResponse, HttpResponse
 from django.db.models import ObjectDoesNotExist
@@ -11,8 +12,16 @@ from django.db.utils import IntegrityError
 from os.path import basename
 import os
 import openpyxl
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 
-class LeadView(APIView):
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+class LeadView(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         parser_classes = (MultiPartParser, FormParser)
         lead_data = request.data
@@ -126,7 +135,6 @@ class LeadView(APIView):
             return JsonResponse({'message':f'{up_file.name} Uploaded Successfully',}, status=status.HTTP_201_CREATED)
     
     def get(self, request):
-        print('get')
         try:
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
@@ -192,7 +200,9 @@ class LeadView(APIView):
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
         
         
-class LeadInfo(APIView):
+class LeadInfo(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         val = request.GET.get('key')
         name = request.GET.get('name')
@@ -265,33 +275,33 @@ class LeadInfo(APIView):
                 with transaction.atomic():
                     deleteLeadStatus = LeadStatus.objects.get(pk=id)
                     deleteLeadStatus.delete()
-                    return JsonResponse({'message': 'Lead Status Deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
             except ObjectDoesNotExist:
                 return JsonResponse({'message': 'Lead Status Not Found'}, status=status.HTTP_404_NOT_FOUND)
             except IntegrityError as i:
                 return JsonResponse({'message': str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({'message': 'Lead Status Deleted Successfully'}, status=status.HTTP_200_OK)
             
         if val == 'tag':
             try:
                 with transaction.atomic():
                     deleteLeadTag = Tag.objects.get(pk=id)
                     deleteLeadTag.delete()
-                    return JsonResponse({'message': 'Lead Tag Deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
             except ObjectDoesNotExist:
                 return JsonResponse({'message': 'Lead Tag Not Found'}, status=status.HTTP_404_NOT_FOUND)
             except IntegrityError as i:
                 return JsonResponse({'message': str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({'message': 'Lead Tag Deleted Successfully'}, status=status.HTTP_200_OK)
             
         if val == 'source':
             try:
                 with transaction.atomic():
                     deleteLeadSource = Source.objects.get(pk=id)
                     deleteLeadSource.delete()
-                    return JsonResponse({'message': 'Lead Source Deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
             except ObjectDoesNotExist:
                 return JsonResponse({'message': 'Lead Source Not Found'}, status=status.HTTP_404_NOT_FOUND)
             except IntegrityError as i:
                 return JsonResponse({'message': str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return JsonResponse({'message': 'Lead Source Deleted Successfully'}, status=status.HTTP_200_OK)
 
 class LeadExcelDownload(APIView):
     def get(self, request):
