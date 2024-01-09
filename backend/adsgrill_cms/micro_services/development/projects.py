@@ -1,5 +1,6 @@
 from app.models import Project, Users, Client
 from rest_framework.views import APIView
+
 from rest_framework import status
 from django.http import JsonResponse
 import json
@@ -12,6 +13,12 @@ class ProjectView(APIView):
         try:
             requestData = json.loads(request.body)
             client_id = requestData.get('client_id')
+            reported_id=requestData.get('reported_id')
+            technology=requestData.get('technology')
+            lead_id=requestData.get('lead_id')
+            progress_bar=requestData.get('progress_bar')
+            file=requestData.get('file')#-->make file field later
+            host_address=requestData.get('host_address')
             name = requestData.get('name')
             key = requestData.get('key')
             type = requestData.get('type')
@@ -22,18 +29,25 @@ class ProjectView(APIView):
                     return JsonResponse({'message':'Project with this name already exists'})
             
             with transaction.atomic():
-                lead_instance = Users.objects.get(pk=lead_man_id)
-                client_instance = Client.objects.get(pk=client_id)
+                lead_instance = Users.objects.get(pk=lead_man_id) if lead_id else None
+                client_instance = Client.objects.get(pk=client_id) if client_id else None
+                reported_instance=Users.objects.get(pk=reported_id) if reported_id else None
 
                 project_instance = Project.objects.create(
                      client = client_instance,
                      name = name,
                      key = key,
                      type = type,
+                     reported_id=reported_instance,
+                     technology=technology,
+                     lead_id=lead_id,
+                     progress_bar=progress_bar,
+                     file=file,
+                     host_address=host_address,
                      status = pr_status,
                      lead = lead_instance
                 )
-
+          
                 project_instance.save()
 
         except IntegrityError as i:
@@ -50,6 +64,11 @@ class ProjectView(APIView):
             res_data = [{
                 "id":project.pk,
                 "client": project.client.name,
+                "reported_id":project.reported_id.name,
+                "technology":project.technology,
+                "progress_bar":project.progress_bar,
+                "file":project.file,
+                "host_address":project.host_address,
                 "name":project.name,
                 "key":project.key,
                 "type":project.type,
