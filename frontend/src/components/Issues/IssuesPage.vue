@@ -33,37 +33,59 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="createProjectLabel">Create Sprint</h5>
+                                <h5 class="modal-title" id="createProjectLabel">Create Issue</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody">
                                 <form @submit="createSprints($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="type" class="form-label">Sprint Name</label>
-                                            <input type="text" class="form-control" v-model="sprintData.sprint_name"
-                                                required>
+                                            <label for="task_name" class="form-label">Title</label>
+                                            <input type="text" class="form-control" v-model="sprintData.task_name" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="projectName" class="form-label">Duration</label>
-                                            <input type="text" class="form-control" v-model="sprintData.sprintDuration"
-                                                required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="key" class="form-label">Start Date</label>
-                                            <input type="date" class="form-control" v-model="sprintData.startDate" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="type" class="form-label">End Date</label>
-                                            <input type="date" class="form-control" v-model="sprintData.endDate" required>
+                                            <label for="sprint_name" class="form-label">Sprint Name</label>
+                                            <!-- <input type="text" class="form-control" v-model="sprintData.sprint_name"
+                                                required> -->
+                                            <select class="form-select" v-model="sprintData.sprint_name" required>
+                                                <option value="">Select Sprint Name</option>
+                                                <option value="Sprint 1">Sprint 1</option>
+                                                <option value="Sprint 2">Sprint 2</option>
+                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="type" class="form-label">Goal</label>
-                                            <input type="text" class="form-control" v-model="sprintData.goal" required>
+                                            <label for="expectedDuration" class="form-label">Estimated duration</label>
+                                            <input type="text" class="form-control" v-model="sprintData.expectedDuration" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="actualDuration" class="form-label">Actual duration</label>
+                                            <input type="text" class="form-control" v-model="sprintData.actualDuration" required>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="reportingManager" class="form-label">Reporting Manager</label>
+                                            <select class="form-select" v-model="sprintData.reportingManager" required>
+                                                <option value="">Select Sprint Name</option>
+                                                <option value="Abhishek">Abhishek</option>
+                                                <option value="Pawan">Pawan</option>
+                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="assignee" class="form-label">Assignee</label>
+                                            <select class="form-select" v-model="sprintData.assignee" required>
+                                                <option value="">Assignee</option>
+                                                <option value="Shantanu">Shantanu</option>
+                                                <option value="Pushkaraj">Pushkaraj</option>
+                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -174,7 +196,7 @@ export default {
     },
     methods: {
         resetValues() {
-            this.sprintData= {
+            this.sprintData = {
                 sprint_name: '',
                 sprintDuration: '',
                 startDate: '',

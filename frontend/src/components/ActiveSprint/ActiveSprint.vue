@@ -53,7 +53,8 @@
                                         style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
                                 </div>
                             </div>
-                            <div class="issue-card">
+                            <div class="issue-card" data-bs-toggle="modal"
+                                data-bs-target="#issueModal">
                                 <div class="row p-2 align-items-center">
                                     <p style="font-size: 12px; font-weight: bold;" class="col">Frontend</p>
                                     <div class="col text-end">
@@ -142,16 +143,40 @@
                 </div>
             </div>
 
+            <!--Editor's Work in progress-->
+            <div style="z-index: 9999999999;" class="modal fade" ref="createProjectModal" id="issueModal" tabindex="-1"
+                aria-labelledby="createProjectLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createProjectLabel">Create Task</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body modalBody">
+                            <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
+                        </div>
+                        <div class="modal-footer">
+                            <button @click="saveContent">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </template>
   
 <script>
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+// import ImageUploader from 'quill-image-uploader';
+// import axios from 'axios';
+
 export default {
     name: "active-sprint",
     data() {
         return {
-
+            editorInstance: null,
             sprintData: {
                 sprint_name: '',
                 sprintDuration: '',
@@ -162,6 +187,7 @@ export default {
         };
     },
     components: {
+        QuillEditor,
     },
     methods: {
         resetValues() {
@@ -174,11 +200,50 @@ export default {
             }
         },
         createSprints() { },
-    }
+        saveContent() {
+            if (this.$refs.editor) {
+                const quillEditor = this.$refs.editor;
+                if (quillEditor.getHTML) {
+                    const htmlContent = quillEditor.getHTML();
+                    console.log(htmlContent);
+                } else {
+                    console.error('getHTML method is not available');
+                }
+            } else {
+                console.error('Quill editor reference not found');
+            }
+        },
+    },
+    // setup: () => {
+    //     const modules = {
+    //         name: 'imageUploader',
+    //         module: ImageUploader,
+    //         options: {
+    //             upload: file => {
+    //                 return new Promise((resolve, reject) => {
+    //                     const formData = new FormData();
+    //                     formData.append("image", file);
+
+    //                     axios.post('/upload-image', formData)
+    //                         .then(res => {
+    //                             console.log(res)
+    //                             resolve(res.data.url);
+    //                         })
+    //                         .catch(err => {
+    //                             reject("Upload failed");
+    //                             console.error("Error:", err)
+    //                         })
+    //                 })
+    //             }
+
+    //         }
+    //     }
+    //     return { modules }
+    // }
 }
 </script>
     
-<style>
+<style scoped>
 .issue-div {
     height: 70vh;
     background-color: #f3f3f3;
@@ -221,7 +286,7 @@ export default {
     right: 10px;
 }
 
-.issue-card-btn:hover{
+.issue-card-btn:hover {
     cursor: pointer;
     background-color: white;
     color: black !important;
@@ -229,5 +294,6 @@ export default {
 
 .dropdown-menu:hover {
     z-index: 999;
-}</style>
+}
+</style>
   
