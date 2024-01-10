@@ -17,7 +17,7 @@ class ClientView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
-        if Client.objects.filter(email=email, is_delted=False).exists():
+        if Client.objects.filter(email=email, is_deleted=False).exists():
             return JsonResponse({'message':'Client with this email already exists'})
         send_password = serializer.validated_data['password']
         self.perform_create(serializer)
