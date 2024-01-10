@@ -21,21 +21,28 @@
                                     placeholder="Search by name, role, designation or number..." />
                             </div>
                         </div>
-                        <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
+                        <div class="col-md-6 col-lg-6 col-sm-10 d-flex justify-content-lg-end justify-content-md-end">
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                                <button class="btn btn-primary mb-2 h-100" type="button"
-                                    style="width: auto; height: 40px !important;" data-bs-toggle="modal"
-                                    data-bs-target="#createLead">Create Lead</button>
-                                <a class="btn btn-primary mb-2 h-100" type="button"
-                                    style="width: auto; height: 40px !important;"
-                                    href="http://127.0.0.1:8000/api/leadExcelFormat/" download><i
-                                        class="fas fa-download"></i>&nbsp;&nbsp;Lead Format</a>
-                                <input @change="leadsBulkUpload" type="file" class="btn btn-primary mb-2 h-100"
-                                    style="width: auto; height: 40px !important; display: none;" id="fileInput" accept=".xlsx, .xls">
-
-                                <label for="fileInput" class="btn btn-primary mb-2 h-100"
+                                <button type="button" style="width: auto; height: 40px !important;"
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
+                                    data-bs-target="#createLead">
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>
+                                    <span class="d-none d-md-inline">&nbsp; &nbsp;Create Lead</span>
+                                </button>
+                                <a class="btn btn-sm btn-dark px-3 py-2 h-100" type="button"
+                                    style="width: auto; height: 40px !important; padding: none !important; "
+                                    href="http://127.0.0.1:8000/api/leadExcelFormat/" download>
+                                    <i class="fas fa-download text-success text-sm opacity-10"></i>
+                                    <span class="d-none d-md-inline">&nbsp;&nbsp;Lead Format</span>
+                                </a>
+                                <input @change="leadsBulkUpload" type="file" class="btn btn-sm btn-dark px-3 py-2 h-100"
+                                    style="width: auto; height: 40px !important; display: none; " id="fileInput"
+                                    accept=".xlsx, .xls">
+                                <label for="fileInput" class="btn btn-sm btn-dark px-3 py-2 h-100"
                                     style="width: auto; height: 40px !important;">
-                                    <i class="fas fa-upload"></i>&nbsp;&nbsp;Bulk Upload</label>
+                                    <i class="fas fa-upload text-success text-sm opacity-10"></i>
+                                    <span class="d-none d-md-inline">&nbsp;&nbsp;Bulk Upload</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -316,7 +323,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage"
+                    <PaginationComponent v-if="leads.length>10" :currentPage="currentPage" :itemsPerPage="itemsPerPage"
                         :filteredUsers="filteredLeads" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
             </div>
@@ -524,16 +531,16 @@ export default {
                 }).show()
             }
         },
-        async leadsBulkUpload(event){
+        async leadsBulkUpload(event) {
             let file = event.target.files[0]
-            if (!file){
+            if (!file) {
                 new Noty({
-                    type:'error',
-                    text:'Please select a file',
-                    timeout:500
+                    type: 'error',
+                    text: 'Please select a file',
+                    timeout: 500
                 }).show()
             }
-            else{
+            else {
                 const formData = new FormData();
                 formData.append('key', 'bulkUpload');
                 formData.append('file', file);
@@ -541,20 +548,20 @@ export default {
                     headers: {
                         'Content-Type': "multipart/form-data",
                     },
-                }).then((r=>{
-                    if(r.status == 201){
+                }).then((r => {
+                    if (r.status == 201) {
                         Swal.fire({
-                        title: `${r.data.message}`,
-                        icon: 'success',
-                    })
-                    this.getLeads()
+                            title: `${r.data.message}`,
+                            icon: 'success',
+                        })
+                        this.getLeads()
                     }
-                })).catch(e=>{
-                    console.log('error',e)
+                })).catch(e => {
+                    console.log('error', e)
                     new Noty({
-                        type:'error',
-                        text:e,
-                        timeout:500
+                        type: 'error',
+                        text: e,
+                        timeout: 500
                     }).show()
                 })
             }
