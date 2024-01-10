@@ -50,8 +50,7 @@
                         <div
                             class="top-0 my-auto text-center col-6 d-lg-flex d-none h-100 pe-0 position-absolute end-0 justify-content-center flex-column">
                             <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
-                                style="background-image: url('https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signin-ill.jpg');
-            background-size: cover;">
+                                style="background-size: cover;">
                                 <span class="mask bg-gradient-success opacity-6"></span>
                                 <img src="../assets/img/login/01.png" />
                             </div>
@@ -66,8 +65,8 @@
 <script>
 import ArgonSwitch from "@/components/ArgonSwitch.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
-import Noty from "noty"
-import axios from "axios"
+import Noty from "noty";
+import axios from "axios";
 import { mapMutations } from "vuex";
 import { mapState } from "vuex";
 import router from "@/router";
@@ -106,7 +105,60 @@ export default {
     },
     methods: {
         ...mapMutations(['setAuthToken', 'setAuthUser']),
-        doLogin(e) {
+        // doLogin(e) {
+        //     e.preventDefault();
+        //     if (!this.username) {
+        //         new Noty({
+        //             type: 'warning',
+        //             text: 'Please enter email',
+        //             timeout: 3000,
+        //             layout: 'topCenter'
+        //         }).show();
+        //     }
+        //     else if (!this.password) {
+        //         new Noty({
+        //             type: 'warning',
+        //             text: 'Please enter password',
+        //             timeout: 3000,
+        //             layout: 'topCenter'
+        //         }).show();
+        //     }
+        //     else {
+        //         axios.post(`${BASE_URL}api/client/login/`, {
+        //             "username": this.username,
+        //             "password": this.password
+        //         }).then((response) => {
+        //             if (response.data.status == 'Success') {
+        //                 new Noty({
+        //                     type: 'success',
+        //                     text: response.data.message,
+        //                     timeout: 500,
+        //                     layout: 'topCenter'
+        //                 }).show()
+        //                 this.storeAuthToken(response.headers['token'], response.data.user)
+        //                 setTimeout(() => {
+        //                     router.push('/projects')
+        //                 }, 1000);
+        //             }
+        //             else if (response.data.status == 'Failed') {
+        //                 new Noty({
+        //                     type: 'error',
+        //                     text: response.data.message,
+        //                     timeout: 3000,
+        //                     layout: 'topCenter'
+        //                 }).show()
+        //             }
+        //         }).catch((error) => {
+        //             new Noty({
+        //                 type: 'error',
+        //                 text: error.message,
+        //                 timeout: 3000,
+        //                 layout: 'topCenter'
+        //             }).show()
+        //         })
+        //     }
+        // },
+        async doLogin(e) {
             e.preventDefault();
             if (!this.username) {
                 new Noty({
@@ -115,48 +167,54 @@ export default {
                     timeout: 3000,
                     layout: 'topCenter'
                 }).show();
+                return;
             }
-            else if (!this.password) {
+            if (!this.password) {
                 new Noty({
                     type: 'warning',
                     text: 'Please enter password',
                     timeout: 3000,
                     layout: 'topCenter'
                 }).show();
+                return;
             }
-            else {
-                axios.post(`${BASE_URL}api/client/login/`, {
+            try {
+                this.$store.commit('showLoader')
+                const response = await axios.post(`${BASE_URL}api/client/login/`, {
                     "username": this.username,
-                    "password": this.password
-                }).then((response) => {
-                    if (response.data.status == 'Success') {
-                        new Noty({
-                            type: 'success',
-                            text: response.data.message,
-                            timeout: 500,
-                            layout: 'topCenter'
-                        }).show()
-                        this.storeAuthToken(response.headers['token'], response.data.user)
-                        setTimeout(() => {
-                            router.push('/projects')
-                        }, 1000);
-                    }
-                    else if (response.data.status == 'Failed') {
-                        new Noty({
-                            type: 'error',
-                            text: response.data.message,
-                            timeout: 3000,
-                            layout: 'topCenter'
-                        }).show()
-                    }
-                }).catch((error) => {
+                    "password": this.password,
+                })
+                if (response.data.status == 'Success') {
+                    new Noty({
+                        type: 'success',
+                        text: response.data.message,
+                        timeout: 500,
+                        layout: 'topCenter'
+                    }).show()
+                    this.storeAuthToken(response.headers['token'], response.data.user)
+                    setTimeout(() => {
+                        router.push('/projects')
+                    }, 1000);
+                    this.$store.commit('hideLoader')
+                }
+                else if (response.data.status == 'Failed') {
                     new Noty({
                         type: 'error',
-                        text: error.message,
+                        text: response.data.message,
                         timeout: 3000,
                         layout: 'topCenter'
                     }).show()
-                })
+                    this.$store.commit('hideLoader')
+                }
+                this.$store.commit('hideLoader')
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 3000,
+                    layout: 'topCenter'
+                }).show()
+                this.$store.commit('hideLoader')
             }
         },
         storeAuthToken(token, user) {
@@ -170,6 +228,5 @@ export default {
         },
     },
 };
-
 </script>
   

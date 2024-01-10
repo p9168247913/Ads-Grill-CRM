@@ -3,10 +3,10 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Tag</h6>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-5 mb-3">
                     <form @submit="addLeadInfo($event, 'tag')" style="display: flex; gap: 10px;">
                         <input required type="text" class="form-control" v-model="newLeadInfoTag" placeholder="Enter Tag" />
-                        <button type="submit" class="btn btn-primary">Add</button>
+                        <button type="submit" class="btn btn-sm btn-dark px-3 py-2 h-100 d-flex" style="width: auto !important;">  <i class="fas fa-plus-circle text-success text-sm opacity-10"></i> &nbsp;&nbsp;<span>Add</span></button>
                     </form>
                 </div>
                 <table class="table">
@@ -43,11 +43,11 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Source</h6>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-5 mb-3">
                     <form @submit="addLeadInfo($event, 'source')" style="display: flex; gap: 10px;">
                         <input required type="text" class="form-control" v-model="newLeadInfoSource"
                             placeholder="Enter Source" />
-                        <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="submit" class="btn btn-dark d-flex" style="width: auto !important;">  <i class="fas fa-plus-circle text-success text-sm opacity-10"></i> &nbsp;&nbsp;<span>Add</span></button>
                     </form>
                 </div>
                 <table class="table">
@@ -84,11 +84,11 @@
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Status</h6>
-                <div class="col-md-4 mb-3">
+                <div class="col-md-5 mb-3">
                     <form @submit="addLeadInfo($event, 'status')" style="display: flex; gap: 10px;">
                         <input required type="text" class="form-control" v-model="newLeadInfoStatus"
                             placeholder="Enter Status" />
-                        <button type="submit" class="btn btn-primary">Add</button>
+                            <button type="submit" class="btn btn-dark d-flex" style="width: auto !important;">  <i class="fas fa-plus-circle text-success text-sm opacity-10"></i> &nbsp;&nbsp;<span>Add</span></button>
                     </form>
                 </div>
                 <table class="table">

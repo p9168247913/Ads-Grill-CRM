@@ -23,22 +23,28 @@
                         </div>
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                                <button v-if="authUser.role == 'super-admin'" class="btn btn-primary mb-2 h-100"
-                                    type="button" style="width: auto; height: 40px !important;" data-bs-toggle="modal"
-                                    data-bs-target="#createRoleModal">Create Role</button>
-                                <button v-if="authUser.role == 'super-admin'" class="btn btn-primary mb-2 h-100"
-                                    type="button" style="width: auto;height: 40px !important;" data-bs-toggle="modal"
-                                    data-bs-target="#createAdmin">Create Admin</button>
-                                <button v-if="authUser.role == 'admin'" class="btn btn-primary mb-2 h-100" type="button"
-                                    style="width: auto;height: 40px !important;" data-bs-toggle="modal"
-                                    data-bs-target="#createUser" @click="getUserRole">Create User</button>
+                                <button v-if="authUser.role == 'super-admin'" type="button" style="width: auto; height: 40px !important;"
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
+                                    data-bs-target="#createRoleModal" >
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Role
+                                </button>
+                                <button v-if="authUser.role == 'super-admin'" type="button" style="width: auto; height: 40px !important;"
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
+                                    data-bs-target="#createAdmin" >
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Admin
+                                </button>
+                                <button v-if="authUser.role == 'admin'" type="button" style="width: auto; height: 40px !important;"
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
+                                    data-bs-target="#createUser" @click="getUserRole" >
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create User
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Modal for Create Role -->
                 <div class="modal fade" id="createRoleModal" tabindex="-1" aria-labelledby="createRoleModalLabel"
-                    aria-hidden="true"  @hidden="createRole">
+                    aria-hidden="true" @hidden="createRole">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
@@ -125,8 +131,9 @@
                 <!-- end -->
 
                 <!-- Modal for Create user -->
-                <div class="modal fade" id="createUser" tabindex="-1" aria-labelledby="createadminLabel" aria-hidden="true" @hidden="createUser">
-                    <div class="modal-dialog modal-dialog-centered" >
+                <div class="modal fade" id="createUser" tabindex="-1" aria-labelledby="createadminLabel" aria-hidden="true"
+                    @hidden="createUser">
+                    <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create User</h5>
@@ -257,39 +264,39 @@
                                 </thead>
                                 <tbody v-for="(user, index) in paginatedUsers" :key="index">
                                     <tr>
-                                        <td>
+                                        <td style="padding-left: 25px;">
                                             <div class="d-flex px-2 py-1">
                                                 <div>
                                                     <img src="" class="avatar avatar-sm me-3" alt="user1" />
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ user.name }}</h6>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ user.designation }}</h6>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ user.role }}</h6>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ user.contact_no }}</h6>
                                             </div>
                                         </td>
-                                        <td>
+                                        <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ user.pincode }}</h6>
                                             </div>
                                         </td>
-                                        <td class="align-middle" style="margin-left: 15px !important;">
+                                        <td class="align-middle" style="padding-left: 25px;">
                                             <i v-if="authUser.role == 'admin'"
                                                 class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                                                 data-bs-toggle="modal" data-bs-target="#edituser"
@@ -310,9 +317,8 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="users.length > 10" :currentPage="currentPage"
-                        :itemsPerPage="itemsPerPage" :filteredUsers="filteredUsers" :prevPage="prevPage"
-                        :nextPage="nextPage" :goToPage="goToPage" />
+                    <PaginationComponent v-if="users.length > 10" :currentPage="currentPage" :itemsPerPage="itemsPerPage"
+                        :filteredUsers="filteredUsers" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
             </div>
         </div>
@@ -459,7 +465,7 @@ export default {
                                 userID: id
                             }
                         });
-                        if(response.status===201){
+                        if (response.status === 201) {
                             Swal.fire('Deleted!', 'The user has been deleted.', 'success');
                         }
                         this.$store.commit('hideLoader')

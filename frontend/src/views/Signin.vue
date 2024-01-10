@@ -21,7 +21,8 @@
               <div style="margin: auto;">
                 <img src="../assets/img/logos/Adsgrill.png" style=" width: 150px !important;" alt="">
               </div>
-              <div class="card card-plain" style="margin-top: 20px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;">
+              <div class="card card-plain"
+                style="margin-top: 20px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;">
                 <div class="pb-0 card-header text-start">
                   <h4 class="font-weight-bolder"><u>Sign In</u></h4>
                   <p class="mb-0">Enter your email and password to sign in</p>
@@ -61,8 +62,7 @@
               class="top-0 my-auto text-center col-6 d-lg-flex d-none h-100 pe-0 position-absolute end-0 justify-content-center flex-column">
               <div
                 class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
-                style="background-image: url('https://raw.githubusercontent.com/creativetimofficial/public-assets/master/argon-dashboard-pro/assets/img/signin-ill.jpg');
-          background-size: cover;">
+                style="background-size: cover;">
                 <span class="mask bg-gradient-success opacity-6"></span>
                 <img src="../assets/img/login/01.png" />
                 <!-- <h4 class="mt-5 text-white font-weight-bolder position-relative">"Attention is the new currency"</h4>
@@ -124,7 +124,61 @@ export default {
   },
   methods: {
     ...mapMutations(['setAuthToken', 'setAuthUser']),
-    doLogin(e) {
+    // doLogin(e) {
+    //   e.preventDefault();
+    //   if (!this.email) {
+    //     new Noty({
+    //       type: 'warning',
+    //       text: 'Please enter email',
+    //       timeout: 3000,
+    //       layout: 'topCenter'
+    //     }).show();
+    //   }
+    //   else if (!this.pswd) {
+    //     new Noty({
+    //       type: 'warning',
+    //       text: 'Please enter password',
+    //       timeout: 3000,
+    //       layout: 'topCenter'
+    //     }).show();
+    //   }
+    //   else {
+    //     // this.loading = true
+    //     axios.post(`${BASE_URL}api/login/`, {
+    //       "username": this.email,
+    //       "password": this.pswd
+    //     }).then((response) => {
+    //       this.$store.commit('showLoader')
+    //       if (response.data.status == 'Success') {
+    //         new Noty({
+    //           type: 'success',
+    //           text: response.data.message,
+    //           timeout: 500,
+    //           layout: 'topCenter'
+    //         }).show()
+    //         this.storeAuthToken(response.headers['token'], response.data.user)
+    //         setTimeout(() => {
+    //           router.push('/dashboard')
+    //         }, 2000);
+    //         this.$store.commit('hideLoader')
+    //       }
+    //       else if (response.data.status == 'Failed') {
+    //         new Noty({
+    //           type: 'error',
+    //           text: response.data.message,
+    //           timeout: 3000,
+    //           layout: 'topCenter'
+    //         }).show()
+    //         this.$store.commit('hideLoader')
+    //       }
+    //       this.$store.commit('hideLoader')
+    //     }).catch((error) => {
+    //       // console.log(error)
+    //       
+    //     })
+    //   }
+    // },
+    async doLogin(e) {
       e.preventDefault();
       if (!this.email) {
         new Noty({
@@ -133,44 +187,54 @@ export default {
           timeout: 3000,
           layout: 'topCenter'
         }).show();
+        return;
       }
-      else if (!this.pswd) {
+      if (!this.pswd) {
         new Noty({
           type: 'warning',
           text: 'Please enter password',
           timeout: 3000,
           layout: 'topCenter'
         }).show();
+        return;
       }
-      else {
-        // this.loading = true
-        axios.post(`${BASE_URL}api/login/`, {
+      try {
+        this.$store.commit('showLoader')
+        const response = await axios.post(`${BASE_URL}api/login/`, {
           "username": this.email,
           "password": this.pswd
-        }).then((response) => {
-          if (response.data.status == 'Success') {
-            new Noty({
-              type: 'success',
-              text: response.data.message,
-              timeout: 500,
-              layout: 'topCenter'
-            }).show()
-            this.storeAuthToken(response.headers['token'], response.data.user)
-            setTimeout(() => {
-              router.push('/dashboard')
-            }, 2000);
-          }
-          else if (response.data.status == 'Failed') {
-            new Noty({
-              type: 'error',
-              text: response.data.message,
-              timeout: 3000,
-              layout: 'topCenter'
-            }).show()
-          }
-        }).catch(() => {
-          // console.log(error)
         })
+        if (response.data.status == 'Success') {
+          new Noty({
+            type: 'success',
+            text: response.data.message,
+            timeout: 500,
+            layout: 'topCenter'
+          }).show()
+          this.storeAuthToken(response.headers['token'], response.data.user)
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 1000);
+          this.$store.commit('hideLoader')
+        }
+        else if (response.data.status == 'Failed') {
+          new Noty({
+            type: 'error',
+            text: response.data.message,
+            timeout: 3000,
+            layout: 'topCenter'
+          }).show()
+          this.$store.commit('hideLoader')
+        }
+        this.$store.commit('hideLoader')
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.response.data.message,
+          timeout: 3000,
+          layout: 'topCenter'
+        }).show()
+        this.$store.commit('hideLoader')
       }
     },
     storeAuthToken(token, user) {
