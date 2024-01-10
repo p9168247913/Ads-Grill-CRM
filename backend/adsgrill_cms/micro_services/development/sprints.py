@@ -14,7 +14,6 @@ import os
 import openpyxl
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-# from django.utils.duration import duration_iso_string
 from datetime import datetime, time
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -28,13 +27,11 @@ class SprintView(CsrfExemptMixin, APIView):
     def post(self, request):
         try:
             requestData = request.data
-            # exp_dur_str = request.data.get('exp_duration')
-            # exp_duration = parse_duration(exp_dur_str)
             exp_duration = request.data.get('exp_duration')
             start_date_str = request.data.get('start_date')
             end_date_str = request.data.get('end_date')
 
-            if Sprint.objects.filter(name=request.data.get('name'), is_deleted=False).exists():
+            if Sprint.objects.filter(name=request.data.get('name')).exists():
                     return JsonResponse({'message':'Sprint with this name already exists'})
             
             if start_date_str:
@@ -156,5 +153,3 @@ class SprintView(CsrfExemptMixin, APIView):
                     return JsonResponse({"message":str(e)})
                 
                 return JsonResponse({"sprintAndIssues":sprintsAndIssues}, safe=False)
-
-

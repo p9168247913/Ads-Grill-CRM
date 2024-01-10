@@ -7,8 +7,17 @@ import json
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.db.models import ObjectDoesNotExist
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from braces.views import CsrfExemptMixin
 
-class ProjectView(APIView):
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+class ProjectView(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
             requestData = request.data
@@ -25,7 +34,7 @@ class ProjectView(APIView):
             host_address = requestData.get('host_address')
             tech_stacks = requestData.get('tech_stacks')
 
-            if Project.objects.filter(name=name, is_deleted=False).exists():
+            if Project.objects.filter(name=name).exists():
                     return JsonResponse({'message':'Project with this name already exists'})
             
             with transaction.atomic():
@@ -67,7 +76,7 @@ class ProjectView(APIView):
     
     def get(self, request):
         try:
-            all_projects = Project.objects.filter(is_deleted=False).order_by('-created_at')
+            all_projects = Project.objects.all().order_by('-created_at')
             res_data = [{
                 "id": project.pk,
                 "reporter_id": project.reporter.id if project.reporter else None,
