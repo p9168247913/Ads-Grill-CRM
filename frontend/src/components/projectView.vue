@@ -48,19 +48,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body modalBody">
-                <form @submit="createProjects($event), resetValues()">
+                <form @submit="createProjects($event)">
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label for="client_name" class="form-label">Client Name</label>
-                      <v-select v-model="selectedClient" :options="allClients" label="name" placeholder="Select Client Name" />
+                      <v-select v-model="selectedClient" :options="allClients" label="name"
+                        placeholder="Select Client Name" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="manager" class="form-label">Manager</label>
+                      <select class="form-control" v-model="projectData.manager" required>
+                        <option value="">Select Manager</option>
+                        <option value="Abhishek">Abhishek</option>
+                        <option value="Pawan">Pawan</option>
+                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                          tag.name }}</option> -->
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="key" class="form-label">Creator</label>
+                      <select class="form-control" v-model="projectData.createdBy" required>
+                        <option value="Abhishek">Abhishek</option>
+
+                      </select>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="projectName" class="form-label">Project Name</label>
-                      <input type="text" class="form-control" v-model="projectData.projectName" required>
+                      <input type="text" class="form-control" v-model="projectData.projectName" @input="generateKey"
+                        required>
                     </div>
                   </div>
-
-
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label for="key" class="form-label">Key</label>
@@ -77,14 +96,32 @@
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label for="manager" class="form-label">Manager</label>
-                      <select class="form-control" v-model="projectData.manager" required>
-                        <option value="">Select Manager</option>
-                        <option value="Abhishek">Abhishek</option>
-                        <option value="Pawan">Pawan</option>
-                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option> -->
+                      <label for="key" class="form-label">Team Lead</label>
+                      <select class="form-control" v-model="projectData.teamLead" required>
+                        <option value="">Select Team Lead</option>
+                        <option value="Alpha">Alpha</option>
+                        <option value="Delta">Delta</option>
                       </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="projectName" class="form-label">Frontend Technology</label>
+                      <input type="text" class="form-control" v-model="projectData.frontendTech" required>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label for="projectName" class="form-label">Backend Technology</label>
+                      <input type="text" class="form-control" v-model="projectData.backendTech" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                      <label for="projectName" class="form-label">Host Address</label>
+                      <input type="text" class="form-control" v-model="projectData.hostAddress">
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-12 mb-3">
+                      <label for="projectName" class="form-label">Files</label>
+                      <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple required>
                     </div>
                   </div>
                   <div class="modal-footer">
@@ -235,11 +272,13 @@ export default {
       tags: [],
       searchText: '',
       selectedClient: '',
-      headers: ['S.No.', 'Client Name', 'Project Name', 'Key', 'Type', 'Manager', 'Actions'],
+      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Actions'],
       allProjects: [],
+      existingKeys: [],
       projectData: {
         client_name: '',
         projectName: '',
+        createdBy: 'Abhishek',
         key: '',
         type: '',
         manager: '',
@@ -260,7 +299,7 @@ export default {
   },
   methods: {
     resetValues() {
-      this.selectedClient=''
+      this.selectedClient = ''
       this.projectData = {
         client_name: '',
         projectName: '',
@@ -277,9 +316,13 @@ export default {
     },
     createProjects(e) {
       e.preventDefault();
+      if (!this.selectedClient) {
+        alert('Please select a Client');
+        return;
+      }
       console.log(this.selectedClient.id);
       console.log(this.selectedClient.name);
-
+      this.resetValues()
     },
     async createClient(e) {
       e.preventDefault();
@@ -327,9 +370,30 @@ export default {
         }).show()
       }
     },
+    generateKey() {
+      const projectName = this.projectData.projectName.toLowerCase().split(' ');
+      let key = '';
+
+      if (projectName.length === 1) {
+        key = projectName[0]
+      } else if (projectName.length === 2) {
+        key = `${projectName[0].charAt(0)}${projectName[1].charAt(0)}`;
+      } else {
+        key = projectName.reduce((acc, curr) => acc + curr.charAt(0), '');
+      }
+
+      let count = 1;
+      let uniqueKey = key + '01';
+
+      while (this.existingKeys.includes(uniqueKey)) {
+        count++;
+        uniqueKey = `${key}${count.toString().padStart(2, '0')}`;
+      }
+
+      this.projectData.key = uniqueKey;
+    },
   },
   mounted() {
-
     this.getClients()
   }
 };
@@ -376,9 +440,9 @@ export default {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
-
 </style>
