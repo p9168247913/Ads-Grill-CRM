@@ -33,8 +33,8 @@ class UsersView(APIView):
                 with transaction.atomic():
                     userID = request.GET.get('userID')
                     deleteUser = Users.objects.filter(pk = userID)
-                    deleteUser.is_deleted=True
-                    deleteUser.save()
+                    print('deletedUser', deleteUser)
+                    deleteUser.update(is_deleted=True)
             except Users.DoesNotExist:
                 return JsonResponse({"message": "Something went wrong! Can't Delete User"}, status=500)
             return JsonResponse({'message': 'User Deleted Successfully'}, status=204)

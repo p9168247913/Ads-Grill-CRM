@@ -7,11 +7,20 @@ import json
 from django.db import transaction
 from django.db.utils import IntegrityError
 from django.db.models import ObjectDoesNotExist
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from braces.views import CsrfExemptMixin
 
-class ProjectView(APIView):
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+class ProjectView(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
-            requestData = json.loads(request.body)
+            requestData = request.data
             reporter_id = requestData.get('reporter_id')
             team_lead_id = requestData.get('team_lead_id')
             client_id = requestData.get('client_id')
@@ -25,7 +34,7 @@ class ProjectView(APIView):
             host_address = requestData.get('host_address')
             tech_stacks = requestData.get('tech_stacks')
 
-            if Project.objects.filter(name=name, is_deleted=False).exists():
+            if Project.objects.filter(name=name).exists():
                     return JsonResponse({'message':'Project with this name already exists'})
             
             with transaction.atomic():
@@ -67,7 +76,7 @@ class ProjectView(APIView):
     
     def get(self, request):
         try:
-            all_projects = Project.objects.filter(is_deleted=False).order_by('-created_at')
+            all_projects = Project.objects.all().order_by('-created_at')
             res_data = [{
                 "id": project.pk,
                 "reporter_id": project.reporter.id if project.reporter else None,
@@ -90,7 +99,7 @@ class ProjectView(APIView):
     
     def put(self, request):
         try:
-            req_data = json.loads(request.body)
+            req_data = request.data
             reporter_instance = Users.objects.get(pk=req_data.get('reporter_id'))
             team_lead_instance = Users.objects.get(pk=req_data.get('team_lead_id')) if req_data.get('team_lead_id') else None
             client_instance = Client.objects.get(pk=req_data.get('client_id'))
