@@ -11,7 +11,7 @@ from django.db.models import ObjectDoesNotExist
 class ProjectView(APIView):
     def post(self, request):
         try:
-            requestData = json.loads(request.body)
+            requestData = request.data
             reporter_id = requestData.get('reporter_id')
             team_lead_id = requestData.get('team_lead_id')
             client_id = requestData.get('client_id')
@@ -90,7 +90,7 @@ class ProjectView(APIView):
     
     def put(self, request):
         try:
-            req_data = json.loads(request.body)
+            req_data = request.data
             reporter_instance = Users.objects.get(pk=req_data.get('reporter_id'))
             team_lead_instance = Users.objects.get(pk=req_data.get('team_lead_id')) if req_data.get('team_lead_id') else None
             client_instance = Client.objects.get(pk=req_data.get('client_id'))
