@@ -33,7 +33,7 @@ class SprintView(CsrfExemptMixin, APIView):
 
             if Sprint.objects.filter(name=request.data.get('name')).exists():
                     return JsonResponse({'message':'Sprint with this name already exists'})
-            
+                
             if start_date_str:
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%d %H:%M:%S')
             else:
@@ -86,13 +86,13 @@ class SprintView(CsrfExemptMixin, APIView):
                     activeSprint = Sprint.objects.get(project=project_id, is_started=True)
                     to_do_issues = Issue.objects.filter(sprint = activeSprint.pk, status='to_do').order_by('-created_at')
                     in_progress_issues = Issue.objects.filter(sprint = activeSprint.pk, status='in_progress').order_by('-created_at')
-                    done_issues = Issue.objects.filter(sprint = activeSprint.pk, status='in_progress').order_by('-created_at')
+                    done_issues = Issue.objects.filter(sprint = activeSprint.pk, status='done').order_by('-created_at')
 
                     activeSprintData = {
                         "id":activeSprint.pk,
                         "name":activeSprint.name,
                     }
-
+                    
                     to_do = [{
                         "id":to_do_issue.pk,
                         "title":to_do_issue.title,
@@ -153,3 +153,67 @@ class SprintView(CsrfExemptMixin, APIView):
                     return JsonResponse({"message":str(e)})
                 
                 return JsonResponse({"sprintAndIssues":sprintsAndIssues}, safe=False)
+            
+    def put(self, request):
+        try:
+            requestData = request.data
+    
+            exp_duration = request.data.get('exp_duration')
+            start_date_str = request.data.get('start_date')
+            end_date_str = request.data.get('end_date')
+    
+            upd_sprint = Sprint.objects.get(pk=requestData.get('id'))
+    
+            if start_date_str:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                start_date = None
+    
+            if end_date_str:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                end_date = None
+    
+            reporter_instance = Users.objects.get(pk=requestData.get("reporter_id"))
+    
+            with transaction.atomic():
+                upd_sprint.reporter = reporter_instance
+                upd_sprint.key = requestData.get("key")
+                upd_sprint.name = requestData.get("name")
+                upd_sprint.description = requestData.get("description")
+                upd_sprint.status = requestData.get("status")
+                upd_sprint.exp_duration = exp_duration
+                upd_sprint.start_date = start_date
+                upd_sprint.end_date = end_date
+                upd_sprint.goal = requestData.get('goal')
+    
+                upd_sprint.save()
+    
+        except Sprint.DoesNotExist:
+            return JsonResponse({"message": "Requested Sprint not found"}, status=404)
+    
+        except Users.DoesNotExist:
+            return JsonResponse({"message": "Requested User not found"}, status=404)
+    
+        except IntegrityError as i:
+            return JsonResponse({"message": str(i)})
+    
+        except Exception as e:
+            return JsonResponse({'message': str(e)})
+    
+        return JsonResponse({"message": "Sprint Updated Successfully"}, status=status.HTTP_200_OK)
+    
+
+    def delete(self,request):
+        try:
+            with transaction.atomic():
+                id=request.GET.get('id')
+                del_sprint=Sprint.objects.get(pk=id)
+                del_sprint.delete()
+            
+        except ObjectDoesNotExist:
+            return JsonResponse({'message':'Requested Sprint Does Not Exists'}, status=status.HTTP_204_NO_CONTENT)        
+        except Exception as e:
+            return JsonResponse({"message":str(e)})
+        
+        return JsonResponse({"message":"Sprint Deleted Successfuly"},status=status.HTTP_201_CREATED)
