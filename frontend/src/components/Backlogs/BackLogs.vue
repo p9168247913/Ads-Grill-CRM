@@ -1,4 +1,3 @@
-<!-- Home.vue -->
 <template>
     <div class="wrapper" style="margin-bottom: 80px; ">
         <div class="content-page">
@@ -53,11 +52,13 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Start Date</label>
-                                            <input type="date" class="form-control" v-model="sprintData.startDate" required>
+                                            <input type="datetime-local" class="form-control" v-model="sprintData.startDate"
+                                                :min="currentDateTime()" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
-                                            <input type="date" class="form-control" v-model="sprintData.endDate" required>
+                                            <input type="datetime-local" class="form-control" v-model="sprintData.endDate"
+                                                required>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -174,13 +175,18 @@ export default {
     },
     methods: {
         resetValues() {
-            this.sprintData= {
+            this.sprintData = {
                 sprint_name: '',
                 sprintDuration: '',
                 startDate: '',
                 endDate: '',
                 goal: '',
             }
+        },
+        currentDateTime() {
+            const now = new Date();
+            const formattedDateTime = now.toISOString().slice(0, 16);
+            return formattedDateTime;
         },
         createSprints() { },
     }

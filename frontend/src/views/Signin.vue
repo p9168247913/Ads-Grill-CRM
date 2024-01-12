@@ -6,14 +6,11 @@
   <div class="container top-0 position-sticky z-index-sticky">
     <div class="row">
       <div class="col-12">
-        <!-- <navbar isBlur="blur  border-radius-lg my-3 py-2 start-0 end-0 mx-4 shadow" v-bind:darkMode="true"
-          isBtn="bg-gradient-success" /> -->
       </div>
     </div>
   </div>
   <main class="mt-0 main-content">
     <section>
-
       <div class="page-header min-vh-100">
         <div class="container">
           <div class="row">
@@ -37,25 +34,15 @@
                         <input v-model="pswd" type="password" class="form-control" placeholder="Password" size="lg" />
                       </div>
                     </div>
-                    <!-- <div class="mb-3">
-                      <input v-model="email"  placeholder="Email" size="lg" />
-                    </div> -->
                     <div class="mb-3">
                     </div>
                     <argon-switch id="rememberMe">Remember me</argon-switch>
-
                     <div class="text-center">
                       <argon-button class="mt-4" variant="gradient" color="success" fullWidth size="lg"
                         @click="doLogin">Sign in</argon-button>
                     </div>
                   </form>
                 </div>
-                <!-- <div class="px-1 pt-0 text-center card-footer px-lg-2">
-                  <p class="mx-auto mb-4 text-sm">
-                    Don't have an account?
-                    <a href="javascript:;" class="text-success text-gradient font-weight-bold">Sign up</a>
-                  </p>
-                </div> -->
               </div>
             </div>
             <div
@@ -65,9 +52,6 @@
                 style="background-size: cover;">
                 <span class="mask bg-gradient-success opacity-6"></span>
                 <img src="../assets/img/login/01.png" />
-                <!-- <h4 class="mt-5 text-white font-weight-bolder position-relative">"Attention is the new currency"</h4>
-                <p class="text-white position-relative">The more effortless the writing looks, the more effort the writer
-                  actually put into the process.</p> -->
               </div>
             </div>
           </div>
@@ -78,8 +62,6 @@
 </template>
 
 <script>
-// import Navbar from "@/examples/PageLayout/Navbar.vue";
-// import ArgonInput from "@/components/ArgonInput.vue";
 import ArgonSwitch from "@/components/ArgonSwitch.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
 import Noty from "noty"
@@ -93,8 +75,6 @@ import { BASE_URL } from "../config/apiConfig";
 export default {
   name: "signin",
   components: {
-    // Navbar,
-    // ArgonInput,
     ArgonSwitch,
     ArgonButton,
   },
@@ -124,60 +104,6 @@ export default {
   },
   methods: {
     ...mapMutations(['setAuthToken', 'setAuthUser']),
-    // doLogin(e) {
-    //   e.preventDefault();
-    //   if (!this.email) {
-    //     new Noty({
-    //       type: 'warning',
-    //       text: 'Please enter email',
-    //       timeout: 3000,
-    //       layout: 'topCenter'
-    //     }).show();
-    //   }
-    //   else if (!this.pswd) {
-    //     new Noty({
-    //       type: 'warning',
-    //       text: 'Please enter password',
-    //       timeout: 3000,
-    //       layout: 'topCenter'
-    //     }).show();
-    //   }
-    //   else {
-    //     // this.loading = true
-    //     axios.post(`${BASE_URL}api/login/`, {
-    //       "username": this.email,
-    //       "password": this.pswd
-    //     }).then((response) => {
-    //       this.$store.commit('showLoader')
-    //       if (response.data.status == 'Success') {
-    //         new Noty({
-    //           type: 'success',
-    //           text: response.data.message,
-    //           timeout: 500,
-    //           layout: 'topCenter'
-    //         }).show()
-    //         this.storeAuthToken(response.headers['token'], response.data.user)
-    //         setTimeout(() => {
-    //           router.push('/dashboard')
-    //         }, 2000);
-    //         this.$store.commit('hideLoader')
-    //       }
-    //       else if (response.data.status == 'Failed') {
-    //         new Noty({
-    //           type: 'error',
-    //           text: response.data.message,
-    //           timeout: 3000,
-    //           layout: 'topCenter'
-    //         }).show()
-    //         this.$store.commit('hideLoader')
-    //       }
-    //       this.$store.commit('hideLoader')
-    //     }).catch((error) => {
-    //       // console.log(error)
-    //       
-    //     })
-    //   }
-    // },
     async doLogin(e) {
       e.preventDefault();
       if (!this.email) {
@@ -241,7 +167,6 @@ export default {
       if (token !== 'undefined' && user) {
         this.setAuthToken(token)
         this.setAuthUser(user)
-        // console.log(this.authToken, this.authUser, "from state management")
       }
     },
   },

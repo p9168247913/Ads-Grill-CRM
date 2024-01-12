@@ -50,7 +50,9 @@
               <span v-else class="d-sm-inline d-none">Sign In</span>
             </router-link>
           </li> -->
-          <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+
+          <!-- d-xl-none -->
+          <li class="nav-item ps-3 d-flex align-items-center"> 
             <a
               href="#"
               @click="toggleSidebar"
