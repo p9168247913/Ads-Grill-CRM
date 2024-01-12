@@ -4,6 +4,7 @@ from micro_services.leads import leads
 from micro_services.sales import sales
 from micro_services.development import client, projects, sprints
 
+
 urlpatterns = [
     path("users/", users.UsersView.as_view()),
     path("roles/", roles.RolesView.as_view()),
@@ -15,5 +16,6 @@ urlpatterns = [
     path("client/login/", client.ClientLogin.as_view()),
     path("development/projects", projects.ProjectView.as_view()),
     path("development/sprints", sprints.SprintView.as_view()),
-    path("getLeadManagers/", projects.GetLeadManagers.as_view())
+    path("getLeadManagers/", projects.GetLeadManagers.as_view()),
+    path("development/projects/download",projects.DownloadProjectAttchments.as_view())
 ]
