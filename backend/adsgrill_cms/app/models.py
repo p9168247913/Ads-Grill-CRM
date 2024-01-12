@@ -3,8 +3,6 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 import os
-import logging
-logger = logging.getLogger(__name__)
 
 # Create your models here.
 
@@ -115,15 +113,6 @@ class Sale(models.Model):
 
     def __str__(self):
         return self.lead.client_name
-
-def uploadProjectAttachments(instance, filename):
-    base_directory = os.path.join('Development', 'projects', str(instance.name))
-    print(base_directory)
-    if not os.path.exists(base_directory):
-        os.makedirs(base_directory)
-    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
-    unique_filename = f"{timestamp}_{filename}"
-    return os.path.join(base_directory, unique_filename)
 
 def default_attachments():
     return []
