@@ -3,7 +3,6 @@
     <div class="wrapper" style="margin-bottom: 80px; ">
         <div class="content-page">
             <div class="container-fluid">
-                <!-- <h6 class="sprint-head">Backlogs</h6> -->
                 <div style="margin-top: 20px;">
                     <div class="row">
                         <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
@@ -19,7 +18,7 @@
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
                                 <button type="button" style="width: auto; height: 40px !important;"
                                     class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createProject">
+                                    data-bs-target="#createIssue">
                                     <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
                                     Issue
                                 </button>
@@ -28,7 +27,7 @@
                     </div>
                 </div>
                 <!-- Modal for Create Issue -->
-                <div class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
+                <div class="modal fade" ref="createProjectModal" id="createIssue" tabindex="-1"
                     aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
@@ -59,11 +58,13 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="expectedDuration" class="form-label">Estimated duration</label>
-                                            <input type="text" class="form-control" v-model="sprintData.expectedDuration" required>
+                                            <input type="text" class="form-control" v-model="sprintData.expectedDuration"
+                                                required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="actualDuration" class="form-label">Actual duration</label>
-                                            <input type="text" class="form-control" v-model="sprintData.actualDuration" required>
+                                            <input type="text" class="form-control" v-model="sprintData.actualDuration"
+                                                required>
                                         </div>
                                     </div>
                                     <div class="row">

@@ -170,7 +170,7 @@
         </h6>
         <h6 v-else class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="this.$store.state.isRTL ? 'me-4' : 'ms-2'">
-          ACCOUNT PAGES
+          ACCOUNT
         </h6>
       </li>
       <li class="nav-item">
@@ -209,7 +209,7 @@
         </h6>
         <h6 v-else class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="this.$store.state.isRTL ? 'me-4' : 'ms-2'">
-          ACCOUNT PAGES
+          ACCOUNT
         </h6>
       </li>
       <li class="nav-item">

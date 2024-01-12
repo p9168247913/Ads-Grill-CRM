@@ -26,7 +26,7 @@
               <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
                 <button type="button" style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                  data-bs-target="#createProject" @click="getLeadsInfo(), getClients()">
+                  data-bs-target="#createProject">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Project
                 </button>
                 <button type="button" style="width: auto; height: 40px !important;"
@@ -56,11 +56,11 @@
                         placeholder="Select Client Name" />
                     </div>
                     <div class="col-md-6 mb-3">
-                      <label for="manager" class="form-label">Manager</label>
-                      <select class="form-control" v-model="projectData.manager" required>
+                      <label for="reporter_id" class="form-label">Manager</label>
+                      <select class="form-control" v-model="projectData.reporter_id">
                         <option value="">Select Manager</option>
-                        <option value="Abhishek">Abhishek</option>
-                        <option value="Pawan">Pawan</option>
+                        <option value="18">Abhishek</option>
+                        <!-- <option value="Pawan">Pawan</option> -->
                         <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
                           tag.name }}</option> -->
                       </select>
@@ -68,60 +68,49 @@
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label for="key" class="form-label">Creator</label>
-                      <select class="form-control" v-model="projectData.createdBy" required>
-                        <option value="Abhishek">Abhishek</option>
-
-                      </select>
+                      <label for="name" class="form-label">Project Name</label>
+                      <input type="text" class="form-control" v-model="projectData.name" @input="generateKey" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                      <label for="projectName" class="form-label">Project Name</label>
-                      <input type="text" class="form-control" v-model="projectData.projectName" @input="generateKey"
-                        required>
+                      <label for="key" class="form-label">Key</label>
+                      <input type="text" class="form-control" v-model="projectData.key" disabled required>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-6 mb-3">
-                      <label for="key" class="form-label">Key</label>
-                      <input type="text" class="form-control" v-model="projectData.key" required>
-                    </div>
                     <div class="col-md-6 mb-3">
                       <label for="type" class="form-label">Type</label>
                       <select class="form-control" v-model="projectData.type" required>
                         <option value="">Select Type</option>
-                        <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option>
+                        <option value="ERP">ERP</option>
+                        <option value="CRM">CRM</option>
+                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                          tag.name }}</option> -->
                       </select>
                     </div>
-                  </div>
-                  <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label for="key" class="form-label">Team Lead</label>
-                      <select class="form-control" v-model="projectData.teamLead" required>
+                      <label for="team_lead_id" class="form-label">Team Lead</label>
+                      <select class="form-control" v-model="projectData.team_lead_id" required>
                         <option value="">Select Team Lead</option>
-                        <option value="Alpha">Alpha</option>
-                        <option value="Delta">Delta</option>
+                        <option value="7">Shyam</option>
+                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                          tag.name }}</option> -->
                       </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                      <label for="projectName" class="form-label">Frontend Technology</label>
-                      <input type="text" class="form-control" v-model="projectData.frontendTech" required>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label for="projectName" class="form-label">Backend Technology</label>
-                      <input type="text" class="form-control" v-model="projectData.backendTech" required>
+                      <label for="tech_stacks" class="form-label">Tech. Stack</label>
+                      <input type="text" class="form-control" v-model="projectData.tech_stacks" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                      <label for="projectName" class="form-label">Host Address</label>
+                      <label for="hostAddress" class="form-label">Host Address</label>
                       <input type="text" class="form-control" v-model="projectData.hostAddress">
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-12 mb-3">
                       <label for="projectName" class="form-label">Files</label>
-                      <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple required>
+                      <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple>
                     </div>
                   </div>
                   <div class="modal-footer">
@@ -193,56 +182,82 @@
                       v-for="(head) in headers" :key="head">{{ head }}</th>
                   </tr>
                 </thead>
-                <!-- <tbody v-for="(user, index) in paginatedUsers" :key="index">
-                                <tr>
-                                    <td>
-                                        <div class="d-flex px-2 py-1">
-                                            <div>
-                                                <img src="" class="avatar avatar-sm me-3" alt="user1" />
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.name }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.designation }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.role }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.contact_no }}</h6>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ user.pincode }}</h6>
-                                        </div>
-                                    </td>
-                                    <td class="align-middle" style="margin-left: 15px !important;">
-                                        <i v-if="authUser.role == 'admin'"
+                <tbody v-for="(project, index) in allProjects" :key="index">
+                  <tr>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                      </div>
+                    </td>
+                    
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.name }}</h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.key }}</h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.client_id }}</h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.type }}</h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.reporter_id }}</h6>
+                      </div>
+                    </td>
+                    
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm"></h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.tech_stacks }}</h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">{{ project.team_lead_id }}</h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">
+                          <argon-progress percentage="25" color="success"/>
+                        </h6>
+                      </div>
+                    </td>
+                    <td class="align-middle" style="margin-left: 15px !important;">
+                      <!-- <i v-if="authUser.role == 'admin'"
                                             class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                                             data-bs-toggle="modal" data-bs-target="#edituser"
                                             style="margin-left: 20px; cursor: pointer;" @click="handleEditClick"></i>
                                         <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
-                                            style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
+                                            style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i> -->
 
-                                        <i v-if="authUser.role == 'admin'"
+                      <!-- <i v-if="authUser.role == 'admin'"
                                             class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"
                                             @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
-                                            style="cursor: not-allowed;"></i>
-                                    </td>
-                                </tr>
-                            </tbody> -->
+                                            style="cursor: not-allowed;"></i> -->
+
+                      <i class="fas fa-pencil-alt text-primary fa-xs pr-4"
+                        style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
+                      <i class="fas fa-trash text-danger m-3 fa-xs" style="cursor: not-allowed;"></i>
+                    </td>
+                  </tr>
+                </tbody>
               </table>
             </div>
           </div>
@@ -262,6 +277,7 @@ import Swal from 'sweetalert2';
 import { mapState } from 'vuex'
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
+import ArgonProgress from './ArgonProgress.vue'
 
 export default {
   name: "projects",
@@ -269,19 +285,24 @@ export default {
     return {
       searchTerm: '',
       isLoading: false,
+      allClients: [],
       tags: [],
       searchText: '',
-      selectedClient: '',
+      selectedClient: null,
+      selectedFiles: [],
       headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Actions'],
       allProjects: [],
       existingKeys: [],
       projectData: {
-        client_name: '',
-        projectName: '',
-        createdBy: 'Abhishek',
+        client_id: '',
+        name: '',
+        reporter_id: '',
         key: '',
         type: '',
-        manager: '',
+        team_lead_id: '',
+        tech_stacks: '',
+        hostAddress: '',
+        attachments: []
       },
       clientData: {
         name: '',
@@ -293,36 +314,87 @@ export default {
   },
   components: {
     vSelect,
+    ArgonProgress,
   },
   computed: {
-    ...mapState(['authUser']),
+    ...mapState(['authUser', 'authToken']),
   },
   methods: {
+
     resetValues() {
       this.selectedClient = ''
       this.projectData = {
-        client_name: '',
-        projectName: '',
+        client_id: this.selectedClient,
+        name: '',
+        reporter_id: '',
         key: '',
         type: '',
         manager: '',
-      },
-        this.clientData = {
-          client_name: '',
-          email: '',
-          password: '',
-          pincode: '',
-        }
+        team_lead_id: '',
+        tech_stacks: this.tech_stacks,
+        hostAddress: '',
+        attachments: []
+      }
+      this.clientData = {
+        client_name: '',
+        email: '',
+        password: '',
+        pincode: '',
+      }
     },
-    createProjects(e) {
+    async getProjects() {
+      try {
+        this.$store.commit('showLoader');
+        const response = await axios.get(`${BASE_URL}api/development/projects`, {
+          headers: {
+            'Content-Type': "multipart/form-data",
+            token: this.authToken,
+          }
+        })
+        this.allProjects = response.data.projects;
+        console.log("resp", this.allProjects);
+        this.$store.commit('hideLoader');
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.message,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader');
+      }
+    },
+    async createProjects(e) {
       e.preventDefault();
       if (!this.selectedClient) {
         alert('Please select a Client');
         return;
       }
-      console.log(this.selectedClient.id);
-      console.log(this.selectedClient.name);
-      this.resetValues()
+      this.projectData.client_id = this.selectedClient.id
+      try {
+        this.$store.commit('showLoader')
+        const response = await axios.post(`${BASE_URL}api/development/projects`, this.projectData, {
+          headers: {
+            'Content-Type': "multipart/form-data",
+            token: this.authToken,
+          }
+        })
+        console.log("resp", response.data);
+        if (response.status == 201) {
+          Swal.fire({
+            title: response.data.message,
+            icon: 'success',
+          })
+        }
+        this.$store.commit('hideLoader')
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.message,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+
     },
     async createClient(e) {
       e.preventDefault();
@@ -344,34 +416,37 @@ export default {
         }).show()
       }
     },
-    async getLeadsInfo() {
-      try {
-        const response = await axios.get(`${BASE_URL}api/leadinfo/`)
-        this.tags = response.data.leadInfoData['leadTag']
+    // async getLeadsInfo() {
+    //   try {
+    //     const response = await axios.get(`${BASE_URL}api/leadinfo/`)
+    //     this.tags = response.data.leadInfoData['leadTag']
 
-      } catch (error) {
-        new Noty({
-          type: 'error',
-          text: error.message,
-          timeout: 500,
-        }).show()
-      }
-    },
+    //   } catch (error) {
+    //     new Noty({
+    //       type: 'error',
+    //       text: error.message,
+    //       timeout: 500,
+    //     }).show()
+    //   }
+    // },
     async getClients() {
       try {
+        this.$store.commit('showLoader')
         const response = await axios.get(`${BASE_URL}api/client/`)
-        console.log(response.data.clients);
         this.allClients = response.data.clients
+        this.$store.commit('hideLoader')
       } catch (error) {
         new Noty({
           type: 'error',
           text: error.message,
           timeout: 500,
         }).show()
+        this.$store.commit('hideLoader')
+
       }
     },
     generateKey() {
-      const projectName = this.projectData.projectName.toLowerCase().split(' ');
+      const projectName = this.projectData.name.toLowerCase().split(' ');
       let key = '';
 
       if (projectName.length === 1) {
@@ -383,18 +458,18 @@ export default {
       }
 
       let count = 1;
-      let uniqueKey = key + '01';
+      let uniqueKey = key + 1;
 
       while (this.existingKeys.includes(uniqueKey)) {
         count++;
         uniqueKey = `${key}${count.toString().padStart(2, '0')}`;
       }
-
       this.projectData.key = uniqueKey;
     },
   },
   mounted() {
-    this.getClients()
+    this.getClients();
+    this.getProjects();
   }
 };
 </script>

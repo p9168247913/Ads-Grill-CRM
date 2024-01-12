@@ -37,8 +37,9 @@
                                             <i class="fas fa-ellipsis-h"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                            <li><a class="dropdown-item" href="#"><i
-                                                        class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a></li>
+                                            <li data-bs-toggle="modal" data-bs-target="#editIssue"><a class="dropdown-item"
+                                                    href="#"><i class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                            </li>
                                             <li><a class="dropdown-item" href="#"><i
                                                         class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a></li>
                                         </ul>
@@ -53,8 +54,7 @@
                                         style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
                                 </div>
                             </div>
-                            <div class="issue-card" data-bs-toggle="modal"
-                                data-bs-target="#issueModal">
+                            <div class="issue-card" data-bs-toggle="modal" data-bs-target="#issueModal">
                                 <div class="row p-2 align-items-center">
                                     <p style="font-size: 12px; font-weight: bold;" class="col">Frontend</p>
                                     <div class="col text-end">
@@ -70,8 +70,7 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <div class="row align-items-center "
-                                    style="margin-left: 2px;width: 95%; margin-top: -20px;">
+                                <div class="row align-items-center" style="margin-left: 2px;width: 95%; margin-top: -20px;">
                                     <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
                                         src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
                                         aria-describedby="5673val-tooltip">
@@ -81,7 +80,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div" style="">
                             <p class="card-head">IN PROGRESS</p>
@@ -119,11 +117,13 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="key" class="form-label">Start Date</label>
-                                        <input type="date" class="form-control" v-model="sprintData.startDate" required>
+                                        <input type="datetime-local" class="form-control" v-model="sprintData.startDate"
+                                            :min="currentDateTime()" required />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="type" class="form-label">End Date</label>
-                                        <input type="date" class="form-control" v-model="sprintData.endDate" required>
+                                        <input type="datetime-local" class="form-control" v-model="sprintData.endDate"
+                                            :min="sprintData.startDate" required />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -144,24 +144,99 @@
             </div>
 
             <!--Editor's Work in progress-->
-            <div style="z-index: 9999999999;" class="modal fade" ref="createProjectModal" id="issueModal" tabindex="-1"
+            <div class="modal fade" ref="createProjectModal" id="issueModal" tabindex="-1"
                 aria-labelledby="createProjectLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="createProjectLabel">Create Task</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body modalBody">
+                            <label for="task_description" class="form-label">Task Description</label>
                             <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
                         </div>
                         <div class="modal-footer">
-                            <button @click="saveContent">Save</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                @click="resetValues">Close</button>
+                            <button type="submit" @click="saveContent" class="btn btn-primary">Save</button>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Modal for Edit Issue -->
+            <div class="modal fade" ref="createProjectModal" id="editIssue" tabindex="-1"
+                aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createProjectLabel">Edit Issue</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body modalBody">
+                            <form @submit="createSprints($event), resetValues()">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="task_name" class="form-label">Title</label>
+                                        <input type="text" class="form-control" v-model="sprintData.task_name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="sprint_name" class="form-label">Sprint Name</label>
+                                        <!-- <input type="text" class="form-control" v-model="sprintData.sprint_name"
+                                                required> -->
+                                        <select class="form-select" v-model="sprintData.sprint_name" required>
+                                            <option value="">Select Sprint Name</option>
+                                            <option value="Sprint 1">Sprint 1</option>
+                                            <option value="Sprint 2">Sprint 2</option>
+                                            <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expectedDuration" class="form-label">Estimated duration</label>
+                                        <input type="text" class="form-control" v-model="sprintData.expectedDuration"
+                                            required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="actualDuration" class="form-label">Actual duration</label>
+                                        <input type="text" class="form-control" v-model="sprintData.actualDuration"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reportingManager" class="form-label">Reporting Manager</label>
+                                        <select class="form-select" v-model="sprintData.reportingManager" required>
+                                            <option value="">Select Sprint Name</option>
+                                            <option value="Abhishek">Abhishek</option>
+                                            <option value="Pawan">Pawan</option>
+                                            <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="assignee" class="form-label">Assignee</label>
+                                        <select class="form-select" v-model="sprintData.assignee" required>
+                                            <option value="">Assignee</option>
+                                            <option value="Shantanu">Shantanu</option>
+                                            <option value="Pushkaraj">Pushkaraj</option>
+                                            <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                        @click="resetValues">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -199,7 +274,13 @@ export default {
                 goal: '',
             }
         },
+        currentDateTime() {
+            const now = new Date();
+            const formattedDateTime = now.toISOString().slice(0, 16);
+            return formattedDateTime;
+        },
         createSprints() { },
+        editIssue() { },
         saveContent() {
             if (this.$refs.editor) {
                 const quillEditor = this.$refs.editor;
@@ -211,6 +292,13 @@ export default {
                 }
             } else {
                 console.error('Quill editor reference not found');
+            }
+        },
+    },
+    watch: {
+        'sprintData.startDate': function (newStartDate) {
+            if (this.sprintData.endDate < newStartDate) {
+                this.sprintData.endDate = newStartDate;
             }
         },
     },
@@ -244,6 +332,38 @@ export default {
 </script>
     
 <style scoped>
+::v-deep .ql-container {
+    max-height: 500px;
+
+}
+
+::v-deep .ql-editor img {
+    width: 150px;
+    height: auto;
+    margin: 5px;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+::v-deep .ql-editor {
+    height: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    color: black;
+}
+
+::v-deep .ql-tooltip {
+    position: fixed;
+    /* Fix the position */
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border: 1px solid red;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 99;
+    /* Adjust the z-index as needed */
+}
+
 .issue-div {
     height: 70vh;
     background-color: #f3f3f3;
@@ -296,4 +416,3 @@ export default {
     z-index: 999;
 }
 </style>
-  
