@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 # Create your models here.
 
@@ -115,7 +117,13 @@ class Sale(models.Model):
         return self.lead.client_name
 
 def uploadProjectAttachments(instance, filename):
-    os.path.join('Development', 'projects', str(instance.name), filename)
+    base_directory = os.path.join('Development', 'projects', str(instance.name))
+    print(base_directory)
+    if not os.path.exists(base_directory):
+        os.makedirs(base_directory)
+    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
+    unique_filename = f"{timestamp}_{filename}"
+    return os.path.join(base_directory, unique_filename)
 
 def default_attachments():
     return []
@@ -128,7 +136,7 @@ class Project(models.Model):
     key = models.CharField(max_length=10, null=True, blank=False)
     type = models.CharField(max_length=25, null=False, blank=False)
     status = models.CharField(max_length=15, null=False, blank=False, default='to_do')
-    attachments = ArrayField(models.FileField(upload_to=uploadProjectAttachments,), blank=True, default=default_attachments)
+    attachments = ArrayField(models.FileField(), blank=True, default=default_attachments)
     progress = models.CharField(null=True, blank=False)
     team_members = models.CharField(null=True, blank=False)
     host_address = models.CharField(max_length=100, null=True, blank=False)
@@ -158,9 +166,6 @@ class Sprint(models.Model):
     def __str__(self):
         return self.name
     
-def uploadIssueAttachments(instance, filename):
-    os.path.join('Development', instance.project, instance.sprint, str(instance.title),  filename)
-
 class Issue(models.Model):
     parent_issue = models.ManyToManyField('self', symmetrical=False,db_index=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, db_index=True, null=False, blank=False)
@@ -168,11 +173,12 @@ class Issue(models.Model):
     reporter = models.ForeignKey(Users, on_delete=models.PROTECT, null=False, blank=False, related_name='task_rep_man')
     team_lead = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index=True, related_name='issue_team_lead')
     title = models.CharField(null=False, blank=True)
+    key=models.CharField(null=True, blank=True)
     description = models.TextField(null=True, blank=False)
     type= models.CharField(max_length=15, null=False, blank=False)
     priority = models.CharField(max_length=20, null=True, blank=False)
     status = models.CharField(max_length=15, null=False, blank=False, default='to_do')
-    attachments = ArrayField(models.FileField(upload_to=uploadIssueAttachments), blank=True, default=default_attachments)
+    attachments = ArrayField(models.FileField(), blank=True, default=default_attachments)
     exp_duration = models.DurationField(null=True, blank=False)
     org_duration = models.DurationField(null=True, blank=False)
     assignee = models.ManyToManyField(Users, db_index=True, related_name='task_assignee')
@@ -191,9 +197,6 @@ class LinkedIssue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
-def uploadWorkLogAttachments(instance, filename):
-    os.path.join('Development', instance.project, instance.sprint, str(instance.issue), 'work_log', filename)
-
 class WorkLog(models.Model):
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
@@ -201,12 +204,9 @@ class WorkLog(models.Model):
     logged_time = models.TimeField(null=True, blank=False)
     remaining_time = models.TimeField(null=True, blank=False)
     description = models.TextField(null=True, blank=False)
-    attachment = ArrayField(models.FileField(upload_to=uploadWorkLogAttachments), blank=True, default=default_attachments)
+    attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
-
-def uploadCommentsAttachments(instance, filename):
-    os.path.join('Development', instance.project, instance.sprint, str(instance.issue), 'comments', filename)
 
 class Comment(models.Model):
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
@@ -214,7 +214,7 @@ class Comment(models.Model):
     author = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index = True)
     author_type = models.CharField(null=True, blank=False)
     description = models.TextField(null=True, blank=False)
-    attachment = ArrayField(models.FileField(upload_to=uploadCommentsAttachments), blank=True, default=default_attachments)
+    attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
