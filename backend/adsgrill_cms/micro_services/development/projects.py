@@ -1,6 +1,7 @@
 from app.models import Project, Users, Client, Sprint
 from rest_framework.views import APIView
-
+from django.utils import timezone
+import os
 from rest_framework import status
 from django.http import JsonResponse
 import json
@@ -9,7 +10,11 @@ from django.db.utils import IntegrityError
 from django.db.models import ObjectDoesNotExist
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from django.core.files.storage import default_storage
 from braces.views import CsrfExemptMixin
+from io import BytesIO
+import zipfile
+from django.http import HttpResponse
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -28,7 +33,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             key = requestData.get('key')
             type = requestData.get('type')
             pro_status = requestData.get('status', 'to_do') 
-            attachments = requestData.get('attachments', [])
+            attachments = request.FILES.getlist('attachments', [])
             progress = requestData.get('progress')
             team_members = requestData.get('team_members')
             host_address = requestData.get('host_address')
@@ -45,19 +50,32 @@ class ProjectView(CsrfExemptMixin, APIView):
                 project_instance = Project.objects.create(
                     reporter=reporter_instance,
                     team_lead=team_lead_instance,
-                    
                     client=client_instance,
                     name=name,
                     key=key,
                     type=type,
                     status=pro_status,
-                    attachments=attachments,
                     progress=progress,
                     team_members=team_members,
                     host_address=host_address,
                     tech_stacks=tech_stacks,
                 )
-          
+                attachment_file_names = []
+                for attachment in attachments:
+                    subdirectory = os.path.join('media', 'uploads', 'Development', 'projects', str(project_instance.name))
+                    if not os.path.exists(subdirectory):
+                        os.makedirs(subdirectory)
+                    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
+                    unique_filename = f"{timestamp}_{attachment.name}"
+                    attachment_path = os.path.join(subdirectory, unique_filename)
+
+                    with open(attachment_path, 'wb') as destination:
+                        for chunk in attachment.chunks():
+                            destination.write(chunk)
+
+                    attachment_file_names.append(attachment_path)
+
+                project_instance.attachments = attachment_file_names
                 project_instance.save()
 
         except Client.DoesNotExist:
@@ -70,6 +88,8 @@ class ProjectView(CsrfExemptMixin, APIView):
             return JsonResponse({'messge':str(i)})
         
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Created Successfully'}, status=status.HTTP_201_CREATED)
@@ -79,9 +99,9 @@ class ProjectView(CsrfExemptMixin, APIView):
             all_projects = Project.objects.all().order_by('-created_at')
             res_data = [{
                 "id": project.pk,
-                "reporter_id": project.reporter.id if project.reporter else None,
-                "team_lead_id": project.team_lead.id if project.team_lead else None,
-                "client_id": project.client.id if project.client else None,
+                "reporter": project.reporter.name if project.reporter else None,
+                "team_lead": project.team_lead.name if project.team_lead else None,
+                "client": project.client.name if project.client else None,
                 "name": project.name,
                 "key": project.key,
                 "type": project.type,
@@ -103,9 +123,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             reporter_instance = Users.objects.get(pk=req_data.get('reporter_id'))
             team_lead_instance = Users.objects.get(pk=req_data.get('team_lead_id')) if req_data.get('team_lead_id') else None
             client_instance = Client.objects.get(pk=req_data.get('client_id'))
-            
             upd_project = Project.objects.get(pk=req_data.get('id'))
-
             upd_project.reporter = reporter_instance
             upd_project.team_lead = team_lead_instance
             upd_project.client = client_instance
@@ -147,6 +165,26 @@ class ProjectView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
+    
+class DownloadProjectAttchments(APIView):
+    def get(self,request):
+        try:
+            id=request.GET.get("id")
+            project_instance=Project.objects.get(pk=id)
+            files=project_instance.attachments
+            
+            zip_buffer=BytesIO()
+            with zipfile.ZipFile(zip_buffer,'w') as pro_zip:
+                for file in files:
+                    file_name = file.split("\\")[-1]
+                    pro_zip.write(file, file_name)
+            response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename={project_instance.name}_attachments.zip'
+            
+            return response
+            
+        except Exception as e:
+            return JsonResponse({"message":str(e)})
     
 
 class GetLeadManagers(APIView):
