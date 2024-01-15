@@ -5,6 +5,7 @@
 
 export default {}
 </script>
+
 <style>
 #preloader {
     background: rgba(223, 223, 223, 0.6) url(../../assets/img/Loader/spinner100.gif) no-repeat center center;

@@ -7,6 +7,29 @@ Docs & License: https://fullcalendar.io/
 
 /* classes attached to <body> */
 
+
+.delete-icon {
+  transition: background-color 0.3s, color 0.3s;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.delete-icon:hover {
+  background-color: #ff0000;
+  color: white !important;
+}
+
+.edit-icon {
+  transition: background-color 0.3s, color 0.3s;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.edit-icon:hover {
+  background-color: dodgerblue;
+  color: rgb(251, 251, 251) !important;
+}
+
 .fc-not-allowed,
 .fc-not-allowed .fc-event { /* override events' custom cursors */
   cursor: not-allowed;

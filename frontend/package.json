@@ -33,6 +33,7 @@
     "sweetalert2": "^11.6.13",
     "vue": "3.2.0",
     "vue-flatpickr-component": "9.0.5",
+    "vue-progressbar": "^0.7.5",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "4.0.14",
     "vue-select": "^4.0.0-beta.6",
