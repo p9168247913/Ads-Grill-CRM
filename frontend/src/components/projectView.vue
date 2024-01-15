@@ -18,8 +18,7 @@
                 <span class="input-group-text text-body">
                   <i class="fas fa-search" aria-hidden="true"></i>
                 </span>
-                <input type="text" v-model="searchTerm" @change="filterUsers" class="form-control"
-                  placeholder="Search by Project Name..." />
+                <input type="text" v-model="searchTerm" class="form-control" placeholder="Search by Project Name..." />
               </div>
             </div>
             <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
@@ -50,7 +49,7 @@
               <div class="modal-body modalBody">
                 <form @submit="createProjects($event)">
                   <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div style="color: black;" class="col-md-6 mb-3">
                       <label for="client_name" class="form-label">Client Name</label>
                       <v-select v-model="selectedClient" :options="allClients" label="name"
                         placeholder="Select Client Name" />
@@ -103,26 +102,29 @@
                       <input type="text" class="form-control" v-model="projectData.tech_stacks" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                      <label for="hostAddress" class="form-label">Host Address</label>
-                      <input type="text" class="form-control" v-model="projectData.hostAddress">
+                      <label for="host_address" class="form-label">Host Address</label>
+                      <input type="text" class="form-control" v-model="projectData.host_address">
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-12 mb-3">
                       <label for="projectName" class="form-label">Files</label>
-                      <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple>
+                      <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple
+                        @change="handleFileChange">
                     </div>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" class="btn btn-primary">Create</button>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
                   </div>
                 </form>
               </div>
             </div>
           </div>
         </div>
+
+        <vue-progress-bar :progress="uploadProgress" />
 
         <!-- Modal for Create Client -->
         <div class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
@@ -182,14 +184,14 @@
                       v-for="(head) in headers" :key="head">{{ head }}</th>
                   </tr>
                 </thead>
-                <tbody v-for="(project, index) in allProjects" :key="index">
+                <tbody v-for="(project, index) in paginatedProjects" :key="index">
                   <tr>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                        <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
                       </div>
                     </td>
-                    
+
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">{{ project.name }}</h6>
@@ -202,7 +204,7 @@
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.client_id }}</h6>
+                        <h6 class="mb-0 text-sm">{{ project.client }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
@@ -212,29 +214,40 @@
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.reporter_id }}</h6>
+                        <h6 class="mb-0 text-sm">{{ project.reporter }}</h6>
                       </div>
                     </td>
-                    
+
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm"></h6>
+                      <div class="d-flex flex-row justify-content-center">
+                        <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.team_members ?
+                          limitedTeamMembers(project.team_members) : '' }}
+                        </h6>
+                        <p class="show" v-if="project.team_members && project.team_members.length > 15"
+                          data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.team_members)">
+                          ...more
+                        </p>
+                      </div>
+                    </td>
+                    <td style="padding-left: 25px;">
+                      <div class="d-flex flex-row justify-content-center">
+                        <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ limitedTeamMembers(project.tech_stacks) }}
+                        </h6>
+                        <p class="show" v-if="project.tech_stacks && project.tech_stacks.length > 15"
+                          data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.tech_stacks)">
+                          ...more
+                        </p>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.tech_stacks }}</h6>
-                      </div>
-                    </td>
-                    <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.team_lead_id }}</h6>
+                        <h6 class="mb-0 text-sm">{{ project.team_lead }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
                         <h6 class="mb-0 text-sm">
-                          <argon-progress percentage="25" color="success"/>
+                          <argon-progress :percentage="project.progress" color="success" />
                         </h6>
                       </div>
                     </td>
@@ -252,17 +265,29 @@
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
                                             style="cursor: not-allowed;"></i> -->
 
-                      <i class="fas fa-pencil-alt text-primary fa-xs pr-4"
-                        style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i>
-                      <i class="fas fa-trash text-danger m-3 fa-xs" style="cursor: not-allowed;"></i>
+                      <i class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
+                        style="margin-left: 20px; cursor: pointer;"></i>
+                      <i class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"></i>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
-          <!-- <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage" :filteredUsers="filteredUsers"
-                    :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" /> -->
+          <PaginationComponent v-if="allProjects.length>itemsPerPage" :currentPage="currentPage" :itemsPerPage="itemsPerPage" :filteredUsers="filteredProjects"
+            :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
+        </div>
+
+        <!-- Modal for detailed view -->
+        <div class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1" aria-labelledby="createProjectLabel"
+          aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <span class="close" data-bs-dismiss="modal"
+                style="position: absolute; top: 0; right: 0; margin-right: 20px;">&times;</span>
+              <p style="color: black; margin-top: 10px;">{{ detailedTeamMembers }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -278,11 +303,18 @@ import { mapState } from 'vuex'
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 import ArgonProgress from './ArgonProgress.vue'
+import VueProgressBar from 'vue-progressbar';
+import PaginationComponent from './Paginator/PaginatorComponent.vue';
 
 export default {
   name: "projects",
   data() {
     return {
+      currentPage: 1,
+      itemsPerPage: 10,
+      uploadProgress: 0,
+      modalOpen: false,
+      detailedTeamMembers: "",
       searchTerm: '',
       isLoading: false,
       allClients: [],
@@ -301,8 +333,7 @@ export default {
         type: '',
         team_lead_id: '',
         tech_stacks: '',
-        hostAddress: '',
-        attachments: []
+        host_address: '',
       },
       clientData: {
         name: '',
@@ -315,12 +346,58 @@ export default {
   components: {
     vSelect,
     ArgonProgress,
+    VueProgressBar,
+    PaginationComponent,
   },
   computed: {
     ...mapState(['authUser', 'authToken']),
+    filteredProjects() {
+      return this.allProjects.filter(project => {
+        const searchLowerCase = this.searchTerm.toLowerCase() || ''
+        return (
+          project.name.toLowerCase().includes(searchLowerCase) ||
+          project.key.toLowerCase().includes(searchLowerCase) ||
+          project.client.toLowerCase().includes(searchLowerCase) ||
+          project.type.toLowerCase().includes(searchLowerCase) ||
+          project.status.toLowerCase().includes(searchLowerCase)
+        );
+      });
+    },
+    paginatedProjects() {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      return this.filteredProjects.slice(startIndex, startIndex + this.itemsPerPage);
+    }
   },
   methods: {
-
+    nextPage() {
+      if (this.currentPage * this.itemsPerPage < this.filteredProjects.length) {
+        this.currentPage++;
+      }
+    },
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+    goToPage(page) {
+      this.currentPage = page;
+      const startIndex = (page - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      this.displayedUsers = this.filteredProjects.slice(startIndex, endIndex);
+    },
+    limitedTeamMembers(teamMembers) {
+      const maxLength = 15;
+      return teamMembers && typeof teamMembers === 'string' && teamMembers.length >= maxLength
+        ? teamMembers.substring(0, maxLength) + " "
+        : teamMembers;
+    },
+    openModal(teamMembers) {
+      this.detailedTeamMembers = teamMembers;
+      this.modalOpen = true;
+    },
+    closeModal() {
+      this.modalOpen = false;
+    },
     resetValues() {
       this.selectedClient = ''
       this.projectData = {
@@ -332,7 +409,7 @@ export default {
         manager: '',
         team_lead_id: '',
         tech_stacks: this.tech_stacks,
-        hostAddress: '',
+        host_address: '',
         attachments: []
       }
       this.clientData = {
@@ -352,7 +429,7 @@ export default {
           }
         })
         this.allProjects = response.data.projects;
-        console.log("resp", this.allProjects);
+        console.log("response", this.allProjects);
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
@@ -365,36 +442,59 @@ export default {
     },
     async createProjects(e) {
       e.preventDefault();
+
       if (!this.selectedClient) {
         alert('Please select a Client');
         return;
       }
-      this.projectData.client_id = this.selectedClient.id
+
+      this.projectData.client_id = this.selectedClient.id;
+
       try {
-        this.$store.commit('showLoader')
-        const response = await axios.post(`${BASE_URL}api/development/projects`, this.projectData, {
+        this.$store.commit('showLoader');
+        let formData = new FormData();
+        formData.append('client_id', this.projectData.client_id);
+        formData.append('name', this.projectData.name);
+        formData.append('key', this.projectData.key);
+        formData.append('type', this.projectData.type);
+        formData.append('reporter_id', this.projectData.reporter_id);
+        formData.append('host_address', this.projectData.host_address);
+        formData.append('tech_stacks', this.projectData.tech_stacks);
+
+        for (let i = 0; i < this.selectedFiles.length; i++) {
+          formData.append('attachments', this.selectedFiles[i]);
+        }
+
+        const response = await axios.post(`${BASE_URL}api/development/projects`, formData, {
           headers: {
-            'Content-Type': "multipart/form-data",
-            token: this.authToken,
-          }
-        })
-        console.log("resp", response.data);
-        if (response.status == 201) {
+            'Content-Type': 'multipart/form-data',
+            'token': this.authToken,
+          },
+          onUploadProgress: progressEvent => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            this.uploadProgress = percentCompleted;
+          },
+        });
+        if (response.status === 201) {
           Swal.fire({
             title: response.data.message,
             icon: 'success',
-          })
+          });
         }
-        this.$store.commit('hideLoader')
+        this.getProjects();
+        this.$store.commit('hideLoader');
+        this.resetValues();
       } catch (error) {
         new Noty({
           type: 'error',
           text: error.message,
           timeout: 500,
-        }).show()
-        this.$store.commit('hideLoader')
+        }).show();
+        this.$store.commit('hideLoader');
       }
-
+    },
+    handleFileChange(e) {
+      this.selectedFiles = e.target.files
     },
     async createClient(e) {
       e.preventDefault();
@@ -442,30 +542,27 @@ export default {
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader')
-
       }
     },
     generateKey() {
-      const projectName = this.projectData.name.toLowerCase().split(' ');
+      const projectName = this.projectData.name ? this.projectData.name.toLowerCase().split(' ') : [];
       let key = '';
 
       if (projectName.length === 1) {
-        key = projectName[0]
+        key = projectName[0];
       } else if (projectName.length === 2) {
         key = `${projectName[0].charAt(0)}${projectName[1].charAt(0)}`;
-      } else {
+      } else if (projectName.length > 2) {
         key = projectName.reduce((acc, curr) => acc + curr.charAt(0), '');
       }
 
-      let count = 1;
-      let uniqueKey = key + 1;
+      const currentDate = new Date();
+      const datePart = currentDate.toISOString().slice(0, 10).replace(/-/g, '');
+      const timePart = currentDate.toISOString().slice(11, 16).replace(/\D/g, '');
 
-      while (this.existingKeys.includes(uniqueKey)) {
-        count++;
-        uniqueKey = `${key}${count.toString().padStart(2, '0')}`;
-      }
+      let uniqueKey = key ? `${key}_${datePart}${timePart}` : '';
       this.projectData.key = uniqueKey;
-    },
+    }
   },
   mounted() {
     this.getClients();
@@ -519,5 +616,54 @@ export default {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Style for the modal */
+
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding-top: 60px;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.show {
+  color: blue;
+  font-size: 12px;
+  margin-top: 16px;
+}
+
+.show:hover {
+  cursor: pointer;
 }
 </style>

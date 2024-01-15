@@ -253,7 +253,7 @@
                                     <tr>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
