@@ -16,6 +16,7 @@ urlpatterns = [
     path("client/login/", client.ClientLogin.as_view()),
     path("development/projects", projects.ProjectView.as_view()),
     path("development/sprints", sprints.SprintView.as_view()),
-    path("getLeadManagers/", projects.GetLeadManagers.as_view()),
+    path("development/getProjectManagers", projects.GetProjectManagers.as_view()),
+    path("development/getAssignees", projects.GetAllAssignees.as_view()),
     path("development/projects/download",projects.DownloadProjectAttchments.as_view())
 ]
