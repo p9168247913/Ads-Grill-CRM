@@ -15,6 +15,7 @@ from braces.views import CsrfExemptMixin
 from io import BytesIO
 import zipfile
 from django.http import HttpResponse
+from django.db.models import Q
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -99,9 +100,18 @@ class ProjectView(CsrfExemptMixin, APIView):
             all_projects = Project.objects.all().order_by('-created_at')
             res_data = [{
                 "id": project.pk,
-                "reporter": project.reporter.name if project.reporter else None,
-                "team_lead": project.team_lead.name if project.team_lead else None,
-                "client": project.client.name if project.client else None,
+                "reporter": {
+                    'id': project.reporter.pk if project.reporter else None,
+                    'name': project.reporter.name if project.reporter else None
+                },
+                "team_lead": {
+                    'id': project.team_lead.pk if project.team_lead else None,
+                    'name': project.team_lead.name if project.team_lead else None
+                },
+                "client": {
+                    'id': project.client.pk if project.client else None,
+                    'name': project.client.name if project.client else None
+                },
                 "name": project.name,
                 "key": project.key,
                 "type": project.type,
@@ -187,7 +197,7 @@ class DownloadProjectAttchments(APIView):
             return JsonResponse({"message":str(e)})
     
 
-class GetLeadManagers(APIView):
+class GetProjectManagers(APIView):
     def get(self, request):
         try:
             all_lead_man = Users.objects.filter(role__name='Development', designation='Product Manager', is_deleted=False).order_by("-created_at")
@@ -198,6 +208,19 @@ class GetLeadManagers(APIView):
         except Exception as e:
             return JsonResponse({'message':str(e)})
         return JsonResponse({'lead_man':res_data}, status=status.HTTP_200_OK)
+    
+class GetAllAssignees(APIView):
+    def get(self, request):
+        try:
+            all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='Development')
+            res_data = [{
+                'id':assignee.pk,
+                'name': assignee.name
+            } for assignee in all_assignees]
+        except Exception as e:
+            return JsonResponse({'message':str(e)})
+        return JsonResponse({'Assignees':res_data}, status=status.HTTP_200_OK)
+
 
 
 
