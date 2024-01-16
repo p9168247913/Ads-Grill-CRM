@@ -16,6 +16,7 @@ from io import BytesIO
 import zipfile
 from django.http import HttpResponse
 from django.db.models import Q
+import uuid
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -35,7 +36,6 @@ class ProjectView(CsrfExemptMixin, APIView):
             type = requestData.get('type')
             pro_status = requestData.get('status', 'to_do') 
             attachments = request.FILES.getlist('attachments', [])
-            progress = requestData.get('progress')
             team_members = requestData.get('team_members')
             host_address = requestData.get('host_address')
             tech_stacks = requestData.get('tech_stacks')
@@ -56,7 +56,6 @@ class ProjectView(CsrfExemptMixin, APIView):
                     key=key,
                     type=type,
                     status=pro_status,
-                    progress=progress,
                     team_members=team_members,
                     host_address=host_address,
                     tech_stacks=tech_stacks,
@@ -66,8 +65,9 @@ class ProjectView(CsrfExemptMixin, APIView):
                     subdirectory = os.path.join('media', 'uploads', 'Development', 'projects', str(project_instance.name))
                     if not os.path.exists(subdirectory):
                         os.makedirs(subdirectory)
-                    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
-                    unique_filename = f"{timestamp}_{attachment.name}"
+                    file_extension = attachment.name.split('.')[-1]
+                    unique_id = str(uuid.uuid4().hex[:6])
+                    unique_filename = f"{unique_id}_{project_instance.key}.{file_extension}"
                     attachment_path = os.path.join(subdirectory, unique_filename)
 
                     with open(attachment_path, 'wb') as destination:
@@ -89,8 +89,8 @@ class ProjectView(CsrfExemptMixin, APIView):
             return JsonResponse({'messge':str(i)})
         
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            # import traceback
+            # traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Created Successfully'}, status=status.HTTP_201_CREATED)
@@ -130,23 +130,40 @@ class ProjectView(CsrfExemptMixin, APIView):
     def put(self, request):
         try:
             req_data = request.data
+            attachments = request.FILES.getlist('attachments', [])
             reporter_instance = Users.objects.get(pk=req_data.get('reporter_id'))
             team_lead_instance = Users.objects.get(pk=req_data.get('team_lead_id')) if req_data.get('team_lead_id') else None
             client_instance = Client.objects.get(pk=req_data.get('client_id'))
             upd_project = Project.objects.get(pk=req_data.get('id'))
-            upd_project.reporter = reporter_instance
-            upd_project.team_lead = team_lead_instance
-            upd_project.client = client_instance
-            upd_project.name = req_data.get('name')
-            upd_project.key = req_data.get('key')
-            upd_project.type = req_data.get('type')
-            upd_project.status = req_data.get('status', 'to_do')  
-            upd_project.attachments = req_data.get('attachments', []) 
-            upd_project.progress = req_data.get('progress')
-            upd_project.team_members = req_data.get('team_members')
-            upd_project.host_address = req_data.get('host_address')
-            upd_project.tech_stacks = req_data.get('tech_stacks')
-            upd_project.save()
+            with transaction.atomic():
+                upd_project.reporter = reporter_instance
+                upd_project.team_lead = team_lead_instance
+                upd_project.client = client_instance
+                upd_project.name = req_data.get('name')
+                upd_project.key = req_data.get('key')
+                upd_project.type = req_data.get('type')
+                upd_project.status = req_data.get('status', 'to_do')  
+                upd_project.team_members = req_data.get('team_members')
+                upd_project.host_address = req_data.get('host_address')
+                upd_project.tech_stacks = req_data.get('tech_stacks')
+                attachment_file_names = []
+                for attachment in attachments:
+                    subdirectory = os.path.join('media', 'uploads', 'Development', 'projects', str(upd_project.name))
+                    if not os.path.exists(subdirectory):
+                        os.makedirs(subdirectory)
+                    file_extension = attachment.name.split('.')[-1]
+                    unique_id = str(uuid.uuid4().hex[:6])
+                    unique_filename = f"{unique_id}_{upd_project.key}.{file_extension}"
+                    attachment_path = os.path.join(subdirectory, unique_filename)
+
+                    with open(attachment_path, 'wb') as destination:
+                        for chunk in attachment.chunks():
+                            destination.write(chunk)
+
+                    attachment_file_names.append(attachment_path)
+
+                upd_project.attachments.extend(attachment_file_names)
+                upd_project.save()
             
         except Client.DoesNotExist as e:
             return JsonResponse({'message':"Client field is required"}, status=status.HTTP_404_NOT_FOUND)
@@ -176,7 +193,9 @@ class ProjectView(CsrfExemptMixin, APIView):
         
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
     
-class DownloadProjectAttchments(APIView):
+class DownloadProjectAttchments(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
             id=request.GET.get("id")
@@ -197,7 +216,9 @@ class DownloadProjectAttchments(APIView):
             return JsonResponse({"message":str(e)})
     
 
-class GetProjectManagers(APIView):
+class GetProjectManagers(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
             all_lead_man = Users.objects.filter(role__name='Development', designation='Product Manager', is_deleted=False).order_by("-created_at")
@@ -209,7 +230,9 @@ class GetProjectManagers(APIView):
             return JsonResponse({'message':str(e)})
         return JsonResponse({'lead_man':res_data}, status=status.HTTP_200_OK)
     
-class GetAllAssignees(APIView):
+class GetAllAssignees(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
             all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='Development')
