@@ -130,7 +130,7 @@
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="createProjectLabel">Create Project</h5>
+                <h5 class="modal-title" id="createProjectLabel">Edit Project</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body modalBody">
@@ -139,14 +139,13 @@
                     <div style="color: black;" class="col-md-6 mb-3">
                       <label for="client_name" class="form-label">Client Name</label>
                       <v-select v-model="selectedClient" :options="allClients" label="name"
-                        placeholder="Select Client Name" />
+                        placeholder="Select Client Name" disabled />
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="reporter_id" class="form-label">Manager</label>
-                      <select class="form-control" v-model="updateProjectData.reporter_id">
+                      <select class="form-control" v-model="updateProjectData.reporter.id">
                         <option value="">Select Manager</option>
                         <option value="18">Abhishek</option>
-                        <!-- <option value="Pawan">Pawan</option> -->
                         <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
                           tag.name }}</option> -->
                       </select>
@@ -156,7 +155,7 @@
                     <div class="col-md-6 mb-3">
                       <label for="name" class="form-label">Project Name</label>
                       <input type="text" class="form-control" v-model="updateProjectData.name" @input="generateKey"
-                        required>
+                        required disabled>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="key" class="form-label">Key</label>
@@ -292,7 +291,7 @@
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.client }}</h6>
+                        <h6 class="mb-0 text-sm">{{ project.client.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
@@ -302,7 +301,7 @@
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.reporter }}</h6>
+                        <h6 class="mb-0 text-sm">{{ project.reporter.name }}</h6>
                       </div>
                     </td>
 
@@ -329,7 +328,7 @@
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.team_lead }}</h6>
+                        <h6 class="mb-0 text-sm">{{ project.team_lead.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
@@ -337,6 +336,14 @@
                         <h6 class="mb-0 text-sm">
                           <argon-progress :percentage="project.progress" color="success" />
                         </h6>
+                      </div>
+                    </td>
+                    <td style="padding-left: 30px;">
+                      <div class="d-flex flex-column justify-content-center">
+                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)" download>
+                          <i class="fas fa-download"></i>
+                        </a>
+                        <span v-else>No Files</span>
                       </div>
                     </td>
                     <td class="align-middle" style="margin-left: 15px !important;">
@@ -356,7 +363,8 @@
                       <i data-bs-toggle="modal" data-bs-target="#editProject" @click="editModal(project)"
                         class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                         style="margin-left: 20px; cursor: pointer;"></i>
-                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"></i>
+                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                        style="cursor: pointer;"></i>
                     </td>
                   </tr>
                 </tbody>
@@ -412,7 +420,7 @@ export default {
       searchText: '',
       selectedClient: null,
       selectedFiles: [],
-      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Actions'],
+      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Files', 'Actions'],
       allProjects: [],
       existingKeys: [],
       projectData: {
@@ -429,13 +437,13 @@ export default {
         id: '',
         client_id: '',
         name: '',
-        reporter_id: '',
+        reporter: '',
         key: '',
         type: '',
         team_lead_id: '',
         tech_stacks: '',
         host_address: '',
-        status: '',
+        status: ''
       },
       clientData: {
         name: '',
@@ -521,17 +529,16 @@ export default {
         pincode: '',
       }
     },
-    async getProjectManagers(){
+    async getProjectManagers() {
       try {
         this.$store.commit('showLoader');
         const response = await axios.get(`${BASE_URL}api/development/getProjectManagers`, {
           headers: {
-            'Content-Type': "multipart/form-data",
             token: this.authToken,
           }
         })
         // this.allProjects = response.data.projects;
-        console.log("response",  response.data.projects);
+        console.log("response111", response.data);
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
@@ -540,6 +547,50 @@ export default {
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader');
+      }
+    },
+    async getAttachmentUrl(e, id) {
+      e.preventDefault();
+      try {
+        const response = await axios.get(`${BASE_URL}api/development/projects/download?id=${id}`, {
+          headers: {
+            token: this.authToken
+          },
+          responseType: 'arraybuffer',
+        });
+        this.resetValues();
+        if (response && response.status === 200 && response.data) {
+          console.log(response.data);
+          const filename = this.extractFilename(response);
+          const blob = new Blob([response.data], { type: 'application/zip' });
+
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = filename;
+
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          Swal.fire({
+            title: `Downloaded successfully!`,
+            icon: 'success',
+          });
+        }
+      } catch (error) {
+        new Noty({
+          text: 'An error occurred',
+          timeout: 500,
+        }).show();
+      }
+    },
+    extractFilename(response) {
+      const contentDisposition = response.headers['content-disposition'];
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
+        return filenameMatch ? filenameMatch[1] : 'download.zip';
+      } else {
+        return 'download.zip';
       }
     },
     async getProjects() {
@@ -565,14 +616,11 @@ export default {
     },
     async createProjects(e) {
       e.preventDefault();
-
       if (!this.selectedClient) {
         alert('Please select a Client');
         return;
       }
-
       this.projectData.client_id = this.selectedClient.id;
-
       try {
         this.$store.commit('showLoader');
         let formData = new FormData();
@@ -618,7 +666,6 @@ export default {
     },
     async editProjects(e) {
       e.preventDefault();
-      e.preventDefault();
 
       if (!this.selectedClient) {
         alert('Please select a Client');
@@ -626,39 +673,46 @@ export default {
       }
 
       this.updateProjectData.client_id = this.selectedClient.id;
+      console.log("update", this.updateProjectData);
 
       try {
         this.$store.commit('showLoader');
         let formData = new FormData();
         formData.append('id', this.updateProjectData.id);
-        formData.append('client_id', this.updateProjectData.client_id);
+        formData.append('client_id', this.updateProjectData.client.id);
         formData.append('name', this.updateProjectData.name);
         formData.append('key', this.updateProjectData.key);
         formData.append('type', this.updateProjectData.type);
-        formData.append('reporter_id', this.updateProjectData.reporter_id);
+        formData.append('reporter', this.updateProjectData.reporter.id);
         formData.append('host_address', this.updateProjectData.host_address);
         formData.append('tech_stacks', this.updateProjectData.tech_stacks);
+        formData.append('team_lead_id', this.updateProjectData.team_lead_id);
 
+        // Append each selected file individually
         for (let i = 0; i < this.selectedFiles.length; i++) {
-          formData.append('attachments', this.selectedFiles[i]);
+          formData.append('attachments[]', this.selectedFiles[i]);
         }
 
-        const response = await axios.put(`${BASE_URL}api/development/projects`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            'token': this.authToken,
-          },
-          onUploadProgress: progressEvent => {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            this.uploadProgress = percentCompleted;
-          },
-        });
-        if (response.status === 201) {
-          Swal.fire({
-            title: response.data.message,
-            icon: 'success',
-          });
-        }
+        console.log("formData", formData);
+
+        // const response = await axios.put(`${BASE_URL}api/development/projects`, formData, {
+        //   headers: {
+        //     'Content-Type': 'multipart/form-data',
+        //     'token': this.authToken,
+        //   },
+        //   onUploadProgress: progressEvent => {
+        //     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        //     this.uploadProgress = percentCompleted;
+        //   },
+        // });
+
+        // if (response.status === 201) {
+        //   Swal.fire({
+        //     title: response.data.message,
+        //     icon: 'success',
+        //   });
+        // }
+
         this.getProjects();
         this.$store.commit('hideLoader');
         this.resetValues();
@@ -671,42 +725,43 @@ export default {
         this.$store.commit('hideLoader');
       }
     },
+
     editModal(project) {
       console.log("pro", project);
-      this.updateProjectData = { ...project };
+      this.updateProjectData = { ...project, client_id: project.client.id, reporter: project.reporter.id };
       this.selectedClient = project.client
-      this.selectedFiles=project.attachments
+      this.selectedFiles = project.attachments
       this.isEditModalOpen = true;
       console.log("uppro", this.updateProjectData);
       console.log("uppro", this.selectedFiles);
     },
-    async deleteProject(id){
+    async deleteProject(id) {
       console.log(id);
       Swal.fire({
-                title: 'Are you sure?',
-                text: 'You won\'t be able to revert this!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, delete it!'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    try {
-                        const response = await axios.delete(`${BASE_URL}api/development/projects?id=${id}`,{
-                          headers:{
-                            token: this.authToken
-                          }
-                        })
-                        this.getProjects();
-                        Swal.fire('Deleted!', response.data.message, 'success');
-                    } catch (error) {
-                      this.getProjects();
-                      Swal.fire('Deleted!', error.response.data.message, 'success');
+        title: 'Are you sure?',
+        text: 'You won\'t be able to revert this!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!'
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          try {
+            const response = await axios.delete(`${BASE_URL}api/development/projects?id=${id}`, {
+              headers: {
+                token: this.authToken
+              }
+            })
+            this.getProjects();
+            Swal.fire('Deleted!', response.data.message, 'success');
+          } catch (error) {
+            this.getProjects();
+            Swal.fire('Deleted!', error.response.data.message, 'success');
 
-                    }
-                }
-            });
+          }
+        }
+      });
     },
     handleFileChange(e) {
       this.selectedFiles = e.target.files
@@ -760,12 +815,13 @@ export default {
       }
     },
     generateKey() {
-      const projectName = this.projectData.name ? this.projectData.name.toLowerCase().split(' ') : [];
+      var projectName = this.projectData.name ? this.projectData.name.toLowerCase().split(' ') : [];
+      var updateProjectName = this.updateProjectData.name ? this.updateProjectData.name.toLowerCase().split(' ') : [];
       let key = '';
 
-      if (projectName.length === 1) {
+      if (projectName.length === 1 || updateProjectName.length === 1) {
         key = projectName[0];
-      } else if (projectName.length === 2) {
+      } else if (projectName.length === 2 || updateProjectName.length === 2) {
         key = `${projectName[0].charAt(0)}${projectName[1].charAt(0)}`;
       } else if (projectName.length > 2) {
         key = projectName.reduce((acc, curr) => acc + curr.charAt(0), '');
