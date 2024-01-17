@@ -1,5 +1,5 @@
 <template>
-  <div class="progress">
+  <div class="progress w-100">
     <div
       class="progress-bar"
       :class="getClasses(color, variant)"

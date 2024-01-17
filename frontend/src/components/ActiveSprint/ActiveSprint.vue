@@ -244,6 +244,7 @@
 <script>
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+
 // import ImageUploader from 'quill-image-uploader';
 // import axios from 'axios';
 
