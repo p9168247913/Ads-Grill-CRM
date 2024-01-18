@@ -133,6 +133,23 @@ class SprintView(CsrfExemptMixin, APIView):
                             "id": sprint.pk,
                             "name":sprint.name,
                             "is_started":sprint.is_started,
+                            "exp_duration": sprint.exp_duration,
+                            "project":{
+                                "id":sprint.project.pk,
+                                "name":sprint.project.name,
+                                "key":sprint.project.key
+                            },
+                            "reporter":{
+                                "id":sprint.reporter.pk,
+                                "name":sprint.reporter.name
+                            },
+                            "key":sprint.key,
+                            "description":sprint.description,
+                            "status":sprint.status,
+                            "start_date":sprint.start_date,
+                            "end_date":sprint.end_date,
+                            "goal":sprint.goal,
+                            "issue_count": Issue.objects.filter(sprint=sprint.pk).count(),
                             "issues": None
                         }
                         issues = Issue.objects.filter(sprint=sprint.pk)
@@ -140,6 +157,7 @@ class SprintView(CsrfExemptMixin, APIView):
                                 "id":issue.pk,
                                 "title": issue.title,
                                 "status":issue.status,
+                                "priority": issue.priority
                         }for issue in issues]
                         
                         sprintsAndIssues[sprint.name] = sprintData
