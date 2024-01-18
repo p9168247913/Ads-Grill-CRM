@@ -19,5 +19,7 @@ urlpatterns = [
     path("getLeadManagers/", projects.GetLeadManagers.as_view()),
     path("development/projects/download",projects.DownloadProjectAttchments.as_view()),
     path("development/issues",issues.IssueView.as_view()),
-    path("development/linked_issues",issues.LinkedIssueView.as_view())
+    path("development/linked_issues",issues.LinkedIssueView.as_view()),
+    path("development/issues/download",issues.DownloadIssuesAttchments.as_view()),
+
 ]

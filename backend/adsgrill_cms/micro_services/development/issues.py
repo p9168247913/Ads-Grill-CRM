@@ -6,6 +6,11 @@ from django.db.models import ObjectDoesNotExist
 from django.db import transaction
 import os
 from django.utils import timezone
+from rest_framework import status
+import zipfile
+from django.http import HttpResponse
+from io import BytesIO
+import uuid
 
 
 class IssueView(APIView):
@@ -49,24 +54,22 @@ class IssueView(APIView):
                     status=status,
                     exp_duration=exp_duration
                 )
-                if assignee_ids or parent_issue_ids:
+                if assignee_ids:
                     assignee_ids=assignee_ids.split(',')
-                    for assignee_id in assignee_ids:
-                        assignee=Users.objects.get(pk=assignee_id)
-                        issue_instance.assignee.add(assignee)
+                    assignees = Users.objects.filter(pk__in=assignee_ids)
+                    issue_instance.assignee.add(*assignees)
                     
-                    parent_issue_ids=parent_issue_ids.split(',')    
-                    for parent_issue_id in parent_issue_ids:
-                        parent_issue=Issue.objects.get(pk=parent_issue_id)
-                        issue_instance.parent_issue.add(parent_issue)
+                    
                 
                 attachment_file_names = []
                 for attachment in attachments:
                     subdirectory = os.path.join('media', 'uploads', 'Development', 'issues', str(f"{project_instance.key}_{sprint_instance.key}_{issue_instance.title}"))
                     if not os.path.exists(subdirectory):
                         os.makedirs(subdirectory)
-                    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
-                    unique_filename = f"{timestamp}_{attachment.name}"
+                        
+                    file_extension = attachment.name.split('.')[-1]
+                    unique_id = str(uuid.uuid4().hex[:6])
+                    unique_filename = f"{unique_id}_{issue_instance.key}.{file_extension}"
                     attachment_path = os.path.join(subdirectory, unique_filename)
                     with open(attachment_path, 'wb') as destination:
                         for chunk in attachment.chunks():
@@ -76,6 +79,15 @@ class IssueView(APIView):
 
                 issue_instance.attachments = attachment_file_names
                 issue_instance.save()
+                
+                 
+                if parent_issue_ids:
+                    parent_issue_ids=parent_issue_ids.split(',')    
+                    parent_issues = Issue.objects.filter(pk__in=parent_issue_ids)
+                    issue_instance.parent_issue.add(*parent_issues)
+                    
+                    issue_instance.save()
+
                 
                 
                 if linked_issues:
@@ -95,6 +107,7 @@ class IssueView(APIView):
                         return JsonResponse({"message":"Requested Issue do not exists"})
 
                     linked_issue_instances.save()
+                   
                           
 
         except Project.DoesNotExist:
@@ -107,7 +120,121 @@ class IssueView(APIView):
             return JsonResponse({"message": "Requested User not exists"})
 
         return JsonResponse({"message": "Issue created successfully"})
+    
+    def get(self,request):
+        try:
+            project_instance=Project.objects.get(pk=request.data.get('id'))
+            all_issues=Issue.objects.filter(project=project_instance).order_by('-created_at')
+            if not all_issues.exists():
+                return JsonResponse({"message":"No issues on this project"})
+            data = []
+            for issue in all_issues:
+                assignees_data = [{
+                    "id": assignee.id,
+                    "name": assignee.name
+                } for assignee in issue.assignee.all()]
+
+                issue_data = {
+                    "project": issue.project.name,
+                    "sprint": issue.sprint.name,
+                    "reporter": issue.reporter.name,
+                    "team_lead": issue.team_lead.name if issue.team_lead else None,
+                    "title": issue.title,
+                    "key": issue.key,
+                    "description": issue.description,
+                    "type": issue.type,
+                    "priority": issue.priority,
+                    "status": issue.status,
+                    "attachments": issue.attachments,
+                    "exp_duration": issue.exp_duration,
+                    "org_duration": issue.org_duration,
+                    "created_at": issue.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    "assignees": assignees_data
+                }
+                
+                data.append(issue_data)
+            
+        except Exception as e:
+            return JsonResponse({str(e)})    
         
+        return JsonResponse({"issues":data},status=status.HTTP_200_OK)
+    
+    def put(self,request):
+        try:
+            requestData=request.data
+            upd_issue=Issue.objects.get(pk=requestData.get('id'))
+            project_instance=Project.objects.get(pk=requestData.get('project_id'))
+            sprint_instance=Sprint.objects.get(pk=requestData.get('sprint_id'))
+            reporter_instance=Users.objects.get(pk=requestData.get('reporter_id'))
+            team_lead_instance=Users.objects.get(pk=requestData.get("team_lead_id")) if requestData.get('team_lead_id') else None
+            linked_issues=requestData.get('linked_issues',[])
+            parent_issue_ids=requestData.get('parent_issue_ids',[])
+            attachments = request.FILES.getlist('attachments', [])
+            assignee_ids=requestData.get('assignee_ids',[]) if requestData.get('assignee_ids') else None
+            linked_issue_type=requestData.get('linked_issue_type')
+
+            
+            with transaction.atomic():
+                upd_issue.project=project_instance
+                upd_issue.sprint=sprint_instance
+                upd_issue.reporter=reporter_instance
+                upd_issue.team_lead=team_lead_instance
+                upd_issue.title=requestData.get('title')
+                upd_issue.key=requestData.get('key')
+                upd_issue.description=requestData.get('description')
+                upd_issue.type=requestData.get('type')
+                upd_issue.priority=requestData.get('priority')
+                upd_issue.exp_duration=requestData.get('exp_duration')
+                upd_issue.org_duration=requestData.get('org_duration')
+
+                
+                upd_issue.assignee.clear()
+                upd_issue.parent_issue.clear()
+                if assignee_ids or parent_issue_ids:
+                    assignee_ids=assignee_ids.split(',')
+                    assignees = Users.objects.filter(pk__in=assignee_ids)
+                    upd_issue.assignee.add(*assignees)
+                    
+                    parent_issue_ids=parent_issue_ids.split(',')    
+                    parent_issues = Issue.objects.filter(pk__in=parent_issue_ids)
+                    upd_issue.parent_issue.add(*parent_issues)
+
+
+                attachment_file_names = []
+                for attachment in attachments:
+                    subdirectory = os.path.join('media', 'uploads', 'Development', 'issues', str(f"{project_instance.key}_{sprint_instance.key}_{upd_issue.title}"))
+                    if not os.path.exists(subdirectory):
+                        os.makedirs(subdirectory)
+                    file_extension = attachment.name.split('.')[-1]
+                    unique_id = str(uuid.uuid4().hex[:6])
+                    unique_filename = f"{unique_id}_{upd_issue.key}.{file_extension}"
+                    attachment_path = os.path.join(subdirectory, unique_filename)
+                    with open(attachment_path, 'wb') as destination:
+                        for chunk in attachment.chunks():
+                            destination.write(chunk)
+
+                    attachment_file_names.append(attachment_path)
+                upd_issue.attachments.extend(attachment_file_names)
+                
+                upd_issue.save()
+                
+        except Project.DoesNotExist:
+            return JsonResponse({"message":"Requested Project not exists"})
+        except Sprint.DoesNotExist:
+            return JsonResponse({"message":"Requested Sprint not exists"})
+        except Users.DoesNotExist:
+            return JsonResponse({"message":"Requested User not exists"})
+        except Exception as e:
+            return JsonResponse({"message":str(e)})
+        return JsonResponse({"message":"issue Updated successfully"})
+    
+    def delete(self,request):
+        try:
+            issue_instance=Issue.objects.get(pk=request.GET.get('id'))
+            issue_instance.delete()
+        except Issue.DoesNotExist:
+            return JsonResponse({"message":"Request Issue not exists"})
+        return JsonResponse({"message":"issue deleted successfully"})
     
 class LinkedIssueView(APIView):
     def post(self,request):
@@ -163,3 +290,24 @@ class LinkedIssueView(APIView):
             return JsonResponse({"errror":str(e)})
         
         return JsonResponse({"message":"Linked_issue Created successfully "})
+    
+class DownloadIssuesAttchments(APIView):
+    def get(self,request):
+        try:
+            id=request.GET.get("id")
+            issue_instance=Issue.objects.get(pk=id)
+            files=issue_instance.attachments
+            
+            zip_buffer=BytesIO()
+            with zipfile.ZipFile(zip_buffer,'w') as pro_zip:
+                for file in files:
+                    file_name = file.split("\\")[-1]
+                    pro_zip.write(file, file_name)
+            response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename={issue_instance.title}_attachments.zip'
+            
+            return response
+            
+        except Exception as e:
+            return JsonResponse({"message":str(e)})
+    
