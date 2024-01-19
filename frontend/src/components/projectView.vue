@@ -278,10 +278,15 @@
                         <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
                       </div>
                     </td>
-
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
-                        <h6 class="mb-0 text-sm">{{ project.name }}</h6>
+                      <div class="d-flex flex-row justify-content-center">
+                        <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.name ?
+                          limitedTeamMembers(project.name) : '' }}
+                        </h6>
+                        <p class="show-more" v-if="project.name && project.name.length > 15"
+                          data-bs-toggle="modal" data-bs-target="#showTeam" @mouseover="openModal(project.name)">
+                          ...more
+                        </p>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
@@ -304,13 +309,12 @@
                         <h6 class="mb-0 text-sm">{{ project.reporter.name }}</h6>
                       </div>
                     </td>
-
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-row justify-content-center">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.team_members ?
                           limitedTeamMembers(project.team_members) : '' }}
                         </h6>
-                        <p class="show" v-if="project.team_members && project.team_members.length > 15"
+                        <p class="show-more" v-if="project.team_members && project.team_members.length > 15"
                           data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.team_members)">
                           ...more
                         </p>
@@ -320,7 +324,7 @@
                       <div class="d-flex flex-row justify-content-center">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ limitedTeamMembers(project.tech_stacks) }}
                         </h6>
-                        <p class="show" v-if="project.tech_stacks && project.tech_stacks.length > 15"
+                        <p class="show-more" v-if="project.tech_stacks && project.tech_stacks.length > 15"
                           data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.tech_stacks)">
                           ...more
                         </p>
@@ -340,7 +344,7 @@
                     </td>
                     <td style="padding-left: 30px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)" download>
+                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)" >
                           <i class="fas fa-download"></i>
                         </a>
                         <span v-else>No Files</span>
@@ -359,7 +363,6 @@
                                             @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
                                             style="cursor: not-allowed;"></i> -->
-
                       <i data-bs-toggle="modal" data-bs-target="#editProject" @click="editModal(project)"
                         class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                         style="margin-left: 20px; cursor: pointer;"></i>
@@ -467,7 +470,7 @@ export default {
         return (
           project.name.toLowerCase().includes(searchLowerCase) ||
           project.key.toLowerCase().includes(searchLowerCase) ||
-          project.client.toLowerCase().includes(searchLowerCase) ||
+          project.client.name.toLowerCase().includes(searchLowerCase) ||
           project.type.toLowerCase().includes(searchLowerCase) ||
           project.status.toLowerCase().includes(searchLowerCase)
         );
@@ -560,7 +563,6 @@ export default {
         });
         this.resetValues();
         if (response && response.status === 200 && response.data) {
-          console.log(response.data);
           const filename = this.extractFilename(response);
           const blob = new Blob([response.data], { type: 'application/zip' });
 
@@ -603,7 +605,6 @@ export default {
           }
         })
         this.allProjects = response.data.projects;
-        console.log("response", this.allProjects);
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
@@ -671,10 +672,7 @@ export default {
         alert('Please select a Client');
         return;
       }
-
       this.updateProjectData.client_id = this.selectedClient.id;
-      console.log("update", this.updateProjectData);
-
       try {
         this.$store.commit('showLoader');
         let formData = new FormData();
@@ -692,9 +690,6 @@ export default {
         for (let i = 0; i < this.selectedFiles.length; i++) {
           formData.append('attachments[]', this.selectedFiles[i]);
         }
-
-        console.log("formData", formData);
-
         // const response = await axios.put(`${BASE_URL}api/development/projects`, formData, {
         //   headers: {
         //     'Content-Type': 'multipart/form-data',
@@ -725,18 +720,13 @@ export default {
         this.$store.commit('hideLoader');
       }
     },
-
     editModal(project) {
-      console.log("pro", project);
       this.updateProjectData = { ...project, client_id: project.client.id, reporter: project.reporter.id };
       this.selectedClient = project.client
       this.selectedFiles = project.attachments
       this.isEditModalOpen = true;
-      console.log("uppro", this.updateProjectData);
-      console.log("uppro", this.selectedFiles);
     },
     async deleteProject(id) {
-      console.log(id);
       Swal.fire({
         title: 'Are you sure?',
         text: 'You won\'t be able to revert this!',
@@ -768,10 +758,8 @@ export default {
     },
     async createClient(e) {
       e.preventDefault();
-      console.log(this.clientData);
       try {
         const response = await axios.post(`${BASE_URL}api/client/`, this.clientData)
-        console.log(response.data);
         if (response.status == 201) {
           Swal.fire({
             title: "Client created successfully!",
@@ -815,23 +803,18 @@ export default {
       }
     },
     generateKey() {
-      var projectName = this.projectData.name ? this.projectData.name.toLowerCase().split(' ') : [];
-      var updateProjectName = this.updateProjectData.name ? this.updateProjectData.name.toLowerCase().split(' ') : [];
+      var projectName = this.projectData.name ? this.projectData.name.toUpperCase().split(' ') : [];
       let key = '';
 
-      if (projectName.length === 1 || updateProjectName.length === 1) {
+      if (projectName.length === 1 ) {
         key = projectName[0];
-      } else if (projectName.length === 2 || updateProjectName.length === 2) {
+      } else if (projectName.length === 2) {
         key = `${projectName[0].charAt(0)}${projectName[1].charAt(0)}`;
       } else if (projectName.length > 2) {
         key = projectName.reduce((acc, curr) => acc + curr.charAt(0), '');
       }
-
-      const currentDate = new Date();
-      const datePart = currentDate.toISOString().slice(0, 10).replace(/-/g, '');
-      const timePart = currentDate.toISOString().slice(11, 16).replace(/\D/g, '');
-
-      let uniqueKey = key ? `${key}_${datePart}${timePart}` : '';
+      const randomNumber = Math.floor(1000 + Math.random() * 9000); 
+      let uniqueKey = key ? `${key}_${randomNumber}` : '';
       this.projectData.key = uniqueKey;
     }
   },
@@ -843,7 +826,7 @@ export default {
 };
 </script>
 
-<style>
+<style >
 :root {
   --vs-line-height: 1.8;
 }
@@ -890,9 +873,6 @@ export default {
   }
 }
 
-/* Style for the modal */
-
-
 .modal {
   display: none;
   position: fixed;
@@ -902,9 +882,6 @@ export default {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
-  padding-top: 60px;
 }
 
 .modal-content {
@@ -924,18 +901,19 @@ export default {
 
 .close:hover,
 .close:focus {
-  color: black;
+  color: rgb(100, 100, 100);
   text-decoration: none;
   cursor: pointer;
 }
 
-.show {
+.show-more {
   color: blue;
   font-size: 12px;
-  margin-top: 16px;
+  padding-top: 16px;
 }
 
-.show:hover {
+.show-more:hover{
   cursor: pointer;
 }
+
 </style>
