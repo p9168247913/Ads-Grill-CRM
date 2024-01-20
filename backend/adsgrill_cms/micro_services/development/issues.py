@@ -1,7 +1,6 @@
 from app.models import Users,Project,Sprint,Issue,LinkedIssue
 from rest_framework.views import APIView
 from django.http import JsonResponse
-from django.db.utils import IntegrityError
 from django.db.models import ObjectDoesNotExist
 from django.db import transaction
 import os
@@ -11,7 +10,30 @@ import zipfile
 from django.http import HttpResponse
 from io import BytesIO
 import uuid
+from django.db.models import Sum
+from datetime import timedelta
+import re
 
+
+def convert_to_duration(duration_str):
+    if 'd' not in duration_str:
+        duration_str+=' 0d'
+    if 'h' not in duration_str:
+        duration_str+=' 0h'
+    if 'm' not in duration_str:
+        duration_str+=' 0m'
+    regex = re.compile(r'(?:(?P<weeks>\d+)w )?(?:(?P<days>\d+)d )?(?:(?P<hours>\d+)h )?(?:(?P<minutes>\d+)m)?')
+
+    match = regex.match(duration_str)
+    components = {key: int(value) if value else 0 for key, value in match.groupdict().items()}
+
+    duration = timedelta(
+        weeks=components.get('weeks', 0),
+        days=components.get('days', 0),
+        hours=components.get('hours', 0),
+        minutes=components.get('minutes', 0)
+    )
+    return duration
 
 class IssueView(APIView):
     def post(self, request):
@@ -32,16 +54,27 @@ class IssueView(APIView):
             exp_duration = requestData.get('exp_duration')
             linked_issues=requestData.get('linked_issues',[])
             linked_issue_type=requestData.get('linked_issue_type')
+            
+            sprint_instance = Sprint.objects.get(pk=sprint_id)
+            sprint_exp_duration=sprint_instance.exp_duration
+                
+            issue_exp_duration = convert_to_duration(exp_duration)
+            existing_issue_duration=Issue.objects.filter(sprint=sprint_instance).aggregate(Sum('exp_duration'))['exp_duration__sum']
+            
+            total_duration = issue_exp_duration + existing_issue_duration
+
+            if total_duration > sprint_exp_duration:
+                return JsonResponse({"message": "Related issues durations for this sprint exceeds the sprint duration length ,please update sprint duration"})
 
             if Issue.objects.filter(title=title, project=project_id).exists():
                 return JsonResponse({"message": "Issue with this title already exists"})
 
+            
             with transaction.atomic():
                 project_instance = Project.objects.get(pk=project_id)
-                sprint_instance = Sprint.objects.get(pk=sprint_id)
                 reporter_instance = Users.objects.get(pk=reporter_id)
                 team_lead_instance = Users.objects.get(pk=team_lead_id) if team_lead_id else None
-
+                
                 issue_instance = Issue.objects.create(
                     project=project_instance,
                     sprint=sprint_instance,
@@ -108,8 +141,6 @@ class IssueView(APIView):
 
                     linked_issue_instances.save()
                    
-                          
-
         except Project.DoesNotExist:
             return JsonResponse({"message": "Requested Project not exists"})
 
@@ -167,16 +198,23 @@ class IssueView(APIView):
             sprint_instance=Sprint.objects.get(pk=requestData.get('sprint_id'))
             reporter_instance=Users.objects.get(pk=requestData.get('reporter_id'))
             team_lead_instance=Users.objects.get(pk=requestData.get("team_lead_id")) if requestData.get('team_lead_id') else None
-            linked_issues=requestData.get('linked_issues',[])
             parent_issue_ids=requestData.get('parent_issue_ids',[])
             attachments = request.FILES.getlist('attachments', [])
             assignee_ids=requestData.get('assignee_ids',[]) if requestData.get('assignee_ids') else None
-            linked_issue_type=requestData.get('linked_issue_type')
+            
+            sprint_exp_duration=sprint_instance.exp_duration
+            issue_exp_duration = convert_to_duration(request.data.get('exp_duration'))
+            existing_issue_duration=Issue.objects.filter(sprint=sprint_instance).aggregate(Sum('exp_duration'))['exp_duration__sum']
+            
+            total_duration = issue_exp_duration + existing_issue_duration
+
+            if total_duration > sprint_exp_duration:
+                return JsonResponse({"message": "Related issues durations for this sprint exceeds the sprint duration length ,please update sprint duration"})
 
             
             with transaction.atomic():
-                upd_issue.project=project_instance
                 upd_issue.sprint=sprint_instance
+                upd_issue.project=project_instance
                 upd_issue.reporter=reporter_instance
                 upd_issue.team_lead=team_lead_instance
                 upd_issue.title=requestData.get('title')
