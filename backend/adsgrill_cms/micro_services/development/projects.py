@@ -184,11 +184,23 @@ class ProjectView(CsrfExemptMixin, APIView):
             with transaction.atomic():
                 id = request.GET.get('id')
                 del_project = Project.objects.get(pk=id)
+
+                file_paths = del_project.attachments
+                if file_paths:
+                    for file_path in file_paths:
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+                directory = del_project.name
+                directory_path = os.path.join("media\\uploads\\Development\\projects\\", directory)
+                if os.path.exists(directory_path):
+                    os.rmdir(directory_path)
                 del_project.delete()
 
         except ObjectDoesNotExist:
             return JsonResponse({'message':'Requested Project Does Not Exists'}, status=status.HTTP_204_NO_CONTENT)        
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
