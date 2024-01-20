@@ -1,3 +1,5 @@
 adsgrill_venv/
 app/migrations/
 migrations/
+__pycache__/
+media/
