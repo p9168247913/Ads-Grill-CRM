@@ -49,7 +49,7 @@ class IssueView(APIView):
             priority = requestData.get('priority')
             status = requestData.get('status')
             attachments = request.FILES.getlist('attachments', [])
-            assignee_ids=requestData.get('assignee_ids',[])
+            assignee_id=requestData.get('assignee_id')
             parent_issue_ids=requestData.get('parent_issue_ids',[])
             exp_duration = requestData.get('exp_duration')
             linked_issues=requestData.get('linked_issues',[])
@@ -74,12 +74,14 @@ class IssueView(APIView):
                 project_instance = Project.objects.get(pk=project_id)
                 reporter_instance = Users.objects.get(pk=reporter_id)
                 team_lead_instance = Users.objects.get(pk=team_lead_id) if team_lead_id else None
+                assignee_instance=Users.objects.get(pk=assignee_id)
                 
                 issue_instance = Issue.objects.create(
                     project=project_instance,
                     sprint=sprint_instance,
                     reporter=reporter_instance,
                     team_lead=team_lead_instance,
+                    assignee=assignee_instance,
                     title=title,
                     description=description,
                     type=type,
@@ -87,13 +89,7 @@ class IssueView(APIView):
                     status=status,
                     exp_duration=exp_duration
                 )
-                if assignee_ids:
-                    assignee_ids=assignee_ids.split(',')
-                    assignees = Users.objects.filter(pk__in=assignee_ids)
-                    issue_instance.assignee.add(*assignees)
-                    
-                    
-                
+              
                 attachment_file_names = []
                 for attachment in attachments:
                     subdirectory = os.path.join('media', 'uploads', 'Development', 'issues', str(f"{project_instance.key}_{sprint_instance.key}_{issue_instance.title}"))
@@ -198,9 +194,9 @@ class IssueView(APIView):
             sprint_instance=Sprint.objects.get(pk=requestData.get('sprint_id'))
             reporter_instance=Users.objects.get(pk=requestData.get('reporter_id'))
             team_lead_instance=Users.objects.get(pk=requestData.get("team_lead_id")) if requestData.get('team_lead_id') else None
+            assignee_instance=Users.objects.get(pk=requestData.get("assignee_id"))
             parent_issue_ids=requestData.get('parent_issue_ids',[])
             attachments = request.FILES.getlist('attachments', [])
-            assignee_ids=requestData.get('assignee_ids',[]) if requestData.get('assignee_ids') else None
             
             sprint_exp_duration=sprint_instance.exp_duration
             issue_exp_duration = convert_to_duration(request.data.get('exp_duration'))
@@ -217,6 +213,7 @@ class IssueView(APIView):
                 upd_issue.project=project_instance
                 upd_issue.reporter=reporter_instance
                 upd_issue.team_lead=team_lead_instance
+                upd_issue.assignee=assignee_instance
                 upd_issue.title=requestData.get('title')
                 upd_issue.key=requestData.get('key')
                 upd_issue.description=requestData.get('description')
@@ -226,13 +223,8 @@ class IssueView(APIView):
                 upd_issue.org_duration=requestData.get('org_duration')
 
                 
-                upd_issue.assignee.clear()
                 upd_issue.parent_issue.clear()
-                if assignee_ids or parent_issue_ids:
-                    assignee_ids=assignee_ids.split(',')
-                    assignees = Users.objects.filter(pk__in=assignee_ids)
-                    upd_issue.assignee.add(*assignees)
-                    
+                if parent_issue_ids:
                     parent_issue_ids=parent_issue_ids.split(',')    
                     parent_issues = Issue.objects.filter(pk__in=parent_issue_ids)
                     upd_issue.parent_issue.add(*parent_issues)
