@@ -122,7 +122,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'adsgrill_cms',
         'USER': 'postgres',
-        'PASSWORD': '1234',
+        'PASSWORD': '1911',
         'HOST': 'localhost',
         'PORT': '5432', 
     }
@@ -198,6 +198,6 @@ DEFAULT_FROM_EMAIL = 'shantanu.adsgrill@gmail.com'
 # Dajngo session settings
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 3600 * 24 * 7
+SESSION_COOKIE_AGE = 3600 * 24
 SESSION_SAVE_EVERY_REQUEST = False
 

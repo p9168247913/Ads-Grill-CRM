@@ -170,7 +170,7 @@ class Issue(models.Model):
     attachments = ArrayField(models.FileField(), blank=True, default=default_attachments)
     exp_duration = models.DurationField(null=True, blank=False)
     org_duration = models.DurationField(null=True, blank=False)
-    assignee = models.ManyToManyField(Users, db_index=True, related_name='task_assignee')
+    assignee = models.ForeignKey(Users, db_index=True, on_delete=models.CASCADE, related_name='task_assignee')
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
