@@ -126,7 +126,7 @@ class SprintView(CsrfExemptMixin, APIView):
     
             if val == 'backlog':
                 try:
-                    sprintsAndIssues = {}
+                    sprintsAndIssues = []
                     sprints = Sprint.objects.filter(project=project_id).order_by('-created_at')
                     for sprint in sprints:
                         sprintData = {
@@ -160,7 +160,7 @@ class SprintView(CsrfExemptMixin, APIView):
                                 "priority": issue.priority
                         }for issue in issues]
                         
-                        sprintsAndIssues[sprint.name] = sprintData
+                        sprintsAndIssues.append(sprintData)
                     
                     if not sprintsAndIssues:
                         return JsonResponse({"message":"No data found in this project"}, status=status.HTTP_204_NO_CONTENT)
