@@ -180,7 +180,7 @@ class Issue(models.Model):
 class LinkedIssue(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
-    source = models.ManyToManyField(Issue, db_index=True, related_name='source_issues')
+    source = models.ForeignKey(Issue, db_index=True, on_delete=models.CASCADE, related_name='source_issues')
     destination = models.ForeignKey(Issue, on_delete=models.CASCADE, db_index=True, related_name='destination_issue')
     type = models.CharField(null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
@@ -191,7 +191,7 @@ class WorkLog(models.Model):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
     author = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index = True)
     logged_time = models.TimeField(null=True, blank=False)
-    remaining_time = models.TimeField(null=True, blank=False)
+    remaining_time = models.DateTimeField(null=True, blank=False)
     description = models.TextField(null=True, blank=False)
     attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
