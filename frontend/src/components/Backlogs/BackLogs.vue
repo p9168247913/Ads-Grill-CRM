@@ -85,7 +85,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
                                             <input type="datetime-local" class="form-control" v-model="sprintData.end_date"
-                                                :min="sprintData.start_date" :disabled="sprintData.start_date.length === 0"
+                                                :min="sprintData.start_date" :disabled="sprintData.start_date===''"
                                                 required>
                                         </div>
                                     </div>
@@ -189,7 +189,7 @@
                                     <div class="d-flex flex-row justify-content-center">
                                         <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
                                     </div>
-                                    <div class="d-flex flex-row justify-content-center ">
+                                    <div class="d-flex flex-row justify-content-center flex-grow-2">
                                         <p class="mb-0 text-sm" style="font-size: smaller;">{{ formatDate(sprint.start_date)
                                         }} - {{ formatDate(sprint.end_date) }}</p>
                                     </div>
@@ -197,13 +197,6 @@
                                         <p class="mb-0 text-sm" style="font-size: smaller;">({{ sprint.issues.length }}
                                             issues)</p>
                                     </div>
-                                    <!-- <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
-                                    </div><div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
-                                    </div><div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
-                                    </div> -->
                                     <div class="col text-end">
                                         <button class="btn btn-link dropdown-open" type="button" id="dropdownMenuButton2"
                                             data-bs-toggle="dropdown" aria-expanded="false">

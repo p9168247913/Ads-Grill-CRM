@@ -58,10 +58,10 @@
                       <label for="reporter_id" class="form-label">Manager</label>
                       <select class="form-control" v-model="projectData.reporter_id">
                         <option value="">Select Manager</option>
-                        <option value="18">Abhishek</option>
+                        <!-- <option value="18">Abhishek</option> -->
                         <!-- <option value="Pawan">Pawan</option> -->
-                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option> -->
+                        <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
+                          manager.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -143,23 +143,23 @@
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="reporter_id" class="form-label">Manager</label>
-                      <select class="form-control" v-model="updateProjectData.reporter.id">
+                      <select class="form-control" v-model="updateProjectData.reporter_id">
                         <option value="">Select Manager</option>
-                        <option value="18">Abhishek</option>
-                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option> -->
+                        <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
+                          manager.name }}</option>
                       </select>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label for="name" class="form-label">Project Name</label>
-                      <input type="text" class="form-control" v-model="updateProjectData.name" @input="generateKey"
-                        required disabled>
+                      <input style="cursor:not-allowed;" type="text" class="form-control" v-model="updateProjectData.name"
+                        @input="generateKey" required disabled>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="key" class="form-label">Key</label>
-                      <input type="text" class="form-control" v-model="updateProjectData.key" disabled required>
+                      <input style="cursor:not-allowed;" type="text" class="form-control" v-model="updateProjectData.key"
+                        disabled required>
                     </div>
                   </div>
                   <div class="row">
@@ -177,9 +177,9 @@
                       <label for="team_lead_id" class="form-label">Team Lead</label>
                       <select class="form-control" v-model="updateProjectData.team_lead_id" required>
                         <option value="">Select Team Lead</option>
-                        <option value="7">Shyam</option>
-                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option> -->
+                        <!-- <option value="7">Shyam</option> -->
+                        <option v-for="(tag, index) in team_lead" :key="index" :value="tag.id">{{
+                          tag.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -197,13 +197,13 @@
                     <div class="col-md-12 mb-3">
                       <label for="projectName" class="form-label">Files</label>
                       <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple
-                        @change="handleFileChange">
+                        @change="handleUpdateFileChange">
                     </div>
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
+                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
                   </div>
                 </form>
               </div>
@@ -283,8 +283,8 @@
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.name ?
                           limitedTeamMembers(project.name) : '' }}
                         </h6>
-                        <p class="show-more" v-if="project.name && project.name.length > 15"
-                          data-bs-toggle="modal" data-bs-target="#showTeam" @mouseover="openModal(project.name)">
+                        <p class="show-more" v-if="project.name && project.name.length > 15" data-bs-toggle="modal"
+                          data-bs-target="#showTeam" @mouseover="openModal(project.name)">
                           ...more
                         </p>
                       </div>
@@ -344,7 +344,7 @@
                     </td>
                     <td style="padding-left: 30px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)" >
+                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)">
                           <i class="fas fa-download"></i>
                         </a>
                         <span v-else>No Files</span>
@@ -423,9 +423,15 @@ export default {
       searchText: '',
       selectedClient: null,
       selectedFiles: [],
+      selectedUpdateFiles: [],
       headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Files', 'Actions'],
       allProjects: [],
       existingKeys: [],
+      projectManager: [],
+      team_lead: [{
+        id: 7,
+        name: "Shyam",
+      }],
       projectData: {
         client_id: '',
         name: '',
@@ -440,13 +446,13 @@ export default {
         id: '',
         client_id: '',
         name: '',
-        reporter: '',
+        reporter_id: '',
         key: '',
         type: '',
         team_lead_id: '',
         tech_stacks: '',
         host_address: '',
-        status: ''
+        status: '',
       },
       clientData: {
         name: '',
@@ -540,8 +546,7 @@ export default {
             token: this.authToken,
           }
         })
-        // this.allProjects = response.data.projects;
-        console.log("response111", response.data);
+        this.projectManager = response.data.lead_man;
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
@@ -618,7 +623,11 @@ export default {
     async createProjects(e) {
       e.preventDefault();
       if (!this.selectedClient) {
-        alert('Please select a Client');
+        new Noty({
+          type: 'warning',
+          text: "Please select client!",
+          timeout: 1000,
+        }).show();
         return;
       }
       this.projectData.client_id = this.selectedClient.id;
@@ -636,7 +645,7 @@ export default {
         for (let i = 0; i < this.selectedFiles.length; i++) {
           formData.append('attachments', this.selectedFiles[i]);
         }
-
+        console.log("postData", formData);
         const response = await axios.post(`${BASE_URL}api/development/projects`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -669,45 +678,48 @@ export default {
       e.preventDefault();
 
       if (!this.selectedClient) {
-        alert('Please select a Client');
+        new Noty({
+          type: 'warning',
+          text: "Please select client!",
+          timeout: 500,
+        }).show();
         return;
       }
-      this.updateProjectData.client_id = this.selectedClient.id;
       try {
         this.$store.commit('showLoader');
-        let formData = new FormData();
-        formData.append('id', this.updateProjectData.id);
-        formData.append('client_id', this.updateProjectData.client.id);
-        formData.append('name', this.updateProjectData.name);
-        formData.append('key', this.updateProjectData.key);
-        formData.append('type', this.updateProjectData.type);
-        formData.append('reporter', this.updateProjectData.reporter.id);
-        formData.append('host_address', this.updateProjectData.host_address);
-        formData.append('tech_stacks', this.updateProjectData.tech_stacks);
-        formData.append('team_lead_id', this.updateProjectData.team_lead_id);
+        let updateFormData = new FormData();
+        console.log("formData1", updateFormData);
+        updateFormData.append('id', this.updateProjectData.id);
+        updateFormData.append('client_id', this.updateProjectData.client.id);
+        updateFormData.append('name', this.updateProjectData.name);
+        updateFormData.append('key', this.updateProjectData.key);
+        updateFormData.append('type', this.updateProjectData.type);
+        updateFormData.append('reporter_id', this.updateProjectData.reporter_id);
+        updateFormData.append('host_address', this.updateProjectData.host_address);
+        updateFormData.append('tech_stacks', this.updateProjectData.tech_stacks);
+        updateFormData.append('team_lead_id', this.updateProjectData.team_lead_id);
 
-        // Append each selected file individually
-        for (let i = 0; i < this.selectedFiles.length; i++) {
-          formData.append('attachments[]', this.selectedFiles[i]);
+        for (let i = 0; i < this.selectedUpdateFiles.length; i++) {
+          updateFormData.append("attachments",this.selectedUpdateFiles[i]);
         }
-        // const response = await axios.put(`${BASE_URL}api/development/projects`, formData, {
-        //   headers: {
-        //     'Content-Type': 'multipart/form-data',
-        //     'token': this.authToken,
-        //   },
-        //   onUploadProgress: progressEvent => {
-        //     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        //     this.uploadProgress = percentCompleted;
-        //   },
-        // });
 
-        // if (response.status === 201) {
-        //   Swal.fire({
-        //     title: response.data.message,
-        //     icon: 'success',
-        //   });
-        // }
+        const response = await axios.put(`${BASE_URL}api/development/projects`,updateFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'token': this.authToken,
+          },
+          onUploadProgress: progressEvent => {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            this.uploadProgress = percentCompleted;
+          },
+        });
 
+        if (response.status === 200) {
+          Swal.fire({
+            title: response.data.message,
+            icon: 'success',
+          });
+        }
         this.getProjects();
         this.$store.commit('hideLoader');
         this.resetValues();
@@ -721,9 +733,9 @@ export default {
       }
     },
     editModal(project) {
-      this.updateProjectData = { ...project, client_id: project.client.id, reporter: project.reporter.id };
+      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id,  };
       this.selectedClient = project.client
-      this.selectedFiles = project.attachments
+      this.selectedUpdateFiles = []
       this.isEditModalOpen = true;
     },
     async deleteProject(id) {
@@ -755,6 +767,9 @@ export default {
     },
     handleFileChange(e) {
       this.selectedFiles = e.target.files
+    },
+    handleUpdateFileChange(e) {
+      this.selectedUpdateFiles = e.target.files
     },
     async createClient(e) {
       e.preventDefault();
@@ -806,14 +821,14 @@ export default {
       var projectName = this.projectData.name ? this.projectData.name.toUpperCase().split(' ') : [];
       let key = '';
 
-      if (projectName.length === 1 ) {
+      if (projectName.length === 1) {
         key = projectName[0];
       } else if (projectName.length === 2) {
         key = `${projectName[0].charAt(0)}${projectName[1].charAt(0)}`;
       } else if (projectName.length > 2) {
         key = projectName.reduce((acc, curr) => acc + curr.charAt(0), '');
       }
-      const randomNumber = Math.floor(1000 + Math.random() * 9000); 
+      const randomNumber = Math.floor(1000 + Math.random() * 9000);
       let uniqueKey = key ? `${key}_${randomNumber}` : '';
       this.projectData.key = uniqueKey;
     }
@@ -912,8 +927,7 @@ export default {
   padding-top: 16px;
 }
 
-.show-more:hover{
+.show-more:hover {
   cursor: pointer;
 }
-
 </style>
