@@ -121,16 +121,10 @@ class WorklogView(CsrfExemptMixin, APIView):
                 if worklogs:
                     total_logged_time = worklogs.aggregate(Sum('logged_time'))['logged_time__sum'] 
 
-                    latest_worklog=worklogs.first()
-                    
-                    days_in_exp_duration = latest_worklog.issue.exp_duration.days
+                    days_in_exp_duration = worklog_instance.issue.exp_duration.days
+                    remaining_duration=worklog_instance.issue.exp_duration - (days_in_exp_duration*convert_to_duration('16h 30m') + total_logged_time)
 
-                    remaining_duration=latest_worklog.issue.exp_duration - (days_in_exp_duration*convert_to_duration('16h 30m') + total_logged_time)
-
-                    if remaining_duration < convert_to_duration('24h 00m'):
-                        remaining_duration=calculate_remianing_duration(remaining_duration)
-
-                    worklog_instance.remaining_time=remaining_duration
+                    worklog_instance.remaining_time=calculate_remianing_duration(remaining_duration)
                 
 
                 attachment_file_names = []
@@ -203,21 +197,14 @@ class WorklogView(CsrfExemptMixin, APIView):
 
             if upd_worklog.created_at.date() != datetime.now().date():
                 return JsonResponse({"message": "You can update worklog at the same day only"})
-            
-            issue_instance=Issue.objects.get(pk=upd_worklog.issue.pk)
-     
-            worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
-            
+                             
             total_logged_time=WorkLog.objects.filter(issue=upd_worklog.issue).exclude(pk=upd_worklog.pk).aggregate(Sum('logged_time'))['logged_time__sum']
-            latest_worklog=worklogs.first()
             
-            days_in_exp_duration = latest_worklog.issue.exp_duration.days
+            days_in_exp_duration = upd_worklog.issue.exp_duration.days
                     
-            remaining_duration=latest_worklog.issue.exp_duration - (days_in_exp_duration*convert_to_duration('16h 30m') + total_logged_time)
+            remaining_duration=upd_worklog.issue.exp_duration - (days_in_exp_duration*convert_to_duration('16h 30m') + total_logged_time)
             total_remaining_time = remaining_duration - convert_to_duration(logged_time)
-            
-            if total_remaining_time < convert_to_duration('24h 00m'):
-                remaining_duration=calculate_remianing_duration(total_remaining_time)
+
                 
             with transaction.atomic():
                 upd_worklog.logged_time = convert_duration_to_time(logged_time)
@@ -227,7 +214,7 @@ class WorklogView(CsrfExemptMixin, APIView):
                     upd_worklog.remaining_time=convert_to_duration('0h 0m 0s')
                     
                 else: 
-                    upd_worklog.remaining_time=remaining_duration
+                    upd_worklog.remaining_time=calculate_remianing_duration(total_remaining_time)
                 
                 attachment_files_list = []
                 if attachments:
