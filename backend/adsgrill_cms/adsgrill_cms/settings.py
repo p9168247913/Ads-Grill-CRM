@@ -84,7 +84,7 @@ CORS_ALLOW_HEADERS = [
     'origin',
     'user-agent',
 ]
-CORS_EXPOSE_HEADERS = ['token']
+CORS_EXPOSE_HEADERS = ['token', 'content-disposition']
 
 ROOT_URLCONF = 'adsgrill_cms.urls'
 
@@ -120,7 +120,7 @@ WSGI_APPLICATION = 'adsgrill_cms.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adsgrill_cms',
+        'NAME': 'adsgrill_crm',
         'USER': 'postgres',
         'PASSWORD': '1911',
         'HOST': 'localhost',

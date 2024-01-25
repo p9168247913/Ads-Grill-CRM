@@ -199,8 +199,6 @@ class ProjectView(CsrfExemptMixin, APIView):
         except ObjectDoesNotExist:
             return JsonResponse({'message':'Requested Project Does Not Exists'}, status=status.HTTP_204_NO_CONTENT)        
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
@@ -213,19 +211,23 @@ class DownloadProjectAttchments(CsrfExemptMixin, APIView):
             id=request.GET.get("id")
             project_instance=Project.objects.get(pk=id)
             files=project_instance.attachments
-            
-            zip_buffer=BytesIO()
-            with zipfile.ZipFile(zip_buffer,'w') as pro_zip:
-                for file in files:
-                    file_name = file.split("\\")[-1]
-                    pro_zip.write(file, file_name)
-            response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
-            response['Content-Disposition'] = f'attachment; filename={project_instance.name}_attachments.zip'
-            
-            return response
-            
+            if files:
+                zip_buffer=BytesIO()
+                with zipfile.ZipFile(zip_buffer,'w') as pro_zip:
+                    for file in files:
+                        file_name = file.split("\\")[-1]
+                        pro_zip.write(file, file_name)
+                response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename={project_instance.name}_attachments.zip'
+            else:
+                response = JsonResponse({"message":"No files found for the specified criteria."}, status=status.HTTP_204_NO_CONTENT)
+           
+        except IntegrityError as i:
+            response =  JsonResponse({"message":str(i)})
+
         except Exception as e:
-            return JsonResponse({"message":str(e)})
+            response =  JsonResponse({"message":str(e)})
+        return response
     
 
 class GetProjectManagers(CsrfExemptMixin, APIView):
@@ -240,7 +242,7 @@ class GetProjectManagers(CsrfExemptMixin, APIView):
             }for lead_man in all_lead_man]
         except Exception as e:
             return JsonResponse({'message':str(e)})
-        return JsonResponse({'lead_man':res_data}, status=status.HTTP_200_OK)
+        return JsonResponse({'project_managers':res_data}, status=status.HTTP_200_OK)
     
 class GetAllAssignees(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
