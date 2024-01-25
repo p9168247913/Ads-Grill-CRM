@@ -49,7 +49,7 @@ class IssueView(CsrfExemptMixin, APIView):
             requestData = request.data 
             project_id = requestData.get('project_id')
             sprint_id = requestData.get('sprint_id')
-            reporter_id = requestData.get('reporter_id')
+            reporter_id = requestData.get('reporter_id')    
             team_lead_id = requestData.get('team_lead_id')
             title = requestData.get('title')
             key = requestData.get('key')
