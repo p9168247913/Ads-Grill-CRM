@@ -358,4 +358,96 @@ class DownloadIssuesAttchments(CsrfExemptMixin, APIView):
             
         except Exception as e:
             return JsonResponse({"message":str(e)})
+        
+class IssueMetaData(APIView):
+    def get(self,request):
+        try:
+            id=request.data.get('id')
+            issue=Issue.objects.get(pk=id)
+
+            issue_data={
+                "id":issue.pk,
+                "title":issue.title,
+                "key":issue.key,
+                "description":issue.description,
+                "priority":issue.priority,
+                "status":issue.status,
+                "attachments":issue.attachments,
+                "exp_duration":issue.exp_duration,
+                "org_duration":issue.org_duration,
+                "created_at":issue.created_at,
+                "sprint":{
+                    "id":issue.sprint.pk,
+                    "key":issue.sprint.key,
+                    "name":issue.sprint.name
+                },
+                "project":{
+                    "id":issue.project.pk,
+                    "key":issue.project.key,
+                    "name":issue.project.name,
+                },
+                "reporter":{
+                    "id":issue.reporter.pk,
+                    "email":issue.reporter.email,
+                    "designation":issue.reporter.designation,
+                },
+               
+            }
+            if issue.assignee is not None:
+                issue_data['assignee']={
+                    "id":issue.assignee.pk,
+                    "email":issue.assignee.email,
+                    "designation":issue.assignee.designation,
+                }
+            else : issue_data['assignee']={}
+            
+            if issue.team_lead is not None:
+                issue_data["team_lead"]={
+                    "id":issue.team_lead.pk,
+                    "email":issue.team_lead.email,
+                    "designation":issue.team_lead.designation,
+                }
+            else : issue_data['team_lead']={}
+            
+            parent_issues = Issue.objects.filter(pk__in=issue.parent_issue.values_list('pk')) 
+            if parent_issues.exists():
+                issue_data['parentIssues']=[{
+                    "id":parent_issue.pk,
+                    "key":parent_issue.key,
+                    "title":parent_issue.title,
+                    "description":parent_issue.description,
+                }for parent_issue in parent_issues]
+            else : issue_data['parentIssues']=[{}]
+                
+                
+            child_issues=Issue.objects.filter(parent_issue__in=[id])
+            if child_issues.exists():
+                issue_data['childIssues']=[{
+                    "id":child_issue.pk,
+                    "key":child_issue.key,
+                    "title":child_issue.title,
+                    "description":child_issue.description
+                } for child_issue in child_issues]
+            else : issue_data["childIssues"]=[{}]
+                
+            
+                
+            linked_issues = LinkedIssue.objects.filter(destination__in=id)
+            if linked_issues:
+                issue_data['linked_issues']=[{
+                    "id":linked_issue.pk,
+                    "type":linked_issue.type,
+                    "created_at":linked_issue.created_at
+                }for linked_issue in linked_issues]
+                            
+                  
+        except Issue.DoesNotExist:
+            return JsonResponse({'message':'Requested issue not exists'})
+            
+        except Exception as e:
+            return JsonResponse({'error':str(e)})
+        
+        return JsonResponse({"Data":issue_data},status=status.HTTP_200_OK)
+        
+        
     
