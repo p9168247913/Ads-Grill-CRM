@@ -360,6 +360,8 @@ class DownloadIssuesAttchments(CsrfExemptMixin, APIView):
             return JsonResponse({"message":str(e)})
         
 class IssueMetaData(APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
             id=request.data.get('id')
