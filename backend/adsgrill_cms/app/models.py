@@ -186,12 +186,12 @@ class LinkedIssue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
-
 class WorkLog(models.Model):
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
     author = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index = True)
-    logged_time = models.TimeField(null=True, blank=False)
+    logged_time = models.DurationField(null=True, blank=False)
+    extra_efforts = models.DurationField(null=True, blank=False)
     remaining_time = models.DurationField(null=False,blank=False)
     description = models.TextField(null=True, blank=False)
     attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
