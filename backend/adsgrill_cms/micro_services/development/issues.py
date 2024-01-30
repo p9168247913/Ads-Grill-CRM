@@ -16,6 +16,11 @@ import re
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from braces.views import CsrfExemptMixin
+from django.conf import settings
+from django.core.mail import send_mail
+import asyncio
+from datetime import datetime, time
+
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -40,10 +45,19 @@ def convert_to_duration(duration_str):
         minutes=components.get('minutes', 0)
     )
     return duration
+def send_issue_details(title, issue_type,priority,created_at,reporter,link,email):
+    local_time=created_at.astimezone(timezone.get_current_timezone())
+    time=local_time.strftime('%d-%m-%y  %H:%M:%S')
+    subject = f'{title}'
+    message = f'Created_By : {reporter}\n \n Type : {issue_type} \n \n Priority : {priority} \n \n For More Details : {link} \n \n Created_at : {time}'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient = [email]
+    send_mail(subject,message,from_email, recipient)
 
 class IssueView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+    
     def post(self, request):
         try:
             requestData = request.data 
@@ -77,7 +91,7 @@ class IssueView(CsrfExemptMixin, APIView):
             total_duration = issue_exp_duration + existing_issue_duration
 
             if total_duration > sprint_exp_duration:
-                return JsonResponse({"message": "Issues durations for this sprint exceeds the sprint duration length, please update the sprint duration"})
+                return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
 
             if Issue.objects.filter(title=title, project=project_id).exists():
                 return JsonResponse({"message": "Issue with this title already exists"})
@@ -146,6 +160,9 @@ class IssueView(CsrfExemptMixin, APIView):
                         for linked_issue in linked_issues]
 
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
+                                       
+                url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
+                send_issue_details(issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)
                    
         except Project.DoesNotExist:
             return JsonResponse({"message": "Requested project does not exists"})
@@ -223,7 +240,7 @@ class IssueView(CsrfExemptMixin, APIView):
             total_duration = issue_exp_duration + existing_issue_duration
 
             if total_duration > sprint_exp_duration:
-                return JsonResponse({"message": "Issues durations for this sprint exceeds the sprint duration length, please update the sprint duration"})
+                return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
             
             with transaction.atomic():
                 upd_issue.sprint=sprint_instance
@@ -391,6 +408,7 @@ class IssueMetaData(APIView):
                 "reporter":{
                     "id":issue.reporter.pk,
                     "email":issue.reporter.email,
+                    "role":issue.reporter.role.name,
                     "designation":issue.reporter.designation,
                 },
                
@@ -399,6 +417,7 @@ class IssueMetaData(APIView):
                 issue_data['assignee']={
                     "id":issue.assignee.pk,
                     "email":issue.assignee.email,
+                    "role":issue.assignee.role.name,
                     "designation":issue.assignee.designation,
                 }
             else : issue_data['assignee']={}
@@ -407,6 +426,7 @@ class IssueMetaData(APIView):
                 issue_data["team_lead"]={
                     "id":issue.team_lead.pk,
                     "email":issue.team_lead.email,
+                    "role":issue.team_lead.role.name,
                     "designation":issue.team_lead.designation,
                 }
             else : issue_data['team_lead']={}
@@ -417,7 +437,9 @@ class IssueMetaData(APIView):
                     "id":parent_issue.pk,
                     "key":parent_issue.key,
                     "title":parent_issue.title,
-                    "description":parent_issue.description,
+                    "status":parent_issue.status,
+                    "priority":parent_issue.priority,
+                    "assignee":parent_issue.assignee.name
                 }for parent_issue in parent_issues]
             else : issue_data['parentIssues']=[{}]
                 
@@ -428,7 +450,9 @@ class IssueMetaData(APIView):
                     "id":child_issue.pk,
                     "key":child_issue.key,
                     "title":child_issue.title,
-                    "description":child_issue.description
+                    "status":child_issue.status,
+                    "priority":child_issue.priority,
+                    "assignee":child_issue.assignee.name
                 } for child_issue in child_issues]
             else : issue_data["childIssues"]=[{}]
                 
@@ -439,7 +463,10 @@ class IssueMetaData(APIView):
                 issue_data['linked_issues']=[{
                     "id":linked_issue.pk,
                     "type":linked_issue.type,
-                    "created_at":linked_issue.created_at
+                    "created_at":linked_issue.created_at,
+                    "status":linked_issue.source.status,
+                    "priority":linked_issue.source.priority,
+                    "assignee":linked_issue.source.assignee.name
                 }for linked_issue in linked_issues]
                             
                   
