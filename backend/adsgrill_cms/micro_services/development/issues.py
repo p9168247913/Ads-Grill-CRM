@@ -1,4 +1,4 @@
-from app.models import Users,Project,Sprint,Issue,LinkedIssue
+from app.models import Users,Project,Sprint,Issue,LinkedIssue,WorkLog
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.db.models import ObjectDoesNotExist
@@ -242,12 +242,20 @@ class IssueView(CsrfExemptMixin, APIView):
             if total_duration > sprint_exp_duration:
                 return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
             
+            
+            if(request.user.designation=="project_manager" and request.user.role.name=="development"):
+                if requestData.get("status")=="done":
+                   total_org_duration=WorkLog.objects.filter(issue=upd_issue).aggregate(Sum('logged_time'))['logged_time__sum']
+                   upd_issue.org_duration=total_org_duration
+            
+            
             with transaction.atomic():
                 upd_issue.sprint=sprint_instance
                 upd_issue.project=project_instance
                 upd_issue.reporter=reporter_instance
                 upd_issue.team_lead=team_lead_instance
                 upd_issue.assignee=assignee_instance
+                upd_issue.status=requestData.get("status")
                 upd_issue.title=requestData.get('title')
                 upd_issue.key=requestData.get('key')
                 upd_issue.description=requestData.get('description')
