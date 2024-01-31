@@ -7,7 +7,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
     <div class="wrapper" style="margin-bottom: 80px; ">
-        <div class="content-page">
+        <div v-if="projectKey" class="content-page">
             <div class="container-fluid">
                 <!-- <h6 class="sprint-head">Backlogs</h6> -->
                 <div style="margin-top: 20px;">
@@ -37,42 +37,22 @@
                 <div class="modal fade" ref="createProjectModal" id="createSprint" tabindex="-1"
                     aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div style="padding-bottom: 5px;" class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createProjectLabel">Create Sprint</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody">
+                            <div class="modal-body modalBody" style="padding-top: 20px; ">
                                 <form @submit="createSprints($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Sprint Name</label>
-                                            <select class="form-control" v-model="sprintData.project_id" required>
-                                                <option value="">Select Type</option>
-                                                <option value="31">CRM_1234</option>
-                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                                    tag.name }}</option> -->
-                                            </select>
+                                            <input type="text" class="form-control" v-model="sprintData.name"
+                                                @input="generateKey()" required>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="projectName" class="form-label">Duration</label>
-                                            <select class="form-control" v-model="sprintData.reporter_id" required>
-                                                <option value="">Select Type</option>
-                                                <option value="18">Abhishek</option>
-                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                                    tag.name }}</option> -->
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Key</label>
-                                            <input type="text" class="form-control" v-model="sprintData.key" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="projectName" class="form-label">Description</label>
-                                            <input type="text" class="form-control" v-model="sprintData.description"
+                                            <input type="text" class="form-control" v-model="sprintData.key" disabled
                                                 required>
                                         </div>
                                     </div>
@@ -85,32 +65,45 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
                                             <input type="datetime-local" class="form-control" v-model="sprintData.end_date"
-                                                :min="sprintData.start_date" :disabled="sprintData.start_date.length === 0"
+                                                :min="sprintData.start_date" :disabled="sprintData.start_date === ''"
                                                 required>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="type" class="form-label">Sprint Name</label>
-                                            <input type="text" class="form-control" v-model="sprintData.name" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
                                             <label for="projectName" class="form-label">Duration</label>
                                             <input type="text" class="form-control" :disabled="true"
                                                 :value="calculateDuration()" required>
                                         </div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Goal</label>
                                             <input type="text" class="form-control" v-model="sprintData.goal" required>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                            @click="resetValues">Close</button>
-                                        <button type="submit" class="btn btn-primary">Create</button>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="projectName" class="form-label">Reporter</label>
+                                            <select class="form-control" v-model="sprintData.reporter_id" required>
+                                                <option value="">Select Type</option>
+                                                <option value="18">Abhishek</option>
+                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                            </select>
+                                        </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="projectName" class="form-label">Description</label>
+                                            <QuillEditor required ref="editor" :modules="modules" theme="snow"
+                                                toolbar="full" />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal"
+                                            @click="resetValues">Close</button>
+                                        <button type="submit" @click="createSprints" class="btn btn-primary">Create</button>
+                                    </div>
+
                                 </form>
                             </div>
                         </div>
@@ -126,42 +119,66 @@
                                 <h5 class="modal-title" id="createProjectLabel">Edit Sprint</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody">
+                            <div class="modal-body modalBody" style="padding-top: 20px; ">
                                 <form @submit="createSprints($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Sprint Name</label>
-                                            <input type="text" class="form-control" v-model="sprintData.sprint_name"
-                                                required>
+                                            <input type="text" class="form-control" v-model="sprintData.name"
+                                                @input="generateKey()" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="projectName" class="form-label">Duration</label>
-                                            <input type="text" class="form-control" v-model="sprintData.sprintDuration"
+                                            <label for="type" class="form-label">Key</label>
+                                            <input type="text" class="form-control" v-model="sprintData.key" disabled
                                                 required>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Start Date</label>
-                                            <input type="datetime-local" class="form-control" v-model="sprintData.startDate"
-                                                :min="currentDateTime()" required>
+                                            <input type="datetime-local" class="form-control"
+                                                v-model="sprintData.start_date" :min="currentDateTime()" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
-                                            <input type="datetime-local" class="form-control" v-model="sprintData.endDate"
+                                            <input type="datetime-local" class="form-control" v-model="sprintData.end_date"
+                                                :min="sprintData.start_date" :disabled="sprintData.start_date === ''"
                                                 required>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
+                                            <label for="projectName" class="form-label">Duration</label>
+                                            <input type="text" class="form-control" :disabled="true"
+                                                :value="calculateDuration()" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Goal</label>
                                             <input type="text" class="form-control" v-model="sprintData.goal" required>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="projectName" class="form-label">Reporter</label>
+                                            <select class="form-control" v-model="sprintData.reporter_id" required>
+                                                <option value="">Select Type</option>
+                                                <option value="18">Abhishek</option>
+                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
+                                                    tag.name }}</option> -->
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="projectName" class="form-label">Description</label>
+                                            <QuillEditor required ref="editor" :modules="modules" theme="snow"
+                                                toolbar="full" />
+                                        </div>
+                                    </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                        <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
-                                        <button type="submit" class="btn btn-primary">Create</button>
+                                        <button type="submit" @click="createSprints" class="btn btn-primary">Create</button>
                                     </div>
                                 </form>
                             </div>
@@ -170,7 +187,7 @@
                 </div>
 
                 <!--Table-->
-                <div class="card" style="margin-top: 2rem;">
+                <div v-if="filteredSprints.length" class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
                         <h6>SPRINTS</h6>
                     </div>
@@ -187,24 +204,26 @@
                                         <h6 class="mb-0 text-sm">{{ sprint.project.key }}</h6>
                                     </div>
                                     <div class="d-flex flex-row justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
+                                        <h6 class="mb-0 text-sm" style="white-space: nowrap;">{{ sprint.name }}</h6>
                                     </div>
                                     <div class="d-flex flex-row justify-content-center ">
-                                        <p class="mb-0 text-sm" style="font-size: smaller;">{{ formatDate(sprint.start_date)
+                                        <p class="mb-0 text-sm" style="font-size: smaller; white-space: nowrap;">{{
+                                            formatDate(sprint.start_date)
                                         }} - {{ formatDate(sprint.end_date) }}</p>
                                     </div>
                                     <div class="d-flex flex-row justify-content-center">
-                                        <p class="mb-0 text-sm" style="font-size: smaller;">({{ sprint.issues.length }}
+                                        <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">({{
+                                            sprint.issues.length }}
                                             issues)</p>
                                     </div>
-                                    <!-- <div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
-                                    </div><div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
-                                    </div><div class="d-flex flex-column justify-content-center">
-                                        <h6 class="mb-0 text-sm">{{ sprint.name }}</h6>
-                                    </div> -->
-                                    <div class="col text-end">
+
+                                </div>
+                                <div class="col text-end ">
+                                    <div class="col text-end" style="white-space: nowrap;">
+                                        <span v-if="sprint.is_started"
+                                            style="height: 30px; padding: 2px 5px;border-radius: 4px;font-weight: bold; font-size: small; background-color: rgb(215, 215, 215);">
+                                            Started
+                                        </span>
                                         <button class="btn btn-link dropdown-open" type="button" id="dropdownMenuButton2"
                                             data-bs-toggle="dropdown" aria-expanded="false">
                                             <i class="fas fa-ellipsis-h"></i>
@@ -214,47 +233,80 @@
                                                     href="#"><i class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                             </li>
                                             <li><a class="dropdown-item" href="#"><i
-                                                        class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a></li>
+                                                        class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                            </li>
                                         </ul>
                                     </div>
+
                                 </div>
                                 <div class="issue-card">
                                     <div v-show="sprint.showDropdown">
-                                        <table class="table align-items-center mb-0">
-                                            <tbody v-if="sprint.issues.length > 1">
+                                        <table v-if="sprint.issues.length" class="table align-items-center mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th style="color: #344767 !important;"
+                                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold">
+                                                        Sr No.</th>
+                                                    <th style="color: #344767!important;"
+                                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold">
+                                                        Issue Name</th>
+                                                    <th style="color: #344767!important;"
+                                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold">
+                                                        Status</th>
+                                                    <th style="color: #344767!important;"
+                                                        class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold">
+                                                        Priority</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
                                                 <tr v-for="(issue, issueIndex) in sprint.issues" :key="issueIndex">
-                                                    <td>
-                                                        <div class="d-flex flex-row justify-content-center">
-                                                            <h6 class="mb-0 text-sm">{{ issue.id }}</h6>
+                                                    <td style="padding-left: 25px;">
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm">{{ issueIndex + 1 }}</h6>
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <div class="d-flex flex-row justify-content-center">
+
+                                                    <td style="padding-left: 25px;">
+                                                        <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
                                                                 issue.title }}</h6>
                                                         </div>
                                                     </td>
-                                                    <td>
-                                                        <div class="d-flex flex-row justify-content-center">
+                                                    <td style="padding-left: 25px;">
+                                                        <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
                                                                 issue.status }}</h6>
                                                         </div>
                                                     </td>
+                                                    <td style="padding-left: 25px;">
+                                                        <div class="d-flex flex-column justify-content-center">
+                                                            <h6 class="mb-0 text-sm">{{
+                                                                issue.priority }}</h6>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             </tbody>
-                                            <tbody v-else>
-                                                <tr style="margin: auto;">
-                                                    <span style="color: rgb(253, 97, 97);">No issues found!</span>
-                                                </tr>
-                                            </tbody>
+
+                                        </table>
+                                        <table v-else>
+                                            <tr style="margin: auto;">
+                                                <span style="color: rgb(253, 97, 97);">No issues found!</span>
+                                            </tr>
                                         </table>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
+                <div v-else>
+                    <p>No sprints found</p>
+                </div>
             </div>
+        </div>
+        <div v-else>
+
         </div>
     </div>
 </template>
@@ -263,14 +315,15 @@
 import { BASE_URL } from '../../config/apiConfig';
 import axios from 'axios';
 import Noty from 'noty';
-// import Swal from 'sweetalert2';
 import { mapState } from 'vuex'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.min.js';
 import '@popperjs/core/dist/umd/popper.min.js';
 import Popper from 'popper.js';
 window.Popper = Popper;
-
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import Swal from 'sweetalert2';
 export default {
     name: "backlogs",
     data() {
@@ -289,10 +342,22 @@ export default {
                 end_date: '',
                 goal: '',
             },
-            projectId: 31
+            updatedSprintData: {
+                id: '',
+                reporter_id: '',
+                name: '',
+                key: '',
+                description: '',
+                exp_duration: '',
+                start_date: '',
+                end_date: '',
+                goal: '',
+            },
+            projectKey: localStorage.getItem("projectId"),
         };
     },
     components: {
+        QuillEditor,
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
@@ -304,9 +369,34 @@ export default {
                     sprint.start_date.toLowerCase().includes(searchLowerCase)
                 );
             });
+
         },
     },
+    created() {
+        this.projectKey = localStorage.getItem("projectId");
+
+        if (!this.projectKey) {
+            this.showSweetAlert();
+        } else {
+            // this.loadActiveSprints();
+        }
+    },
     methods: {
+        saveContent() {
+            if (this.$refs.editor) {
+                const quillEditor = this.$refs.editor;
+
+                if (quillEditor.getHTML) {
+                    const htmlContent = quillEditor.getHTML();
+                    console.log(htmlContent);
+                    this.sprintData.description = htmlContent;
+                } else {
+                    console.error('getHTMLContent method is not available');
+                }
+            } else {
+                console.error('Quill editor reference not found');
+            }
+        },
         formatDate(dateString) {
             const options = { day: 'numeric', month: 'short' };
             const date = new Date(dateString);
@@ -320,6 +410,21 @@ export default {
                 endDate: '',
                 goal: '',
             }
+        },
+        generateKey() {
+            var sprintData = this.sprintData.name ? this.sprintData.name.toUpperCase().split(' ') : [];
+            let key = '';
+
+            if (sprintData.length === 1) {
+                key = sprintData[0];
+            } else if (sprintData.length === 2) {
+                key = `${sprintData[0].charAt(0)}${sprintData[1].charAt(0)}`;
+            } else if (sprintData.length > 2) {
+                key = sprintData.reduce((acc, curr) => acc + curr.charAt(0), '');
+            }
+            const randomNumber = Math.floor(1000 + Math.random() * 9000);
+            let uniqueKey = key ? `${key}_${randomNumber}` : '';
+            this.sprintData.key = uniqueKey;
         },
         currentDateTime() {
             const now = new Date();
@@ -365,9 +470,9 @@ export default {
 
             return formattedDuration.trim();
         },
-
         createSprints(e) {
             e.preventDefault()
+            this.saveContent()
             console.log("sprintData", this.sprintData);
         },
         toggleDropdown(index) {
@@ -376,23 +481,51 @@ export default {
         async getAllSprints() {
             try {
                 this.$store.commit('showLoader');
-                const response = await axios.get(`${BASE_URL}api/development/sprints?key=backlog&id=${this.projectId}`, {
+                const response = await axios.get(`${BASE_URL}api/development/sprints?key=backlog&id=${this.projectKey}`, {
                     headers: {
                         'Content-Type': "multipart/form-data",
                         token: this.authToken,
                     }
                 });
                 this.allSprints = response.data.sprintAndIssues
+                console.log("allsprints", this.allSprints);
                 this.$store.commit('hideLoader');
             } catch (error) {
+                console.log(error);
                 new Noty({
                     type: 'error',
-                    text: error,
+                    text: error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
             }
-        }
+        },
+        showSweetAlert() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Select Project',
+                text: 'Please select a project.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                this.$router.push('/projects');
+            });
+        },
+        getPriorityIcon(priority) {
+            switch (priority) {
+                case 'low':
+                    return 'low-icon';
+                case 'lowest':
+                    return 'lowest-icon';
+                case 'medium':
+                    return '../../assets/img/priorityImages1/medium.png';
+                case 'high':
+                    return 'high-icon';
+                case 'highest':
+                    return 'highest-icon';
+                default:
+                    return 'default-icon';
+            }
+        },
     },
     mounted() {
         this.getAllSprints();
@@ -404,11 +537,108 @@ export default {
                 this.sprintData.end_date = newStartDate;
             }
         },
+        '$route.params.key': function (newKey, oldKey) {
+            if (newKey !== oldKey) {
+                this.projectKey = newKey || null;
+            }
+        },
     }
 };
 </script>
 
 <style scoped>
+::v-deep .ql-container {
+    max-height: 150px;
+}
+
+::v-deep .ql-editor img {
+    width: 150px;
+    height: auto;
+    margin: 5px;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+::v-deep .ql-editor {
+    height: 250px;
+    max-height: 150px;
+    overflow-y: auto;
+    color: black;
+}
+
+::v-deep .ql-tooltip {
+    position: fixed;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border: 1px solid red;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 99;
+}
+
+.priority-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.low-icon {
+    background-image: url('../../assets/img/priorityImages1/low.png');
+}
+
+.lowest-icon {
+    background-image: url('../../assets/img/priorityImages1/lowest.png');
+}
+
+.medium-icon {
+    background-image: url('../../assets/img/priorityImages1/medium.png');
+}
+
+.high-icon {
+    background-image: url('../../assets/img/priorityImages1/high.png');
+}
+
+.highest-icon {
+    background-image: url('../../assets/img/priorityImages1/highest.png');
+}
+
+.modalBody {
+    max-height: calc(100vh - 150px);
+    overflow: auto;
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        max-width: 99%;
+        margin: auto;
+    }
+
+    .sprint-card {
+        gap: 40px;
+    }
+}
+
+@media (min-width: 577px) and (max-width: 992px) {
+    .modal-dialog {
+        max-width: 80%;
+        margin: auto;
+    }
+}
+
+@media (min-width: 993px) {
+    .modal-dialog {
+        max-width: 50%;
+        margin: auto;
+    }
+}
+
+.close :hover {
+    /* color: #eb1b1b !important; */
+    cursor: pointer;
+    border: 1px solid red;
+    z-index: 999999999999999999999;
+
+}
+
 .drop-icon {
     padding: 5px;
     border-radius: 10px;
@@ -424,7 +654,9 @@ export default {
 }
 
 .sprint-card {
-    width: 98%;
+    width: auto;
+    display: flex;
+    flex-direction: row;
     padding-left: 10px;
     overflow: auto;
     margin: auto;
@@ -435,9 +667,8 @@ export default {
 
 .issue-card {
     margin: auto;
-    width: 95%;
+    width: auto;
     border-radius: 8px;
-    background-color: rgb(232, 230, 230);
 }
 </style>
       

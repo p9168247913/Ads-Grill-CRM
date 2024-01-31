@@ -1,8 +1,8 @@
 <template>
     <div class="wrapper" style="margin-bottom: 80px;">
-        <div class="content-page">
+        <div v-if="projectKey !== ''" class="content-page">
             <div class="container-fluid" style="margin-top: 30px;">
-                <h5 class="sprint-head">SPRINT 1</h5>
+                <h5 class="sprint-head">{{ sprintData.activeSprint ? sprintData.activeSprint.name : "" }}</h5>
                 <div class="row">
                     <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
                         <div class="input-group">
@@ -13,69 +13,40 @@
                                 placeholder="Search Issue..." />
                         </div>
                     </div>
-                    <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
-                        <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                            <button type="button" style="width: auto; height: 40px !important;"
-                                class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                data-bs-target="#createProject">
-                                <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
-                                Sprint
-                            </button>
-                        </div>
-                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
                             <p class="card-head">TO DO</p>
-                            <div class="issue-card">
-                                <div class="row p-2 align-items-center">
-                                    <p style="font-size: 12px; font-weight: bold;" class="col">Backend</p>
-                                    <div class="col text-end">
-                                        <button class="btn btn-link issue-card-btn dropdown-open" type="button"
-                                            id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
-                                            <li data-bs-toggle="modal" data-bs-target="#editIssue"><a class="dropdown-item"
-                                                    href="#"><i class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="#"><i
-                                                        class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a></li>
-                                        </ul>
+                            <div v-if="sprintData.issues && sprintData.issues.to_do.length > 0">
+                                <div class="issue-card" v-for="(issue, index) in sprintData.issues.to_do" :key="index">
+                                    <div class="row p-2 align-items-center">
+                                        <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
+                                        <div class="col text-end">
+                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton">
+                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                        class="dropdown-item" href="#"><i
+                                                            class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row align-items-center "
-                                    style="margin-left: 2px;width: 95%; margin-top: -20px;">
-                                    <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
-                                        src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
-                                        aria-describedby="5673val-tooltip">
-                                    <p class="story-name col-10 ps-0"
-                                        style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
-                                </div>
-                            </div>
-                            <div class="issue-card" data-bs-toggle="modal" data-bs-target="#issueModal">
-                                <div class="row p-2 align-items-center">
-                                    <p style="font-size: 12px; font-weight: bold;" class="col">Frontend</p>
-                                    <div class="col text-end">
-                                        <button class="btn btn-link issue-card-btn dropdown-open" type="button"
-                                            id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton2">
-                                            <li><a class="dropdown-item" href="#"><i
-                                                        class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a></li>
-                                            <li><a class="dropdown-item" href="#"><i
-                                                        class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a></li>
-                                        </ul>
+                                    <div class="row align-items-center "
+                                        style="margin-left: 2px;width: 95%; margin-top: -20px;">
+                                        <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                            aria-describedby="5673val-tooltip">
+                                        <p class="story-name col-10 ps-0"
+                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
                                     </div>
-                                </div>
-                                <div class="row align-items-center" style="margin-left: 2px;width: 95%; margin-top: -20px;">
-                                    <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
-                                        src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
-                                        aria-describedby="5673val-tooltip">
-                                    <p class="story-name col-10 ps-0"
-                                        style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
                                 </div>
                             </div>
                         </div>
@@ -102,63 +73,42 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body modalBody">
-                            <form @submit="createProjects($event), resetValues()">
+                            <form @submit="saveContent($event), resetValues()">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="type" class="form-label">Sprint Name</label>
-                                        <input type="text" class="form-control" v-model="sprintData.sprint_name" required>
+                                        <input type="text" class="form-control" v-model="sprintData.sprint_name">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="projectName" class="form-label">Duration</label>
-                                        <input type="text" class="form-control" v-model="sprintData.sprintDuration"
-                                            required>
+                                        <input type="text" class="form-control" v-model="sprintData.sprintDuration">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="key" class="form-label">Start Date</label>
                                         <input type="datetime-local" class="form-control" v-model="sprintData.startDate"
-                                            :min="currentDateTime()" required />
+                                            :min="currentDateTime()" />
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="type" class="form-label">End Date</label>
                                         <input type="datetime-local" class="form-control" v-model="sprintData.endDate"
-                                            :min="sprintData.startDate" required />
+                                            :min="sprintData.startDate" />
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="type" class="form-label">Goal</label>
-                                        <input type="text" class="form-control" v-model="sprintData.goal" required>
+                                        <input type="text" class="form-control" v-model="sprintData.goal">
                                     </div>
                                 </div>
+
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                         @click="resetValues">Close</button>
                                     <button type="submit" class="btn btn-primary">Create</button>
                                 </div>
                             </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!--Editor's Work in progress-->
-            <div class="modal fade" ref="createProjectModal" id="issueModal" tabindex="-1"
-                aria-labelledby="createProjectLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="createProjectLabel">Create Task</h5>
-                        </div>
-                        <div class="modal-body modalBody">
-                            <label for="task_description" class="form-label">Task Description</label>
-                            <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                @click="resetValues">Close</button>
-                            <button type="submit" @click="saveContent" class="btn btn-primary">Save</button>
                         </div>
                     </div>
                 </div>
@@ -174,17 +124,17 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body modalBody">
-                            <form @submit="createSprints($event), resetValues()">
+                            <form @submit="saveContent($event), resetValues()">
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="task_name" class="form-label">Title</label>
-                                        <input type="text" class="form-control" v-model="sprintData.task_name" required>
+                                        <input type="text" class="form-control" v-model="sprintData.task_name" >
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="sprint_name" class="form-label">Sprint Name</label>
                                         <!-- <input type="text" class="form-control" v-model="sprintData.sprint_name"
                                                 required> -->
-                                        <select class="form-select" v-model="sprintData.sprint_name" required>
+                                        <select class="form-select" v-model="sprintData.sprint_name" >
                                             <option value="">Select Sprint Name</option>
                                             <option value="Sprint 1">Sprint 1</option>
                                             <option value="Sprint 2">Sprint 2</option>
@@ -197,18 +147,18 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="expectedDuration" class="form-label">Estimated duration</label>
                                         <input type="text" class="form-control" v-model="sprintData.expectedDuration"
-                                            required>
+                                            >
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="actualDuration" class="form-label">Actual duration</label>
                                         <input type="text" class="form-control" v-model="sprintData.actualDuration"
-                                            required>
+                                            >
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="reportingManager" class="form-label">Reporting Manager</label>
-                                        <select class="form-select" v-model="sprintData.reportingManager" required>
+                                        <select class="form-select" v-model="sprintData.reportingManager" >
                                             <option value="">Select Sprint Name</option>
                                             <option value="Abhishek">Abhishek</option>
                                             <option value="Pawan">Pawan</option>
@@ -218,13 +168,17 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="assignee" class="form-label">Assignee</label>
-                                        <select class="form-select" v-model="sprintData.assignee" required>
+                                        <select class="form-select" v-model="sprintData.assignee" >
                                             <option value="">Assignee</option>
                                             <option value="Shantanu">Shantanu</option>
                                             <option value="Pushkaraj">Pushkaraj</option>
                                             <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
                                                     tag.name }}</option> -->
                                         </select>
+                                    </div>
+                                    <div class="col-md-13 mb-3">
+                                        <label for="type" class="form-label">Description</label>
+                                        <QuillEditor required ref="editor" :modules="modules" theme="snow" toolbar="full" />
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -238,43 +192,45 @@
                 </div>
             </div>
         </div>
+        <div v-else>
+            <!-- <p>No project selected. Please select a project.</p> -->
+        </div>
     </div>
 </template>
   
 <script>
-import { QuillEditor } from '@vueup/vue-quill'
+import { BASE_URL } from '../../config/apiConfig';
+import axios from 'axios';
+import { mapState } from 'vuex';
+import Swal from 'sweetalert2';
+import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-
-// import ImageUploader from 'quill-image-uploader';
-// import axios from 'axios';
 
 export default {
     name: "active-sprint",
     data() {
         return {
+            projectKey: localStorage.getItem("projectId"),
             editorInstance: null,
-            sprintData: {
-                sprint_name: '',
-                sprintDuration: '',
-                startDate: '',
-                endDate: '',
-                goal: '',
-            },
+            sprintData: {},
         };
     },
     components: {
         QuillEditor,
     },
+    computed: {
+        ...mapState(['authUser', 'authToken']),
+    },
+    created() {
+        const projectId = localStorage.getItem('projectId')
+        if (!projectId) {
+            this.showSweetAlert();
+        } else if (projectId) {
+            this.getSprintData();
+        }
+    },
     methods: {
-        resetValues() {
-            this.sprintData = {
-                sprint_name: '',
-                sprintDuration: '',
-                startDate: '',
-                endDate: '',
-                goal: '',
-            }
-        },
+        resetValues() { },
         currentDateTime() {
             const now = new Date();
             const formattedDateTime = now.toISOString().slice(0, 16);
@@ -282,7 +238,8 @@ export default {
         },
         createSprints() { },
         editIssue() { },
-        saveContent() {
+        saveContent(e) {
+            e.preventDefault()
             if (this.$refs.editor) {
                 const quillEditor = this.$refs.editor;
                 if (quillEditor.getHTML) {
@@ -295,6 +252,46 @@ export default {
                 console.error('Quill editor reference not found');
             }
         },
+        async getSprintData() {
+            const projectId = localStorage.getItem("projectId")
+            try {
+                const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${projectId}`, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                })
+                this.sprintData = response.data.activeSprintAndIssues
+                if (this.sprintData === undefined) {
+                    this.showNoActiveSprintAlert();
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        showSweetAlert() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Select Project',
+                text: 'Please select a project.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                this.$router.push('/projects');
+            });
+        },
+        showNoActiveSprintAlert() {
+            Swal.fire({
+                icon: 'info',
+                title: 'No Active Sprint',
+                text: 'There is no active sprint for the selected project.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                this.$router.push('/backlogs');
+            });
+        },
+    },
+    mounted() {
+        this.getSprintData()
     },
     watch: {
         'sprintData.startDate': function (newStartDate) {
@@ -302,40 +299,18 @@ export default {
                 this.sprintData.endDate = newStartDate;
             }
         },
+        '$route.params.key': function (newKey, oldKey) {
+            if (newKey !== oldKey) {
+                this.projectKey = newKey || null;
+            }
+        },
     },
-    // setup: () => {
-    //     const modules = {
-    //         name: 'imageUploader',
-    //         module: ImageUploader,
-    //         options: {
-    //             upload: file => {
-    //                 return new Promise((resolve, reject) => {
-    //                     const formData = new FormData();
-    //                     formData.append("image", file);
-
-    //                     axios.post('/upload-image', formData)
-    //                         .then(res => {
-    //                             console.log(res)
-    //                             resolve(res.data.url);
-    //                         })
-    //                         .catch(err => {
-    //                             reject("Upload failed");
-    //                             console.error("Error:", err)
-    //                         })
-    //                 })
-    //             }
-
-    //         }
-    //     }
-    //     return { modules }
-    // }
 }
 </script>
     
 <style scoped>
 ::v-deep .ql-container {
-    max-height: 500px;
-
+    max-height: 150px;
 }
 
 ::v-deep .ql-editor img {
@@ -347,22 +322,46 @@ export default {
 }
 
 ::v-deep .ql-editor {
-    height: 300px;
-    max-height: 300px;
+    height: 250px;
+    max-height: 150px;
     overflow-y: auto;
     color: black;
 }
 
 ::v-deep .ql-tooltip {
     position: fixed;
-    /* Fix the position */
     left: 50% !important;
     transform: translateX(-50%) !important;
     border: 1px solid red;
     max-height: 500px;
     overflow-y: auto;
     z-index: 99;
-    /* Adjust the z-index as needed */
+}
+
+.modalBody {
+    max-height: calc(100vh - 150px);
+    overflow: auto;
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        max-width: 99%;
+        margin: auto;
+    }
+}
+
+@media (min-width: 577px) and (max-width: 992px) {
+    .modal-dialog {
+        max-width: 80%;
+        margin: auto;
+    }
+}
+
+@media (min-width: 993px) {
+    .modal-dialog {
+        max-width: 50%;
+        margin: auto;
+    }
 }
 
 .issue-div {

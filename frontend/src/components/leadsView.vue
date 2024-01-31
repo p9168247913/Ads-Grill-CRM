@@ -595,7 +595,7 @@ export default {
 };
 </script>
     
-<style>
+<style scoped>
 .modalBody {
     max-height: calc(100vh - 150px);
     overflow-y: auto;
