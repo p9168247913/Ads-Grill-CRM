@@ -84,7 +84,7 @@ CORS_ALLOW_HEADERS = [
     'origin',
     'user-agent',
 ]
-CORS_EXPOSE_HEADERS = ['token']
+CORS_EXPOSE_HEADERS = ['token', 'content-disposition']
 
 ROOT_URLCONF = 'adsgrill_cms.urls'
 
@@ -120,7 +120,7 @@ WSGI_APPLICATION = 'adsgrill_cms.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adsgrill_cms',
+        'NAME': 'adsgrill_crm',
         'USER': 'postgres',
         'PASSWORD': '123',
         'HOST': 'localhost',
@@ -198,6 +198,6 @@ DEFAULT_FROM_EMAIL = 'shantanu.adsgrill@gmail.com'
 # Dajngo session settings
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_COOKIE_AGE = 3600 * 24 * 7
+SESSION_COOKIE_AGE = 3600 * 24
 SESSION_SAVE_EVERY_REQUEST = False
 
