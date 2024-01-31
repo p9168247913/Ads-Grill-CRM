@@ -8,8 +8,8 @@ import LeadInfo from "../components/LeadInfo.vue"
 import profitView from "../components/profitView";
 import requestAccess from "../components/requestAccess";
 import Profile from "../views/Profile.vue";
- import Signup from "../views/Signup.vue";
- import Signin from "../views/Signin.vue";
+import Signup from "../views/Signup.vue";
+import Signin from "../views/Signin.vue";
 import GetEmployee from "../components/GetEmployee.vue"
 import IssuesPage from '../components/Issues/IssuesPage.vue'
 import Backlogs from '../components/Backlogs/BackLogs.vue'
@@ -37,6 +37,7 @@ const routes = [
     name: "Projects",
     component: projectView,
   },
+
   {
     path: "/investment",
     name: "Investment",
@@ -73,7 +74,7 @@ const routes = [
     component: Backlogs,
   },
   {
-    path: "/active-sprints",
+    path: "/active-sprints/:key?",
     name: "Active Sprint",
     component: ActiveSprint,
   },
@@ -113,8 +114,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('token');
   const role = localStorage.getItem('role');
-  
-  // Redirect to the appropriate sign-in page based on user role after logout
+
   if (to.path !== '/signin' && to.path !== '/signup' && to.path !== '/client-signin') {
     if (!loggedIn || loggedIn === "") {
       if (role !== "client") {
@@ -129,6 +129,5 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
-
 
 export default router;

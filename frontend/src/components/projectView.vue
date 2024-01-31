@@ -279,8 +279,9 @@
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center">
-                        <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.name ?
+                      <div class="d-flex flex-row justify-content-center project-name">
+                        <h6 style="margin-top: 14px;" @click="openProject(project.id)" class="mb-0 text-sm">{{
+                          project.name ?
                           limitedTeamMembers(project.name) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.name && project.name.length > 15" data-bs-toggle="modal"
@@ -406,6 +407,7 @@ import "vue-select/dist/vue-select.css";
 import ArgonProgress from './ArgonProgress.vue'
 import VueProgressBar from 'vue-progressbar';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
+import router from "@/router";
 
 export default {
   name: "projects",
@@ -700,10 +702,10 @@ export default {
         updateFormData.append('team_lead_id', this.updateProjectData.team_lead_id);
 
         for (let i = 0; i < this.selectedUpdateFiles.length; i++) {
-          updateFormData.append("attachments",this.selectedUpdateFiles[i]);
+          updateFormData.append("attachments", this.selectedUpdateFiles[i]);
         }
 
-        const response = await axios.put(`${BASE_URL}api/development/projects`,updateFormData, {
+        const response = await axios.put(`${BASE_URL}api/development/projects`, updateFormData, {
           headers: {
             'Content-Type': 'multipart/form-data',
             'token': this.authToken,
@@ -733,7 +735,7 @@ export default {
       }
     },
     editModal(project) {
-      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id,  };
+      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id, };
       this.selectedClient = project.client
       this.selectedUpdateFiles = []
       this.isEditModalOpen = true;
@@ -831,6 +833,30 @@ export default {
       const randomNumber = Math.floor(1000 + Math.random() * 9000);
       let uniqueKey = key ? `${key}_${randomNumber}` : '';
       this.projectData.key = uniqueKey;
+    },
+    async openProject(id) {
+      localStorage.setItem('projectId', id)
+      try {
+        const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${id}`, {
+          headers: {
+            'Content-Type': "multipart/form-data",
+            token: this.authToken,
+          }
+        })
+        if (response.data.activeSprintAndIssues) {
+          router.push(`/active-sprints/${response.data.activeSprintAndIssues.activeSprint.id}`)
+        } else {
+          new Noty({
+            type: 'warning',
+            text: "No active sprints found!!",
+            timeout: 2000,
+            position:"top-center"
+          }).show();
+          return;
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   },
   mounted() {
@@ -886,6 +912,12 @@ export default {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.project-name :hover {
+  /* border: 1px solid red; */
+  cursor: pointer;
+  color: blue
 }
 
 .modal {
