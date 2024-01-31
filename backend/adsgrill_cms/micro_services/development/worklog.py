@@ -65,8 +65,14 @@ class WorklogView(CsrfExemptMixin, APIView):
             logged_time = requestData.get('logged_time')
             attachments = request.FILES.getlist('attachments', [])
             
-            if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance:
-                return JsonResponse({'message': 'Invalid User'})
+            # if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance:
+            #     return JsonResponse({'message': 'Invalid User'})
+            
+            if convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
+                extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
+                logged_time = '7h 30m 0s'
+            else:
+                extra_effort = timedelta(0)
             
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
             if worklogs:
@@ -90,7 +96,8 @@ class WorklogView(CsrfExemptMixin, APIView):
                     author=assignee_instance,
                     logged_time=upd_logged_time,
                     description=requestData.get('description'),
-                    remaining_time=remaining_time
+                    remaining_time=remaining_time,
+                    extra_efforts = extra_effort
                 ) 
 
                 attachment_file_names = []
@@ -134,20 +141,21 @@ class WorklogView(CsrfExemptMixin, APIView):
                 remaining_time = issue_instance.exp_duration - saved_logged_time
                 if remaining_time < timedelta(0):
                     remaining_time = timedelta(0)           
-                data = [{
+                worklogs = [{
                     "author": worklog.author.name,
                     "sprint": worklog.sprint.pk,
                     "issue": worklog.issue.pk,
                     "description": worklog.description,
                     "logged_time": worklog.logged_time,
+                    "extra_efforts":worklog.extra_efforts,
                     "status":worklog.issue.status,
                     "created_at": worklog.created_at,
                     "remaining_time":issue_instance.exp_duration-worklog.logged_time,
                     "attachments": worklog.attachment
                 } for worklog in worklogs]
-                data.append({'all_logged_time':saved_logged_time, 'final_remaining_time':remaining_time})
+                time_tracking = {'total_logged_time':saved_logged_time, 'actual_remaining_time':remaining_time}
 
-                response = JsonResponse({"Data": data}, status=status.HTTP_200_OK)
+                response = JsonResponse({"worklogs": worklogs, 'time_tracking':time_tracking}, status=status.HTTP_200_OK)
             else:
                 response = JsonResponse({"message":"No worklogs found for this issue"}, status=status.HTTP_204_NO_CONTENT)
                 
@@ -166,25 +174,39 @@ class WorklogView(CsrfExemptMixin, APIView):
             attachments = request.FILES.getlist('attachments', [])
             description = requestData.get('description') if requestData.get('description') else None
 
-            if upd_worklog.created_at.date() != datetime.now().date():
-                return JsonResponse({"message": "You can update worklog at the same day only"})
+            upd_logged_time = None
+            extra_effort = None
+
+            if upd_worklog.created_at.date() != datetime.now().date() and logged_time:
+                return JsonResponse({"message": "You can update logged time at the same day only, rest of the fields could be update"})
+            
+            if logged_time and convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
+                extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
+                logged_time = '7h 30m 0s'
+            elif logged_time:
+                extra_effort = timedelta(0)
             
             issue_instance = upd_worklog.issue
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
 
-            if worklogs:
+            if worklogs and logged_time:
                 saved_logged_time=worklogs.exclude(pk=upd_worklog.pk).aggregate(Sum('logged_time'))['logged_time__sum']
+                if saved_logged_time is None:
+                    saved_logged_time = timedelta(0)
             else:
                 saved_logged_time = timedelta(0)
-            
             checkDays = issue_instance.exp_duration-saved_logged_time
-            if checkDays.days:
+            if checkDays.days and logged_time:
                 upd_logged_time = convert_to_duration(logged_time)+convert_to_duration('16h 30m 0s')
-            else:
+            elif logged_time:
                 upd_logged_time = convert_to_duration(logged_time)
                 
             with transaction.atomic():
-                upd_worklog.logged_time = upd_logged_time
+                if upd_logged_time and extra_effort:
+                    upd_worklog.logged_time = upd_logged_time
+                    upd_worklog.extra_efforts = extra_effort
+                else:
+                    pass
                 upd_worklog.description = description
                 
                 attachment_files_list = []
@@ -214,6 +236,8 @@ class WorklogView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Requested sprint not exists'})
         
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'error': str(e)})
 
         return JsonResponse({"message": "Worklog updated successfully"})
