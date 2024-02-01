@@ -867,7 +867,7 @@ export default {
 };
 </script>
 
-<style >
+<style scoped>
 :root {
   --vs-line-height: 1.8;
 }

@@ -128,13 +128,13 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="task_name" class="form-label">Title</label>
-                                        <input type="text" class="form-control" v-model="sprintData.task_name" >
+                                        <input type="text" class="form-control" v-model="sprintData.task_name">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="sprint_name" class="form-label">Sprint Name</label>
                                         <!-- <input type="text" class="form-control" v-model="sprintData.sprint_name"
                                                 required> -->
-                                        <select class="form-select" v-model="sprintData.sprint_name" >
+                                        <select class="form-select" v-model="sprintData.sprint_name">
                                             <option value="">Select Sprint Name</option>
                                             <option value="Sprint 1">Sprint 1</option>
                                             <option value="Sprint 2">Sprint 2</option>
@@ -146,19 +146,17 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="expectedDuration" class="form-label">Estimated duration</label>
-                                        <input type="text" class="form-control" v-model="sprintData.expectedDuration"
-                                            >
+                                        <input type="text" class="form-control" v-model="sprintData.expectedDuration">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="actualDuration" class="form-label">Actual duration</label>
-                                        <input type="text" class="form-control" v-model="sprintData.actualDuration"
-                                            >
+                                        <input type="text" class="form-control" v-model="sprintData.actualDuration">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="reportingManager" class="form-label">Reporting Manager</label>
-                                        <select class="form-select" v-model="sprintData.reportingManager" >
+                                        <select class="form-select" v-model="sprintData.reportingManager">
                                             <option value="">Select Sprint Name</option>
                                             <option value="Abhishek">Abhishek</option>
                                             <option value="Pawan">Pawan</option>
@@ -168,7 +166,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="assignee" class="form-label">Assignee</label>
-                                        <select class="form-select" v-model="sprintData.assignee" >
+                                        <select class="form-select" v-model="sprintData.assignee">
                                             <option value="">Assignee</option>
                                             <option value="Shantanu">Shantanu</option>
                                             <option value="Pushkaraj">Pushkaraj</option>
@@ -176,7 +174,7 @@
                                                     tag.name }}</option> -->
                                         </select>
                                     </div>
-                                    <div class="col-md-13 mb-3">
+                                    <div class="col-md-12 mb-3">
                                         <label for="type" class="form-label">Description</label>
                                         <QuillEditor required ref="editor" :modules="modules" theme="snow" toolbar="full" />
                                     </div>
@@ -242,9 +240,14 @@ export default {
             e.preventDefault()
             if (this.$refs.editor) {
                 const quillEditor = this.$refs.editor;
+                // console.log('checkhtml', quillEditor)
+                console.log(quillEditor['editor'])
+                // for(let data in quillEditor){
+                //     console.log(quillEditor['editor'])
+                // }
                 if (quillEditor.getHTML) {
                     const htmlContent = quillEditor.getHTML();
-                    console.log(htmlContent);
+                    console.log("html",htmlContent);
                 } else {
                     console.error('getHTML method is not available');
                 }
