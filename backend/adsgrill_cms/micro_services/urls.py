@@ -22,6 +22,7 @@ urlpatterns = [
     path("development/issues/download",issues.DownloadIssuesAttchments.as_view()),
     path("development/getProjectManagers", projects.GetProjectManagers.as_view()),
     path("development/getAssignees", projects.GetAllAssignees.as_view()),
+    path("development/getTeamLeaders", projects.GetAllTeamLeaders.as_view()),
     path("development/comments", comments.CommentsView.as_view()),
     path("development/comments/download", comments.DownloadCommentsAttachments.as_view()),
     path("development/worklog",worklog.WorklogView.as_view())
