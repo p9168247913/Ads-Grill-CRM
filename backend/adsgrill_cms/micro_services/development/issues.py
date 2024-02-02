@@ -70,8 +70,9 @@ class IssueView(CsrfExemptMixin, APIView):
             description = requestData.get('description')
             type = requestData.get('type')
             priority = requestData.get('priority')
-            issueStatus = requestData.get('status')
+          
             attachments = request.FILES.getlist('attachments', [])
+            print("----",attachments)
             assignee_id=requestData.get('assignee_id')
             parent_issues=requestData.get('parent_issues',[])
             exp_duration = requestData.get('exp_duration')
@@ -113,7 +114,7 @@ class IssueView(CsrfExemptMixin, APIView):
                     description=description,
                     type=type,
                     priority=priority,
-                    status=issueStatus,
+                    
                     exp_duration=exp_duration
                 )
               
@@ -175,7 +176,7 @@ class IssueView(CsrfExemptMixin, APIView):
             traceback.print_exc()   
             return JsonResponse({"message": "Requested user does not exists"})
 
-        return JsonResponse({"message": "Issue created successfully"})
+        return JsonResponse({"message": "Issue created successfully"},status=status.HTTP_201_CREATED)
     
     def get(self,request):
         try:
