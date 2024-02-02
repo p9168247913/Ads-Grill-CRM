@@ -548,7 +548,7 @@ export default {
             token: this.authToken,
           }
         })
-        this.projectManager = response.data.lead_man;
+        this.projectManager = response.data.project_managers;
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
@@ -867,7 +867,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style >
 :root {
   --vs-line-height: 1.8;
 }

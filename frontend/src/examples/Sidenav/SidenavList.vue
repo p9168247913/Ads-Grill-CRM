@@ -183,6 +183,14 @@
       </li>
     </ul>
     <ul class="navbar-nav" v-else>
+      <li class="nav-item" >
+        <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
+          <template v-slot:icon>
+            <i class="ni ni-tv-2 text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
       <li v-if="authUser.role !== 'leads'" class="nav-item">
         <sidenav-item url="/projects" :class="getRoute() === 'projects' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع' : 'Projects'">

@@ -89,17 +89,18 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" style="max-height: 300px; overflow: auto;">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editor" :modules="modules" theme="snow"
                                                 toolbar="full" />
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"  style="z-index: 99999999;">
                                         <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
-                                        <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
+                                        <button type="submit" data-bs-dismiss="modal"
+                                            class="btn btn-primary">Create</button>
                                     </div>
 
                                 </form>
@@ -108,7 +109,7 @@
                     </div>
                 </div>
 
-                <!-- Modal for Edit Issue -->
+                <!-- Modal for Edit Sprint -->
                 <div class="modal fade" ref="createProjectModal" id="editSprint" tabindex="-1"
                     aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
                     <div class="modal-dialog modal-dialog-centered">
@@ -118,16 +119,16 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody" style="padding-top: 20px; ">
-                                <form @submit="createSprints($event), resetValues()">
+                                <form @submit="editSprint($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Sprint Name</label>
-                                            <input type="text" class="form-control" v-model="sprintData.name"
+                                            <input type="text" class="form-control" v-model="updatedSprintData.name"
                                                 @input="generateKey()" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Key</label>
-                                            <input type="text" class="form-control" v-model="sprintData.key" disabled
+                                            <input type="text" class="form-control" v-model="updatedSprintData.key" disabled
                                                 required>
                                         </div>
                                     </div>
@@ -135,30 +136,32 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Start Date</label>
                                             <input type="datetime-local" class="form-control"
-                                                v-model="sprintData.start_date" :min="currentDateTime()" required>
+                                                v-model="updatedSprintData.start_date" :min="updatedSprintData.start_date"
+                                                required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
-                                            <input type="datetime-local" class="form-control" v-model="sprintData.end_date"
-                                                :min="sprintData.start_date" :disabled="sprintData.start_date === ''"
-                                                required>
+                                            <input type="datetime-local" class="form-control"
+                                                v-model="updatedSprintData.end_date" :min="updatedSprintData.start_date"
+                                                :disabled="updatedSprintData.start_date === ''" required>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="projectName" class="form-label">Duration</label>
                                             <input type="text" class="form-control" :disabled="true"
-                                                :value="calculateDuration()" required>
+                                                :value="calculateUpdateDuration()" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Goal</label>
-                                            <input type="text" class="form-control" v-model="sprintData.goal" required>
+                                            <input type="text" class="form-control" v-model="updatedSprintData.goal"
+                                                required>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="projectName" class="form-label">Reporter</label>
-                                            <select class="form-control" v-model="sprintData.reporter_id" required>
+                                            <select class="form-control" v-model="updatedSprintData.reporter_id" required>
                                                 <option value="">Select Type</option>
                                                 <option value="18">Abhishek</option>
                                                 <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
@@ -166,17 +169,17 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row">
+                                    <div class="row" style="max-height: 300px; overflow: auto;">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
-                                            <!-- <QuillEditor required ref="editor" :modules="modules" theme="snow"
-                                                toolbar="full" /> -->
+                                            <QuillEditor required ref="editEditor" :modules="modules" theme="snow"
+                                                toolbar="full" />
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer" style="z-index:99999999;">
                                         <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
-                                        <button type="submit" @click="createSprints" class="btn btn-primary">Create</button>
+                                        <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
                                     </div>
                                 </form>
                             </div>
@@ -229,16 +232,15 @@
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end"
                                                 aria-labelledby="dropdownMenuButton2">
-                                                <li data-bs-toggle="modal" data-bs-target="#editSprint"><a
-                                                        class="dropdown-item" href="#"><i
+                                                <li @click="setSprint(sprint)" data-bs-toggle="modal"
+                                                    data-bs-target="#editSprint"><a class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li>
-                                                <li><a class="dropdown-item" href="#"><i
+                                                <li @click="deleteSprint(sprint.id)"><a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
                                         </div>
-
                                     </div>
                                 </div>
                                 <div class="issue-card">
@@ -307,7 +309,6 @@
             </div>
         </div>
         <div v-else>
-
         </div>
     </div>
 </template>
@@ -330,7 +331,6 @@ export default {
     data() {
         return {
             searchTerm: '',
-            headers: [" ", 'S.No.', 'Sprint Name', 'Sprint Duration', 'Start Date', 'End Date', 'Goal', 'Actions'],
             allSprints: [],
             editorInstance: null,
             sprintData: {
@@ -354,6 +354,7 @@ export default {
                 start_date: '',
                 end_date: '',
                 goal: '',
+                status: '',
             },
             projectKey: localStorage.getItem("projectId"),
         };
@@ -414,21 +415,35 @@ export default {
                 description: '',
                 exp_duration: '',
             }
+            const quillEditor = this.$refs.editor;
+            if (quillEditor) {
+                const htmlContent = quillEditor.setHTML("");
+                htmlContent
+            } else {
+                console.error('rootHTML method is not available');
+            }
         },
         generateKey() {
             var sprintData = this.sprintData.name ? this.sprintData.name.toUpperCase().split(' ') : [];
+            var updatedSprintData = this.updatedSprintData.name ? this.updatedSprintData.name.toUpperCase().split(' ') : [];
             let key = '';
+            let key2 = '';
 
-            if (sprintData.length === 1) {
+            if (sprintData.length === 1 || updatedSprintData.length === 1) {
                 key = sprintData[0];
-            } else if (sprintData.length === 2) {
+                key2 = updatedSprintData[0];
+            } else if (sprintData.length === 2 || updatedSprintData.length === 2) {
                 key = `${sprintData[0].charAt(0)}${sprintData[1].charAt(0)}`;
-            } else if (sprintData.length > 2) {
+                key2 = `${updatedSprintData[0].charAt(0)}${updatedSprintData[1].charAt(0)}`;
+            } else if (sprintData.length > 2 || updatedSprintData.length > 2) {
                 key = sprintData.reduce((acc, curr) => acc + curr.charAt(0), '');
+                key2 = updatedSprintData.reduce((acc, curr) => acc + curr.charAt(0), '');
             }
             const randomNumber = Math.floor(1000 + Math.random() * 9000);
             let uniqueKey = key ? `${key}_${randomNumber}` : '';
+            let uniqueKey2 = key2 ? `${key2}_${randomNumber}` : '';
             this.sprintData.key = uniqueKey;
+            this.updatedSprintData.key = uniqueKey2;
         },
         currentDateTime() {
             const now = new Date();
@@ -474,14 +489,53 @@ export default {
 
             return formattedDuration.trim();
         },
+        calculateUpdateDuration() {
+            const startDate = new Date(this.updatedSprintData.start_date);
+            const endDate = new Date(this.updatedSprintData.end_date);
+
+            if (isNaN(startDate) || isNaN(endDate)) {
+                // If either date is missing, return an empty string
+                return '';
+            }
+
+            const diffInMilliseconds = endDate - startDate;
+
+            const minutes = Math.floor(diffInMilliseconds / (1000 * 60) % 60);
+            const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60) % 24);
+            const days = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24) % 7);
+            const weeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7) % 4);
+            const months = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 30));
+
+            let formattedDuration = '';
+
+            if (months > 0) {
+                formattedDuration += `${months}m `;
+            }
+            if (weeks > 0) {
+                formattedDuration += `${weeks}w `;
+            }
+            if (days > 0) {
+                formattedDuration += `${days}d `;
+            }
+            if (hours > 0) {
+                formattedDuration += `${hours}h `;
+            }
+            if (minutes > 0) {
+                formattedDuration += `${minutes}m`;
+            }
+
+            this.updatedSprintData.exp_duration = formattedDuration.trim();
+
+            return formattedDuration.trim();
+        },
         async createSprints(e) {
             e.preventDefault();
             const description = this.saveContent(e);
             const project_id = localStorage.getItem("projectId");
             this.sprintData.description = description;
             this.sprintData.project_id = project_id;
-            console.log(this.sprintData);
             try {
+                this.$store.commit('showLoader');
                 const response = await axios.post(`${BASE_URL}api/development/sprints`, this.sprintData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
@@ -491,6 +545,7 @@ export default {
                 console.log(response);
                 if (response.status === 201) {
                     this.getAllSprints();
+                    this.resetValues()
                     Swal.fire({
                         title: response.data.message,
                         icon: 'success',
@@ -499,10 +554,112 @@ export default {
                     this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
                     this.$refs.createSprintModal.style.display = 'none';
                     this.removeModalBackdrop();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        text: response.data.message,
+                        timeout: 500,
+                    }).show()
                 }
+                this.$store.commit('hideLoader');
             } catch (error) {
-                console.log(error);
+                this.$store.commit('hideLoader');
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
             }
+        },
+        setSprint(sprint) {
+            this.updatedSprintData = {
+                id: sprint.id,
+                name: sprint.name,
+                reporter_id: sprint.reporter.id,
+                key: sprint.key,
+                goal: sprint.goal,
+                status: sprint.status,
+            }
+            this.updatedSprintData.start_date = new Date(sprint.start_date).toISOString().slice(0, 16);
+            this.updatedSprintData.end_date = new Date(sprint.end_date).toISOString().slice(0, 16);
+            this.updatedSprintData.exp_duration = sprint.exp_duration;
+            const quillEditor = this.$refs.editEditor;
+            if (quillEditor) {
+                quillEditor.setHTML(sprint.description);
+
+            }
+        },
+        async editSprint(e) {
+            e.preventDefault();
+            const quillEditor = this.$refs.editEditor;
+            this.updatedSprintData.project_id = this.projectKey
+            if (quillEditor) {
+                const htmlContent = quillEditor.getHTML();
+                this.updatedSprintData.description = htmlContent
+            }
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.put(`${BASE_URL}api/development/sprints`, this.updatedSprintData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                })
+                console.log(response);
+                if (response.status === 200) {
+                    this.getAllSprints();
+                    this.resetValues()
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    });
+                    this.$refs.createSprintModal.classList.remove('show');
+                    this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
+                    this.$refs.createSprintModal.style.display = 'none';
+                    this.removeModalBackdrop();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        text: response.data.message,
+                        timeout: 500,
+                    }).show()
+                }
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                this.$store.commit('hideLoader');
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
+            }
+        },
+        async deleteSprint(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await axios.delete(`${BASE_URL}api/development/sprints?id=${id}`, {
+                            headers: {
+                                token: this.authToken
+                            }
+                        })
+                        this.getAllSprints();
+                        Swal.fire('Deleted!', response.data.message, 'success');
+                    } catch (error) {
+                        this.getAllSprints();
+                        Swal.fire('Deleted!', error.response.data.message, 'success');
+
+                    }
+                }
+            });
         },
         removeModalBackdrop() {
             const modalBackdrop = document.getElementsByClassName('modal-backdrop');
@@ -584,7 +741,7 @@ export default {
 
 <style scoped>
 ::v-deep .ql-container {
-    max-height: 150px;
+    max-height: 300px;
 }
 
 ::v-deep .ql-editor img {
@@ -596,8 +753,8 @@ export default {
 }
 
 ::v-deep .ql-editor {
-    height: 500px;
-    max-height: 150px;
+    height: auto;
+    max-height: 300px;
     overflow-y: auto;
     color: black;
 }
