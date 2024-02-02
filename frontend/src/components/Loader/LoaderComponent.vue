@@ -8,7 +8,8 @@ export default {}
 
 <style>
 #preloader {
-    background: rgba(223, 223, 223, 0.6) url(../../assets/img/Loader/loader_ease.gif) no-repeat center center;
+    background: rgba(0,0,0, 0.4) url(../../assets/img/Loader/loder_11.gif
+    ) no-repeat center center;
     position: fixed;
     width: 100%;
     height: 100vh;
