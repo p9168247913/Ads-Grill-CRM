@@ -1,4 +1,4 @@
-from app.models import Project, Users, Client, Sprint
+from app.models import Project, Users, Client, Sprint, Issue
 from rest_framework.views import APIView
 from django.utils import timezone
 import os
@@ -97,32 +97,85 @@ class ProjectView(CsrfExemptMixin, APIView):
     
     def get(self, request):
         try:
-            all_projects = Project.objects.all().order_by('-created_at')
-            res_data = [{
-                "id": project.pk,
-                "reporter": {
-                    'id': project.reporter.pk if project.reporter else None,
-                    'name': project.reporter.name if project.reporter else None
-                },
-                "team_lead": {
-                    'id': project.team_lead.pk if project.team_lead else None,
-                    'name': project.team_lead.name if project.team_lead else None
-                },
-                "client": {
-                    'id': project.client.pk if project.client else None,
-                    'name': project.client.name if project.client else None
-                },
-                "name": project.name,
-                "key": project.key,
-                "type": project.type,
-                "status": project.status,
-                "attachments": project.attachments,
-                "progress": project.progress,
-                "team_members": project.team_members,
-                "host_address": project.host_address,
-                "tech_stacks": project.tech_stacks,
-                "created_at": project.created_at,
-            }for project in all_projects]
+            val = request.GET.get('key')
+            res_data = []
+            if val == 'development':
+                all_projects = Project.objects.all().order_by('-created_at')
+                for project in all_projects:
+                    all_issues_count = Issue.objects.filter(project = project).count()
+                    done_issues_count = Issue.objects.filter(project = project, status='done').count()
+                    if all_issues_count:
+                        project_progress = int((done_issues_count*100)/all_issues_count)
+                    else:
+                        project_progress = 0
+                    project_data = {
+                        "id": project.pk,
+                        "reporter": {
+                            'id': project.reporter.pk if project.reporter else None,
+                            'name': project.reporter.name if project.reporter else None
+                        },
+                        "team_lead": {
+                            'id': project.team_lead.pk if project.team_lead else None,
+                            'name': project.team_lead.name if project.team_lead else None
+                        },
+                        "client": {
+                            'id': project.client.pk if project.client else None,
+                            'name': project.client.name if project.client else None
+                        },
+                        "name": project.name,
+                        "key": project.key,
+                        "type": project.type,
+                        "status": project.status,
+                        "attachments": project.attachments,
+                        "progress": project_progress,
+                        "team_members": project.team_members,
+                        "host_address": project.host_address,
+                        "tech_stacks": project.tech_stacks,
+                        "created_at": project.created_at,
+                    }
+                    res_data.append(project_data)
+
+            if val == 'client':
+                clientID = request.GET.get('clientID')
+                if not clientID:
+                    return JsonResponse({'messgae':'Request parameter missing(clientID)'}, status=status.HTTP_400_BAD_REQUEST)
+                all_projects = Project.objects.filter(client_id = clientID).order_by('-created_at')
+                for project in all_projects:
+                    all_sprints_count = Sprint.objects.filter(project = project).count()
+                    if all_sprints_count:
+                        done_sprints_count = Sprint.objects.filter(project = project, status='done').count()
+                        project_progress = int((done_sprints_count*100)/all_sprints_count)
+                    else:
+                        project_progress = 0
+                    project_data = {
+                        "id": project.pk,
+                        "reporter": {
+                            'id': project.reporter.pk if project.reporter else None,
+                            'name': project.reporter.name if project.reporter else None
+                        },
+                        "team_lead": {
+                            'id': project.team_lead.pk if project.team_lead else None,
+                            'name': project.team_lead.name if project.team_lead else None
+                        },
+                        "client": {
+                            'id': project.client.pk if project.client else None,
+                            'name': project.client.name if project.client else None
+                        },
+                        "name": project.name,
+                        "key": project.key,
+                        "type": project.type,
+                        "status": project.status,
+                        "attachments": project.attachments,
+                        "progress":project_progress,
+                        "team_members": project.team_members,
+                        "host_address": project.host_address,
+                        "tech_stacks": project.tech_stacks,
+                        "created_at": project.created_at,
+                    }
+                    res_data.append(project_data)
+
+        except Project.DoesNotExist:
+            return JsonResponse({'message':"No projects found"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return JsonResponse({'message':str(e)})
         return JsonResponse({'projects':res_data}, status=status.HTTP_200_OK)

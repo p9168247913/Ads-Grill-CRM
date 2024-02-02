@@ -35,12 +35,12 @@ class SprintView(CsrfExemptMixin, APIView):
                     return JsonResponse({'message':'Sprint with this name already exists'})
                 
             if start_date_str:
-                start_date = datetime.strptime(start_date_str, '%Y-%m-%d %H:%M:%S')
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M')
             else:
                 start_date = None
             
             if end_date_str:
-                end_date = datetime.strptime(end_date_str, '%Y-%m-%d %H:%M:%S')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M')
             else:
                 end_date = None
             project_instance = Project.objects.get(pk=requestData.get('project_id'))
@@ -185,12 +185,12 @@ class SprintView(CsrfExemptMixin, APIView):
                 return JsonResponse({'message':'Sprint with this name already exists'})
     
             if start_date_str:
-                start_date = datetime.strptime(start_date_str, '%Y-%m-%d %H:%M:%S')
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M')
             else:
                 start_date = None
     
             if end_date_str:
-                end_date = datetime.strptime(end_date_str, '%Y-%m-%d %H:%M:%S')
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%dT%H:%M')
             else:
                 end_date = None
     
