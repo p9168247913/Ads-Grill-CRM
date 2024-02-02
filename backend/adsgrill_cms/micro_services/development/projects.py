@@ -235,7 +235,7 @@ class GetProjectManagers(CsrfExemptMixin, APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
-            all_lead_man = Users.objects.filter(role__name='Development', designation='Product Manager', is_deleted=False).order_by("-created_at")
+            all_lead_man = Users.objects.filter(role__name='development', designation='project_manager', is_deleted=False).order_by("-created_at")
             res_data = [{
                 "id":lead_man.pk,
                 "name":lead_man.name
@@ -249,14 +249,30 @@ class GetAllAssignees(CsrfExemptMixin, APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
-            all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='Development')
+            all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='development')
             res_data = [{
                 'id':assignee.pk,
                 'name': assignee.name
             } for assignee in all_assignees]
         except Exception as e:
             return JsonResponse({'message':str(e)})
-        return JsonResponse({'Assignees':res_data}, status=status.HTTP_200_OK)
+        return JsonResponse({'assignees':res_data}, status=status.HTTP_200_OK)
+    
+class GetAllTeamLeaders(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            all_team_leaders = Users.objects.filter(Q(designation__icontains='team_lead'), role__name='development')
+            res_data = [{
+                'id':team_leader.pk,
+                'name': team_leader.name
+            } for team_leader in all_team_leaders]
+        except Exception as e:
+            return JsonResponse({'message':str(e)})
+        return JsonResponse({'team_leaders':res_data}, status=status.HTTP_200_OK)
+        
 
 
 
