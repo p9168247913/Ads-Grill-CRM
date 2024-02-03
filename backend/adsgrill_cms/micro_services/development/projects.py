@@ -7,7 +7,7 @@ from django.http import JsonResponse
 import json
 from django.db import transaction
 from django.db.utils import IntegrityError
-from django.db.models import ObjectDoesNotExist
+from django.db.models import ObjectDoesNotExist, Count, Sum, Case, When, F, Value, IntegerField
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.core.files.storage import default_storage
@@ -100,14 +100,8 @@ class ProjectView(CsrfExemptMixin, APIView):
             val = request.GET.get('key')
             res_data = []
             if val == 'development':
-                all_projects = Project.objects.all().order_by('-created_at')
+                all_projects = Project.objects.annotate(total_issues=Count('issue'), done_issues = Sum(Case(When(issue__status='done', then=1), default=Value(0), output_field=IntegerField()))).order_by('-created_at')
                 for project in all_projects:
-                    all_issues_count = Issue.objects.filter(project = project).count()
-                    done_issues_count = Issue.objects.filter(project = project, status='done').count()
-                    if all_issues_count:
-                        project_progress = int((done_issues_count*100)/all_issues_count)
-                    else:
-                        project_progress = 0
                     project_data = {
                         "id": project.pk,
                         "reporter": {
@@ -127,47 +121,31 @@ class ProjectView(CsrfExemptMixin, APIView):
                         "type": project.type,
                         "status": project.status,
                         "attachments": project.attachments,
-                        "progress": project_progress,
-                        "team_members": project.team_members,
+                        "progress": int((project.done_issues*100) / project.total_issues) if project.total_issues > 0 else int(0),
+                        "team_members": ", ".join(project.issue_set.values_list('assignee__name', flat=True)),
                         "host_address": project.host_address,
                         "tech_stacks": project.tech_stacks,
                         "created_at": project.created_at,
                     }
+                    print('issues of projects', project.issue_set.values_list('assignee', flat=True))
                     res_data.append(project_data)
-
             if val == 'client':
                 clientID = request.GET.get('clientID')
                 if not clientID:
                     return JsonResponse({'messgae':'Request parameter missing(clientID)'}, status=status.HTTP_400_BAD_REQUEST)
-                all_projects = Project.objects.filter(client_id = clientID).order_by('-created_at')
-                for project in all_projects:
-                    all_sprints_count = Sprint.objects.filter(project = project).count()
-                    if all_sprints_count:
-                        done_sprints_count = Sprint.objects.filter(project = project, status='done').count()
-                        project_progress = int((done_sprints_count*100)/all_sprints_count)
-                    else:
-                        project_progress = 0
+                client_all_projects = Project.objects.annotate(total_sprints=Count('sprint'), done_sprints=Sum(Case(When(sprint__status='done', then=1),default=Value(0), output_field=IntegerField()))).filter(client_id=clientID).order_by('-created_at')
+                for project in client_all_projects:
                     project_data = {
                         "id": project.pk,
                         "reporter": {
                             'id': project.reporter.pk if project.reporter else None,
                             'name': project.reporter.name if project.reporter else None
                         },
-                        "team_lead": {
-                            'id': project.team_lead.pk if project.team_lead else None,
-                            'name': project.team_lead.name if project.team_lead else None
-                        },
-                        "client": {
-                            'id': project.client.pk if project.client else None,
-                            'name': project.client.name if project.client else None
-                        },
                         "name": project.name,
-                        "key": project.key,
                         "type": project.type,
                         "status": project.status,
                         "attachments": project.attachments,
-                        "progress":project_progress,
-                        "team_members": project.team_members,
+                        "progress":int((project.done_sprints*100) / project.total_sprints) if project.total_sprints > 0 else int(0),
                         "host_address": project.host_address,
                         "tech_stacks": project.tech_stacks,
                         "created_at": project.created_at,
