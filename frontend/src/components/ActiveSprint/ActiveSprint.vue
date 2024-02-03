@@ -54,11 +54,73 @@
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div" style="">
                             <p class="card-head">IN PROGRESS</p>
+                            <div v-if="sprintData.issues && sprintData.issues.to_do.length > 0">
+                                <div class="issue-card" v-for="(issue, index) in sprintData.issues.in_progress" :key="index">
+                                    <div class="row p-2 align-items-center">
+                                        <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
+                                        <div class="col text-end">
+                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton">
+                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                        class="dropdown-item" href="#"><i
+                                                            class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center "
+                                        style="margin-left: 2px;width: 95%; margin-top: -20px;">
+                                        <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                            aria-describedby="5673val-tooltip">
+                                        <p class="story-name col-10 ps-0"
+                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
                             <p class="card-head">DONE</p>
+                            <div v-if="sprintData.issues && sprintData.issues.to_do.length > 0">
+                                <div class="issue-card" v-for="(issue, index) in sprintData.issues.done" :key="index">
+                                    <div class="row p-2 align-items-center">
+                                        <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
+                                        <div class="col text-end">
+                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton">
+                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                        class="dropdown-item" href="#"><i
+                                                            class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                                </li>
+                                                <li><a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center "
+                                        style="margin-left: 2px;width: 95%; margin-top: -20px;">
+                                        <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                            aria-describedby="5673val-tooltip">
+                                        <p class="story-name col-10 ps-0"
+                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

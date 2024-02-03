@@ -257,7 +257,7 @@
         </div>
 
         <!--Table-->
-        <div class="card" style="margin-top: 2rem;">
+        <div class="card" style="margin-top: 2rem; padding: 5px;">
           <div class="card-header pb-0">
             <h6>PROJECTS</h6>
           </div>
@@ -269,17 +269,19 @@
                     <th style="color: #344767 !important;"
                       class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                       v-for="(head) in headers" :key="head">{{ head }}</th>
+                    <th style="color: #344767 !important;" class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head">
+                      Actions</th>
                   </tr>
                 </thead>
                 <tbody v-for="(project, index) in paginatedProjects" :key="index">
                   <tr>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center project-name">
+                      <div class="d-flex flex-row justify-content-left project-name">
                         <h6 style="margin-top: 14px;" @click="openProject(project.id)" class="mb-0 text-sm">{{
                           project.name ?
                           limitedTeamMembers(project.name) : '' }}
@@ -291,27 +293,27 @@
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.key }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.client.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.type }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.reporter.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center">
+                      <div class="d-flex flex-row justify-content-left">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.team_members ?
                           limitedTeamMembers(project.team_members) : '' }}
                         </h6>
@@ -322,7 +324,7 @@
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center">
+                      <div class="d-flex flex-row justify-content-left">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ limitedTeamMembers(project.tech_stacks) }}
                         </h6>
                         <p class="show-more" v-if="project.tech_stacks && project.tech_stacks.length > 15"
@@ -332,12 +334,12 @@
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.team_lead.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">
                           <argon-progress :percentage="project.progress" color="success" />
                         </h6>
@@ -351,7 +353,7 @@
                         <span v-else>No Files</span>
                       </div>
                     </td>
-                    <td class="align-middle" style="margin-left: 15px !important;">
+                    <td class="align-middle d-md-table-cell actions">
                       <!-- <i v-if="authUser.role == 'admin'"
                                             class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
                                             data-bs-toggle="modal" data-bs-target="#edituser"
@@ -426,7 +428,7 @@ export default {
       selectedClient: null,
       selectedFiles: [],
       selectedUpdateFiles: [],
-      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Files', 'Actions'],
+      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Files'],
       allProjects: [],
       existingKeys: [],
       projectManager: [],
@@ -605,7 +607,7 @@ export default {
     async getProjects() {
       try {
         this.$store.commit('showLoader');
-        const response = await axios.get(`${BASE_URL}api/development/projects`, {
+        const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
           headers: {
             'Content-Type': "multipart/form-data",
             token: this.authToken,
@@ -613,6 +615,7 @@ export default {
         })
         this.allProjects = response.data.projects;
         this.$store.commit('hideLoader');
+        console.log(this.allProjects);
       } catch (error) {
         new Noty({
           type: 'error',
@@ -850,7 +853,7 @@ export default {
             type: 'warning',
             text: "No active sprints found!!",
             timeout: 2000,
-            position:"top-center"
+            position: "top-center"
           }).show();
           return;
         }
@@ -962,4 +965,31 @@ export default {
 .show-more:hover {
   cursor: pointer;
 }
-</style>
+
+.actions {
+  margin-left: 15px !important;
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background-color: white !important;
+}
+
+.action-head {
+  position: sticky;
+  right: 0;
+  z-index: 1;
+  background-color: white !important;
+}
+
+@media (max-width: 576px) {
+  .actions {
+    margin-left: 15px !important;
+    z-index: 1;
+    position: relative;
+  }
+  .action-head {
+  position: relative;
+  
+  z-index: 1;
+}
+}</style>
