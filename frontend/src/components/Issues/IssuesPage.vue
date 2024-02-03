@@ -44,7 +44,8 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="title" class="form-label">Title</label>
-                                            <input type="text" class="form-control" v-model="issueData.title" required>
+                                            <input type="text" class="form-control" v-model="issueData.title"
+                                                @input="generateKey" required>
                                         </div>
 
 
@@ -63,7 +64,8 @@
 
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Key</label>
-                                            <input type="text" class="form-control" v-model="issueData.key" required>
+                                            <input type="text" class="form-control" v-model="issueData.key"
+                                                readonly="readonly" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="reporter" class="form-label">Reporter</label>
@@ -77,18 +79,18 @@
                                             </select>
                                         </div>
 
-                                        <!--<div class="col-md-6 mb-3">
+                                        <div class="col-md-6 mb-3">
                                             <label for="team lead" class="form-label">Team Lead</label>
-                                           <input type="text" class="form-control" v-model="issueData.team_lead"
-                                                required> 
-                                            <select class="form-select" v-model="issueData.team_lead_id" !required>
+                                            <!-- <input type="text" class="form-control" v-model="issueData.team_lead_id"
+                                                required>  -->
+                                            <select class="form-select" v-model="issueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
-                                                <option value=18>Team lead 1</option>
-                                                <option value=20>Team Lead 2</option>
-                                                 <option v-for="(user, index) in teamLead" :key="index" :value="user.id">{{
-                                                    user.name }}</option> -->
-                                        <!-- </select> -->
-                                        <!-- </div> -->
+                                                <!-- <option value=18>Team lead 1</option>
+                                                <option value=20>Team Lead 2</option>  -->
+                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
+                                                    lead.name }}</option>
+                                            </select>
+                                        </div>
 
                                         <div class="col-md-6 mb-3">
                                             <label for="description" class="form-label">Description</label>
@@ -98,8 +100,8 @@
 
                                         <div class="col-md-6 mb-3">
                                             <label for="expected time" class="form-label">Expected Time</label>
-                                            <input type="duration" class="form-control" v-model="issueData.exp_duration"
-                                                required>
+                                            <input type="text" class="form-control" v-model="issueData.exp_duration"
+                                                @change="checkDurationValidity" required>
                                         </div>
 
                                         <div class="col-md-6 mb-3">
@@ -132,7 +134,6 @@
                                                     tag.name }}</option> -->
                                             </select>
                                         </div>
-
                                         <div class="col-md-6 mb-3">
                                             <label for="priority" class="form-label">Priority</label>
                                             <!-- <input type="text" class="form-control" v-model="issueData.issue_name"
@@ -148,21 +149,12 @@
                                                     tag.name }}</option> -->
                                             </select>
                                         </div>
-
-
-
-
                                         <div class="col-md-12 mb-3">
                                             <label for="issueName" class="form-label">Files</label>
-                                            <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple
-                                              @change="handleFileChange">
+                                            <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control"
+                                                multiple @change="handleFileChange">
                                         </div>
-
-
-
-
                                     </div>
-
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
@@ -273,13 +265,13 @@ export default {
             teamLead: [],
             assignees: [],
             projectManagers: [],
-            selectedFiles:[],
+            selectedFiles: [],
             issueData: {
                 project_id: '',
                 sprint_id: '',
                 reporter_id: '',
-                team_lead_id: 17,
-                attachments:[],
+                team_lead_id: '',
+                attachments: [],
                 title: '',
                 key: '',
                 description: '',
@@ -288,60 +280,77 @@ export default {
                 exp_duration: '',
                 assignee_id: '',
             },
-
         };
-
     },
-
     components: {
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
     },
-
-
-
     methods: {
+        checkDurationValidity() {
+            const durationRegex = /^(?:(\d{1,2})h\s*)?(?:(\d{1,2})m\s*)?(?:(\d{1,2})s\s*)?$/;
+            const match = this.issueData.exp_duration.match(durationRegex);
+
+            if (!match) {
+                alert("Invalid duration format. Please use the format like '7h 20m 30s'.");
+                this.issueData.exp_duration = '';
+                return;
+            }
+            const hours = parseInt(match[1]) || 0;
+            const minutes = parseInt(match[2]) || 0;
+            const seconds = parseInt(match[3]) || 0;
+
+            const formattedMinutes = minutes > 0 ? `${minutes}m` : "0m";
+            const formattedSeconds = seconds > 0 ? `${seconds}s` : "0s";
+            const formattedDuration = `${hours}h ${formattedMinutes} ${formattedSeconds}`;
+            this.issueData.exp_duration = formattedDuration;
+
+            if (hours > 23 || minutes > 59 || seconds > 59) {
+                alert("Invalid time values. Hours should be between 0 and 23, and minutes/seconds should be between 0 and 59.");
+                this.issueData.exp_duration = '';
+                return;
+            }
+            console.log(match);
+        },
         resetValues() {
             this.issueData = {
                 sprint: '',
                 reporter: '',
-                team_lead: '',
+                team_lead_id: '',
                 title: '',
                 key: '',
                 description: '',
                 type: '',
                 priority: '',
                 exp_duration: '',
-                assignee: '',
+                assignee_id: '',
+                attachments:null,
             }
         },
-
         async createIssues(e) {
             e.preventDefault()
-           
             try {
-            let project_id = localStorage.getItem('projectId')
-            this.issueData.project_id = project_id
+                let project_id = localStorage.getItem('projectId')
+                this.issueData.project_id = project_id
 
-            let formData = new FormData();
-            formData.append('project_id', this.issueData.project_id);
-            formData.append('sprint_id', this.issueData.sprint_id);
-            formData.append('reporter_id', this.issueData.reporter_id);
-            formData.append('team_lead_id', this.issueData.team_lead_id);
-            formData.append('title', this.issueData.title);
-            formData.append('key', this.issueData.key);
-            formData.append('description', this.issueData.description);
-            formData.append('type', this.issueData.type);
-            formData.append('priority', this.issueData.priority);
-            formData.append('exp_duration', this.issueData.exp_duration);
-            formData.append('assignee_id', this.issueData.assignee_id);
-          
+                let formData = new FormData();
+                formData.append('project_id', this.issueData.project_id);
+                formData.append('sprint_id', this.issueData.sprint_id);
+                formData.append('reporter_id', this.issueData.reporter_id);
+                formData.append('team_lead_id', this.issueData.team_lead_id);
+                formData.append('title', this.issueData.title);
+                formData.append('key', this.issueData.key);
+                formData.append('description', this.issueData.description);
+                formData.append('type', this.issueData.type);
+                formData.append('priority', this.issueData.priority);
+                formData.append('exp_duration', this.issueData.exp_duration);
+                formData.append('assignee_id', this.issueData.assignee_id);
 
-        for (let i = 0; i < this.selectedFiles.length; i++) {
-          formData.append('attachments', this.selectedFiles[i]);
-        }
-                console.log(this.selectedFiles)
+
+                for (let i = 0; i < this.selectedFiles.length; i++) {
+                    formData.append('attachments', this.selectedFiles[i]);
+                }
 
                 this.$store.commit('showLoader');
 
@@ -361,9 +370,16 @@ export default {
                         title: response.data.message,
                         icon: 'success',
                     });
+                    this.resetValues();
+                }
+                if (response.status===200){
+                    new Noty({
+                    type: 'error',
+                    text: response.data.message,
+                    timeout: 2500,
+                }).show();
                 }
                 this.$store.commit('hideLoader');
-                this.resetValues();
             } catch (error) {
                 new Noty({
                     type: 'error',
@@ -373,7 +389,6 @@ export default {
                 this.$store.commit('hideLoader');
             }
         },
-
         async getProjectManagers() {
             try {
                 this.$store.commit('showLoader');
@@ -393,7 +408,6 @@ export default {
                 this.$store.commit('hideLoader');
             }
         },
-
         async getTeamLead() {
             try {
                 this.$store.commit('showLoader');
@@ -402,7 +416,7 @@ export default {
                         token: this.authToken,
                     }
                 })
-                this.projectManagers = response.data.project_managers;
+                this.teamLead = response.data.team_leaders
                 this.$store.commit('hideLoader');
             } catch (error) {
                 new Noty({
@@ -413,8 +427,6 @@ export default {
                 this.$store.commit('hideLoader');
             }
         },
-
-
         async getSprint() {
             let id = localStorage.getItem('projectId')
             try {
@@ -437,7 +449,6 @@ export default {
                 this.$store.commit('hideLoader');
             }
         },
-
         async getAssignees() {
             try {
                 this.$store.commit('showLoader');
@@ -447,8 +458,7 @@ export default {
                     }
                 })
                 if (response.status === 200) {
-                    // console.log(response)
-                    this.assignees = response.data.Assignees
+                    this.assignees = response.data.assignees
                 }
             } catch (error) {
                 new Noty({
@@ -459,16 +469,31 @@ export default {
                 this.$store.commit('hideLoader');
             }
         },
-
         handleFileChange(e) {
-      this.selectedFiles = e.target.files
-    },
+            this.selectedFiles = e.target.files
+        },
+        generateKey() {
+            var issueTitle = this.issueData.title ? this.issueData.title.toUpperCase().split(' ') : [];
+            let key = '';
 
+            if (issueTitle.length === 1) {
+                key = issueTitle[0];
+            } else if (issueTitle.length === 2) {
+                key = `${issueTitle[0].charAt(0)}${issueTitle[1].charAt(0)}`;
+            } else if (issueTitle.length > 2) {
+                key = issueTitle.reduce((acc, curr) => acc + curr.charAt(0), '');
+            }
+            const randomNumber = Math.floor(1000 + Math.random() * 9000);
+            let uniqueKey = key ? `${key}_${randomNumber}` : '';
+            this.issueData.key = uniqueKey;
+        },
+        
     },
     mounted() {
         this.getSprint();
         this.getAssignees();
         this.getProjectManagers();
+        this.getTeamLead();
     },
 };
 

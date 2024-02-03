@@ -163,7 +163,7 @@ class IssueView(CsrfExemptMixin, APIView):
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
                                        
                 url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
-                send_issue_details(issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)
+                # send_issue_details(issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)
                    
         except Project.DoesNotExist:
             return JsonResponse({"message": "Requested project does not exists"})
