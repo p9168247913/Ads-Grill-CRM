@@ -120,9 +120,9 @@ WSGI_APPLICATION = 'adsgrill_cms.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adsgrill_crm',
+        'NAME': 'adsgrill_cms',
         'USER': 'postgres',
-        'PASSWORD': '123',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432', 
     }
@@ -201,3 +201,4 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 3600 * 24
 SESSION_SAVE_EVERY_REQUEST = False
 
+TIME_ZONE='Asia/Kolkata'
