@@ -15,6 +15,8 @@ import openpyxl
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, time
+from django.db.models import Sum
+
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -195,6 +197,12 @@ class SprintView(CsrfExemptMixin, APIView):
                 end_date = None
     
             reporter_instance = Users.objects.get(pk=requestData.get("reporter_id"))
+            
+            if(request.user.designation=="project_manager" and request.user.role.name=="development"):
+                if requestData.get("status")=="done":
+                   total_org_duration=Issue.objects.filter(sprint=upd_sprint).aggregate(Sum('org_duration'))['org_duration__sum']
+                   upd_sprint.org_duration=total_org_duration
+                   upd_sprint.is_started=False
     
             with transaction.atomic():
                 upd_sprint.reporter = reporter_instance
