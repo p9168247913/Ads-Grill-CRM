@@ -5,6 +5,7 @@ import os
 from django.http import JsonResponse, HttpResponse
 from django.db.utils import IntegrityError
 from django.db import transaction
+from django.db.models import Q
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from braces.views import CsrfExemptMixin
@@ -18,7 +19,7 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     
 class CommentsView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:
@@ -58,7 +59,7 @@ class CommentsView(CsrfExemptMixin, APIView):
                     )
                 commentInstance.save()
         except IndentationError as i:
-            return JsonResponse({"message":str(i)})
+            return JsonResponse({"error":str(i)})
         except Exception as e:
             return JsonResponse({"message":str(e)})
 
@@ -66,8 +67,38 @@ class CommentsView(CsrfExemptMixin, APIView):
 
     def get(self, request):
         try:
-            issueInstance = Issue.objects.get(pk=request.data.get('issueID'))
-            allComments = Comment.objects.filter(issue=issueInstance).order_by('-created_at')
+            current_user_role = request.user.role.name
+            current_user_designation = request.user.designation
+            if not current_user_role:
+                return JsonResponse({'message':"Anonymous user has no attribute role or unauthorized user"}, status=status.HTTP_401_UNAUTHORIZED)
+            if not current_user_designation:
+                return JsonResponse({'message':"Anonymous user has no attribute designation or unauthorized user"}, status=status.HTTP_401_UNAUTHORIZED)
+            if current_user_role == 'client':
+                sprintID = request.GET.get('sprintID')
+                if not sprintID:
+                    return JsonResponse({'message':'Invalid credentials(sprintID)'}, status=status.HTTP_400_BAD_REQUEST)
+                sprintInstance = Sprint.objects.get(pk=sprintID)
+                allComments = Comment.objects.filter(
+                    Q(sprint=sprintInstance, author__role__name = 'client') |
+                    Q(sprint=sprintInstance, author__role__name = 'development') &
+                    Q(sprint=sprintInstance, author__designation = 'Product Manager')
+                    ).order_by('-created_at')
+
+            if current_user_role == 'development':
+                value = request.GET.get('key')
+                issueID = request.GET.get('issueID')
+                if not issueID:
+                        return JsonResponse({'message':'Invalid credentials(issueID)'}, status=status.HTTP_400_BAD_REQUEST)
+                if value == 'client':
+                    issueInstance = Issue.objects.get(pk=issueID)
+                    allComments = Comment.objects.filter(
+                        Q(issue=issueInstance, author__role__name='client') |
+                        Q(issue=issueInstance, author__role__name='development') &
+                        Q(issue=issueInstance, author__designation='Product Manager')
+                        ).order_by('-created_at')
+                if value == 'developers':
+                    issueInstance = Issue.objects.get(pk=issueID)
+                    allComments = Comment.objects.filter(issue=issueInstance, author__role__name='development').order_by('-created_at')
             responseData = [{
                 "commentID": comment.pk,
                 "sprintID":comment.sprint.pk,
@@ -75,7 +106,6 @@ class CommentsView(CsrfExemptMixin, APIView):
                 "author":{
                     "id":comment.author.pk,
                     "name":comment.author.name,
-                    "type":comment.author_type
                 },
                 "description":comment.description,
                 "attachments":comment.attachment
@@ -121,8 +151,6 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IntegrityError as i:
             return JsonResponse({"message":str(i)})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         
         return JsonResponse({"message":"Comment updated successfully"}, status=status.HTTP_200_OK)  
@@ -176,13 +204,9 @@ class DownloadCommentsAttachments(CsrfExemptMixin, APIView):
                 response = JsonResponse({"message":"No files found for the specified criteria"}, status=status.HTTP_204_NO_CONTENT)
 
         except IntegrityError as i:
-            import traceback
-            traceback.print_exc()
             response = JsonResponse({"message":str(i)})
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             response = JsonResponse({"message":str(e)})
         return response
 

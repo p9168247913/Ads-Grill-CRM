@@ -27,10 +27,13 @@ class Users(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 class Client(AbstractBaseUser, PermissionsMixin):
+    role = models.ForeignKey(Roles, on_delete=models.PROTECT)
     name = models.CharField(max_length=25, null=True, blank=False)
     email = models.EmailField(null=False, blank=False)
     pincode = models.CharField(max_length=15, null=True, blank=False)
     is_active = models.BooleanField(default=True)
+    groups = models.ManyToManyField('auth.Group', related_name='client_set', blank=True)
+    user_permissions = models.ManyToManyField('auth.Permission', related_name='client_set', blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
@@ -96,14 +99,12 @@ def default_attachments():
 class Project(models.Model):
     reporter = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index=True, related_name='pro_reporter')
     team_lead = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index=True, related_name='pro_team_lead')
-    client = models.ForeignKey(Client, null=True, blank=False, on_delete=models.PROTECT, db_index=True)
+    client = models.ForeignKey(Users, null=True, blank=False, on_delete=models.PROTECT, db_index=True, related_name='pro_client')
     name = models.CharField(max_length=65, null=False, blank=False)
     key = models.CharField(null=True, blank=False)
     type = models.CharField(max_length=25, null=False, blank=False)
     status = models.CharField(max_length=15, null=False, blank=False, default='to_do')
     attachments = ArrayField(models.FileField(), blank=True, default=default_attachments)
-    progress = models.CharField(null=True, blank=False)
-    team_members = models.CharField(null=True, blank=False)
     host_address = models.CharField(max_length=100, null=True, blank=False)
     tech_stacks = models.TextField(null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -170,7 +171,6 @@ class Comment(models.Model):
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
     author = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index = True)
-    author_type = models.CharField(null=True, blank=False)
     description = models.TextField(null=True, blank=False)
     attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
