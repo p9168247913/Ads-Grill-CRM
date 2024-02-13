@@ -470,7 +470,7 @@ export default {
                         }
                         this.$store.commit('hideLoader')
                     } catch (error) {
-                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error!', 'An error occurred while deleting the user.', 'error');
                         this.$store.commit('hideLoader')
                     }
                 }
@@ -533,6 +533,7 @@ export default {
                     params: { role: role }
                 })
                 this.users = response.data.users
+                console.log("users", this.users);
                 this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({

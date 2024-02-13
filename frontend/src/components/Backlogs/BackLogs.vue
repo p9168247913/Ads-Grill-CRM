@@ -96,13 +96,12 @@
                                                 toolbar="full" />
                                         </div>
                                     </div>
-                                    <div class="modal-footer"  style="z-index: 99999999;">
+                                    <div class="modal-footer" style="z-index: 99999999;">
                                         <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
                                         <button type="submit" data-bs-dismiss="modal"
                                             class="btn btn-primary">Create</button>
                                     </div>
-
                                 </form>
                             </div>
                         </div>
@@ -218,7 +217,6 @@
                                                 sprint.issues.length }}
                                                 issues)</p>
                                         </div>
-
                                     </div>
                                     <div class="col text-end ">
                                         <div class="col text-end" style="white-space: nowrap;">
@@ -605,7 +603,6 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log(response);
                 if (response.status === 200) {
                     this.getAllSprints();
                     this.resetValues()
@@ -655,8 +652,7 @@ export default {
                         Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
                         this.getAllSprints();
-                        Swal.fire('Deleted!', error.response.data.message, 'success');
-
+                        Swal.fire('Error!', error.response.data.message, 'error');
                     }
                 }
             });
@@ -763,7 +759,6 @@ export default {
     position: fixed;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    border: 1px solid red;
     max-height: 500px;
     overflow-y: auto;
     z-index: 99;
