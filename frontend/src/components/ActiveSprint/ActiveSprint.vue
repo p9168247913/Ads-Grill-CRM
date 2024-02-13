@@ -33,7 +33,7 @@
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li>
-                                                <li><a class="dropdown-item" href="#"><i
+                                                <li @click="deleteIssue(issue.id)"><a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -69,7 +69,7 @@
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li>
-                                                <li><a class="dropdown-item" href="#"><i
+                                                <li ><a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -263,6 +263,7 @@ import { BASE_URL } from '../../config/apiConfig';
 import axios from 'axios';
 import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
+import Noty from 'noty';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 
@@ -317,9 +318,36 @@ export default {
                 console.error('Quill editor reference not found');
             }
         },
+        async deleteIssue(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await axios.delete(`${BASE_URL}api/development/issues?id=${id}`, {
+                            headers: {
+                                token: this.authToken
+                            }
+                        })
+                        this.getSprintData();
+                        Swal.fire('Deleted!', response.data.message, 'success');
+                    } catch (error) {
+                        this.getSprintData();
+                        Swal.fire('Error!', error.response.data.message, 'error');
+                    }
+                }
+            });
+        },
         async getSprintData() {
             const projectId = localStorage.getItem("projectId")
             try {
+                this.$store.commit('showLoader');
                 const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${projectId}`, {
                     headers: {
                         'Content-Type': "multipart/form-data",
@@ -330,8 +358,14 @@ export default {
                 if (this.sprintData === undefined) {
                     this.showNoActiveSprintAlert();
                 }
+                this.$store.commit('hideLoader');
             } catch (error) {
-                console.log(error);
+                new Noty({
+                    type: 'error',
+                    text: error.message,
+                    timeout: 1000,
+                }).show();
+                this.$store.commit('hideLoader');
             }
         },
         showSweetAlert() {
