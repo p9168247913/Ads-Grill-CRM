@@ -165,7 +165,6 @@ export default {
       this.isFixedNavbar = window.scrollY > 1
     },
     doLogout() {
-      const role = localStorage.getItem('role')
       axios.get(`${BASE_URL}api/logout/`).
         then((r) => {
           if (r.status == 200) {
@@ -175,11 +174,7 @@ export default {
               timeout: 1000,
               layout: 'topCenter'
             }).show()
-            if (role === 'client') {
-              router.push('/client-signin')
-            } else {
-              router.push('/signin')
-            }
+            router.push('/signin')
             this.logout()
           }
         })

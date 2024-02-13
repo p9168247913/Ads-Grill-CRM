@@ -605,7 +605,7 @@ export default {
     async getProjects() {
       try {
         this.$store.commit('showLoader');
-        const response = await axios.get(`${BASE_URL}api/development/projects`, {
+        const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
           headers: {
             'Content-Type': "multipart/form-data",
             token: this.authToken,

@@ -122,7 +122,7 @@ class ProjectView(CsrfExemptMixin, APIView):
                         "status": project.status,
                         "attachments": project.attachments,
                         "progress": int((project.done_issues*100) / project.total_issues) if project.total_issues > 0 else int(0),
-                        "team_members": ", ".join(project.issue_set.values_list('assignee__name', flat=True)),
+                        "team_members": ", ".join(project.issue_set.values_list('assignee__name', flat=True).distinct()),
                         "host_address": project.host_address,
                         "tech_stacks": project.tech_stacks,
                         "created_at": project.created_at,
@@ -135,6 +135,7 @@ class ProjectView(CsrfExemptMixin, APIView):
                     return JsonResponse({'messgae':'Request parameter missing(clientID)'}, status=status.HTTP_400_BAD_REQUEST)
                 client_all_projects = Project.objects.annotate(total_sprints=Count('sprint'), done_sprints=Sum(Case(When(sprint__status='done', then=1),default=Value(0), output_field=IntegerField()))).filter(client_id=clientID).order_by('-created_at')
                 for project in client_all_projects:
+                    sprints = Sprint.objects.filter(project_id = project.pk).order_by('-created_at')
                     project_data = {
                         "id": project.pk,
                         "reporter": {
@@ -149,6 +150,14 @@ class ProjectView(CsrfExemptMixin, APIView):
                         "host_address": project.host_address,
                         "tech_stacks": project.tech_stacks,
                         "created_at": project.created_at,
+                        "sprints":[{
+                            'id':sprint.pk,
+                            'name':sprint.name,
+                            'key':sprint.key,
+                            'status':sprint.status,
+                            'is_started':sprint.is_started,
+                            'start_date':sprint.start_date
+                            }for sprint in sprints]
                     }
                     res_data.append(project_data)
 
@@ -174,7 +183,6 @@ class ProjectView(CsrfExemptMixin, APIView):
                 upd_project.key = req_data.get('key')
                 upd_project.type = req_data.get('type')
                 upd_project.status = req_data.get('status', 'to_do')  
-                upd_project.team_members = req_data.get('team_members')
                 upd_project.host_address = req_data.get('host_address')
                 upd_project.tech_stacks = req_data.get('tech_stacks')
                 attachment_file_names = []

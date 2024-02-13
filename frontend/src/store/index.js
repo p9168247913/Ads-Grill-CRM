@@ -10,6 +10,7 @@ export default createStore({
     },
     authToken: localStorage.getItem('token') || '',
     authUser:{
+      id:localStorage.getItem('id') || "",
       email: localStorage.getItem('email') || "",
       role:localStorage.getItem('role') || "",
       name: localStorage.getItem('name') || "",
@@ -66,6 +67,7 @@ export default createStore({
     },
     setAuthUser(state, user) {
       state.authUser = user
+      localStorage.setItem('id', user.id)
       localStorage.setItem('email', user.email)
       localStorage.setItem('role', user.role)
       localStorage.setItem('name', user.name)

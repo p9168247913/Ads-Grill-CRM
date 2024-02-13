@@ -20,6 +20,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import asyncio
 from datetime import datetime, time
+import threading
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -45,18 +46,19 @@ def convert_to_duration(duration_str):
         minutes=components.get('minutes', 0)
     )
     return duration
-def send_issue_details(title, issue_type,priority,created_at,reporter,link,email):
-    local_time=created_at.astimezone(timezone.get_current_timezone())
-    time=local_time.strftime('%d-%m-%y  %H:%M:%S')
-    subject = f'{title}'
-    message = f'Created_By : {reporter}\n \n Type : {issue_type} \n \n Priority : {priority} \n \n For More Details : {link} \n \n Created_at : {time}'
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient = [email]
-    send_mail(subject,message,from_email, recipient)
 
 class IssueView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def send_issue_details(self,title, issue_type,priority,created_at,reporter,link,email,event):
+        local_time=created_at.astimezone(timezone.get_current_timezone())
+        time=local_time.strftime('%d-%m-%y  %H:%M:%S')
+        subject = f'{title}'
+        message = f'Created_By : {reporter}\n \n Type : {issue_type} \n \n Priority : {priority} \n \n For More Details : {link} \n \n Created_at : {time}'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient = [email]
+        send_mail(subject,message,from_email, recipient)
     
     def post(self, request):
         try:
@@ -70,17 +72,18 @@ class IssueView(CsrfExemptMixin, APIView):
             description = requestData.get('description')
             type = requestData.get('type')
             priority = requestData.get('priority')
-          
             attachments = request.FILES.getlist('attachments', [])
-            print("----",attachments)
             assignee_id=requestData.get('assignee_id')
-            parent_issues=requestData.get('parent_issues',[])
+            parent_issues=requestData.getlist('parent_issues',[])
             exp_duration = requestData.get('exp_duration')
-            linked_issues=requestData.get('linked_issues',[])
-            linked_issue_type=requestData.get('linked_issue_type')
+            linked_issues=requestData.getlist('linked_issues',[])
+            linked_issue_type=requestData.getlist('linked_issue_type')
             
             sprint_instance = Sprint.objects.get(pk=sprint_id)
             sprint_exp_duration=sprint_instance.exp_duration
+
+            if Issue.objects.filter(title=title, project=project_id).exists():
+                return JsonResponse({"message": "Issue with this title already exists"})
                 
             issue_exp_duration = convert_to_duration(exp_duration)
             existing_issue_duration=Issue.objects.filter(sprint=sprint_instance).aggregate(Sum('exp_duration'))['exp_duration__sum']
@@ -93,9 +96,6 @@ class IssueView(CsrfExemptMixin, APIView):
 
             if total_duration > sprint_exp_duration:
                 return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
-
-            if Issue.objects.filter(title=title, project=project_id).exists():
-                return JsonResponse({"message": "Issue with this title already exists"})
 
             with transaction.atomic():
                 project_instance = Project.objects.get(pk=project_id)
@@ -114,7 +114,6 @@ class IssueView(CsrfExemptMixin, APIView):
                     description=description,
                     type=type,
                     priority=priority,
-                    
                     exp_duration=exp_duration
                 )
               
@@ -138,15 +137,13 @@ class IssueView(CsrfExemptMixin, APIView):
                 issue_instance.save()
                 
                 if parent_issues:
-                    parent_issues=parent_issues.split(',')
                     parent_issues = Issue.objects.filter(pk__in=parent_issues)
                     if not parent_issues:
                         return JsonResponse({"message":"Parent issues does not exists or invalid request"}, status=status.HTTP_400_BAD_REQUEST)
                     issue_instance.parent_issue.add(*parent_issues)
                     issue_instance.save()
 
-                if linked_issues:
-                    linked_issues = linked_issues.split(',')
+                if linked_issues:                           
                     linked_issues = Issue.objects.filter(pk__in=linked_issues)
                     if not linked_issues:
                         return JsonResponse({"message":"Linked issues does not exists or invalid request"}, status=status.HTTP_400_BAD_REQUEST)
@@ -163,8 +160,9 @@ class IssueView(CsrfExemptMixin, APIView):
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
                                        
                 url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
-                # send_issue_details(issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)
-                   
+                send_email = threading.Thread(target=self.send_issue_details, args=((issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email,event)))
+                send_email.start()
+        
         except Project.DoesNotExist:
             return JsonResponse({"message": "Requested project does not exists"})
 
@@ -172,10 +170,9 @@ class IssueView(CsrfExemptMixin, APIView):
             return JsonResponse({"message": "Requested sprint does not exists"})
 
         except Users.DoesNotExist:
-            import traceback
-            traceback.print_exc()   
             return JsonResponse({"message": "Requested user does not exists"})
-
+        except Exception as e:
+            return JsonResponse(str(e))
         return JsonResponse({"message": "Issue created successfully"},status=status.HTTP_201_CREATED)
     
     def get(self,request):
@@ -185,8 +182,12 @@ class IssueView(CsrfExemptMixin, APIView):
             if not all_issues.exists():
                 return JsonResponse({"message":"No issues on this project"}, status=status.HTTP_204_NO_CONTENT)
             issue_data = [{
+                'id':issue.pk,
                 "project": issue.project.name,
-                "sprint": issue.sprint.name,
+                "sprint": {
+                    'id':issue.sprint.pk,
+                    'name':issue.sprint.name
+                },
                 "reporter": {
                     "id":issue.reporter.pk,
                     "name":issue.reporter.name
@@ -227,7 +228,7 @@ class IssueView(CsrfExemptMixin, APIView):
             reporter_instance=Users.objects.get(pk=requestData.get('reporter_id'))
             team_lead_instance=Users.objects.get(pk=requestData.get("team_lead_id")) if requestData.get('team_lead_id') else None
             assignee_instance=Users.objects.get(pk=requestData.get("assignee_id"))
-            parent_issues=requestData.get('parent_issues',[])
+            parent_issues=requestData.getlist('parent_issues',[])
             attachments = request.FILES.getlist('attachments', [])
             
             sprint_exp_duration=sprint_instance.exp_duration
@@ -264,8 +265,7 @@ class IssueView(CsrfExemptMixin, APIView):
                 upd_issue.priority=requestData.get('priority')
                 upd_issue.exp_duration=requestData.get('exp_duration')
                 if parent_issues:
-                    upd_issue.parent_issue.clear() 
-                    parent_issues=parent_issues.split(',')    
+                    upd_issue.parent_issue.clear()     
                     parent_issues = Issue.objects.filter(pk__in=parent_issues)
                     upd_issue.parent_issue.add(*parent_issues)
 
@@ -293,8 +293,6 @@ class IssueView(CsrfExemptMixin, APIView):
         except Users.DoesNotExist:
             return JsonResponse({"message":"Requested User not exists"})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         return JsonResponse({"message":"issue Updated successfully"})
     
@@ -321,9 +319,9 @@ class LinkedIssueView(CsrfExemptMixin, APIView):
     def post(self,request):
         try:
             requestData=request.data
-            source_issues=requestData.get("source_issues",[])
+            source_issues=requestData.get("source_issues")
             destination_issue=requestData.get("destination_issue")
-            sourceType=requestData.get("type") if requestData.get("type") else None
+            sourceType=requestData.get("type")
             destination_instance=Issue.objects.get(pk=destination_issue)
             
             if source_issues:
@@ -347,7 +345,8 @@ class LinkedIssueView(CsrfExemptMixin, APIView):
                     ) for source in issues]
 
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
-            
+            else:
+                return JsonResponse({'message':'Source issues not found'}, status=status.HTTP.HTTP_400_BAD_REQUEST)
         except Project.DoesNotExist:
             return JsonResponse({"message":"Requested Project not exists"})
         
@@ -446,11 +445,12 @@ class IssueMetaData(APIView):
                     "id":parent_issue.pk,
                     "key":parent_issue.key,
                     "title":parent_issue.title,
+                    'type':parent_issue.type,
                     "status":parent_issue.status,
                     "priority":parent_issue.priority,
                     "assignee":parent_issue.assignee.name
                 }for parent_issue in parent_issues]
-            else : issue_data['parentIssues']=[{}]
+            else : issue_data['parentIssues']=[]
                 
                 
             child_issues=Issue.objects.filter(parent_issue__in=[id])
@@ -459,26 +459,27 @@ class IssueMetaData(APIView):
                     "id":child_issue.pk,
                     "key":child_issue.key,
                     "title":child_issue.title,
+                    'type':child_issue.type,
                     "status":child_issue.status,
                     "priority":child_issue.priority,
                     "assignee":child_issue.assignee.name
                 } for child_issue in child_issues]
-            else : issue_data["childIssues"]=[{}]
-                
-            
+            else : issue_data["childIssues"]=[]
                 
             linked_issues = LinkedIssue.objects.filter(destination__in=id)
             if linked_issues:
                 issue_data['linked_issues']=[{
-                    "id":linked_issue.pk,
-                    "type":linked_issue.type,
-                    "created_at":linked_issue.created_at,
+                    "id":linked_issue.source.pk,
+                    "link_type":linked_issue.type,
+                    "key":linked_issue.source.key,
+                    "title":linked_issue.source.title,
+                    "type":linked_issue.source.type,
                     "status":linked_issue.source.status,
                     "priority":linked_issue.source.priority,
                     "assignee":linked_issue.source.assignee.name
                 }for linked_issue in linked_issues]
+            else: issue_data['linked_issues'] = []
                             
-                  
         except Issue.DoesNotExist:
             return JsonResponse({'message':'Requested issue not exists'})
             

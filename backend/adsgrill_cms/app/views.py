@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
 from rest_framework.parsers import MultiPartParser
 from django.views import View
+from django.db import transaction
+import threading
 
 class UserCreateView(generics.CreateAPIView):
     serializer_class = UserCreateSerializer
@@ -21,9 +23,10 @@ class UserCreateView(generics.CreateAPIView):
         if Users.objects.filter(email=email, is_deleted=False):
             return JsonResponse({'message':'User with this email already exists'})
         send_password = serializer.validated_data['password']
-        self.perform_create(serializer)
-
-        self.send_login_credentials(serializer.validated_data['email'], send_password)
+        with transaction.atomic():
+            self.perform_create(serializer)
+        send_email = threading.Thread(target=self.send_login_credentials, args=(serializer.validated_data['email'],send_password))
+        send_email.start()
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     

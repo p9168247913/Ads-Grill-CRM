@@ -5,8 +5,17 @@ from app.models import Users
 from django.http import JsonResponse
 import json
 from django.db import transaction
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from braces.views import CsrfExemptMixin
 
-class UsersView(APIView):
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+class UsersView(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         if request.method == 'GET':
             try:

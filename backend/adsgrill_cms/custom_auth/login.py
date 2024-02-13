@@ -20,6 +20,7 @@ class authLogin(APIView):
             if user is not None and checkPassword:
                 login(request,user)
                 res = JsonResponse({'login':'True', 'status':'Success', 'message':'Authenticated successfully', 'user':{
+                    'id':user.pk,
                     'email': user.email,
                     'role':user.role.name,
                     'name': user.name,
