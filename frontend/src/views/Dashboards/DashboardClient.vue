@@ -50,10 +50,10 @@
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">{{
                                                 project.host_address }}</p>
                                         </div>
-                                        <div class="d-flex flex-row justify-content-center">
-                                            <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">
+                                        <div class="d-flex flex-column justify-content-left">
+                                            <h6 class="mb-0 text-sm">
                                                 <argon-progress :percentage="project.progress" color="success" />
-                                            </p>
+                                            </h6>
                                         </div>
                                     </div>
                                 </div>
@@ -119,66 +119,77 @@
                 </div> -->
             </div>
         </div>
+
+        
+        <!--COMMENT SECTION-->
         <div class="d-flex flex-column justify-content-center mt-8">
             <h5 class="mb-2">Comments</h5>
 
-            <div v-if="sprintId!=null" class="d-flex flex-column mb-4">
+            <div v-if="sprintId != null" class="d-flex flex-column mb-4">
                 <div class="d-flex flex-row">
-                    <input ref="doComment" @focus="isCommentFocused = true" v-model="commentDesc" class="small w-50 me-2 rounded border border-dark" type="text" placeholder="Add a comment..."
-                    style="height:33px; background-color: rgb(247, 249, 250);">
+                    <input ref="doComment" @focus="isCommentFocused = true" v-model="commentDesc"
+                        class="small w-50 me-2 rounded border border-dark" type="text" placeholder="Add Comments..."
+                        style="height:33px; background-color: rgb(247, 249, 250);">
                     <div v-if="isCommentFocused">
-                    <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
+                        <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
                             accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
                             class="form-control w-auto me-2 d-none">
-                        <label for="fileInput1" class="p-2 text-xs rounded border border-1 border-dark font-weight-bold me-2"
+                        <label for="fileInput1"
+                            class="p-2 text-xs rounded border border-1 border-dark font-weight-bold me-2 cursor-pointer"
                             title="Attach">Attach</label>
-                        </div>
+                    </div>
                 </div>
-                <p v-if="!isCommentFocused" class="text-xs mt-1"><span class="font-weight-bold text-dark">Pro tip: </span>Press <span
-                        class="font-weight-bold text-dark">C</span> to comment</p>
+                <p v-if="!isCommentFocused" class="text-xs mt-1"><span class="font-weight-bold text-dark">Pro tip:
+                    </span>Press <span class="font-weight-bold text-dark">C</span> to comment</p>
                 <div v-if="isCommentFocused" class="d-flex flex-row">
-                    <p @click="postComment()" class="small me-2 cursor-pointer font-weight-bold">save</p>
-                    <p @click="isCommentFocused=false" class="small cursor-pointer font-weight-bold">cancel</p>
+                    <p v-if="commentDesc" @click="postComment()" class="small me-2 cursor-pointer font-weight-bold">save</p>
+                    <p v-else style="cursor:not-allowed" title="Please enter comment"
+                        class="small me-2 cursor-pointer font-weight-bold">save</p>
+                    <p @click="isCommentFocused = false" class="small cursor-pointer font-weight-bold">cancel</p>
                 </div>
             </div>
-            <div v-else class="small text-danger">Please click on a particular sprint to see and post a comments!!</div>
+            <div v-else class="small text-danger">Please click on a particular sprint to see and post comments!!</div>
             <div v-if="comments.length">
-            <div v-for="(comment, index) in comments" :key="index">
-                <div class="d-flex flex-row text text-dark">
-                    <span
-                        style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
-                        class="small font-weight-bold me-2 pt-1">{{ comment.author.name.charAt(0).toUpperCase() }}</span>
-                    <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
-                    <p class="small">Posted {{ comment.created_at }}</p>
-                </div>
-                <div class="d-flex flex-column" style="margin-left: 40px;">
-                    <!-- <p ref="description" class="small">{{ comment.description }}</p> -->
-                    <div v-if="!comment.editMode" class="d-flex flex-column" style="margin-top: -5px;">
-                        <p class="small">{{ comment.description }}</p>
+                <div v-for="(comment, index) in comments" :key="index">
+                    <div class="d-flex flex-row text text-dark">
+                        <span
+                            style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
+                            class="small font-weight-bold me-2 pt-1">{{ comment.author.name.charAt(0).toUpperCase()
+                            }}</span>
+                        <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
+                        <p class="small">Posted {{ comment.created_at }}</p>
+                        <a v-if="comment.attachments.length" @click="downloadCommentAttachments($event, comment.commentID)">
+                            <i class="fas fa-download ms-3 cursor-pointer" title="download attachments"></i>
+                        </a>
                     </div>
-                    <div v-if="comment.editMode" class="d-flex flex-row">
-                        <input @keyup.enter="editComment(comment, comment.sprintID)" type="text"
-                            v-model="comment.description" class="small w-50 me-2 rounded border border-dark"
-                            style="height:33px; background-color: rgb(247, 249, 250);">
-                        <input @change="handleFileChange($event)" id="fileInput2" type="file" multiple
-                            accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
-                            class="form-control w-auto me-2 d-none">
-                        <label for="fileInput2" class="p-2 text-xs rounded border border-1 border-dark font-weight-bold me-2"
-                            title="Add files">Add Files</label>
+                    <div class="d-flex flex-column" style="margin-left: 40px;">
+                        <div v-if="!comment.editMode" class="d-flex flex-column" style="margin-top: -5px;">
+                            <p class="small">{{ comment.description }}</p>
+                        </div>
+                        <div v-if="comment.editMode" class="d-flex flex-row">
+                            <input @keyup.enter="editComment(comment, comment.sprintID)" type="text"
+                                v-model="comment.description" class="small w-50 me-2 rounded border border-dark"
+                                style="height:33px; background-color: rgb(247, 249, 250);">
+                            <input @change="handleFileChange($event)" id="fileInput2" type="file" multiple
+                                accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
+                                class="form-control w-auto me-2 d-none">
+                            <label for="fileInput2"
+                                class="p-2 text-xs rounded border border-1 border-dark font-weight-bold me-2"
+                                title="Add files">Add Files</label>
+                        </div>
+                        <div v-if="comment.editMode" class="d-flex flex-row">
+                            <p @click="editComment(comment, comment.sprintID)"
+                                class="small me-2 cursor-pointer font-weight-bold">save</p>
+                            <p @click="commentToggler(comment)" class="small cursor-pointer font-weight-bold">cancel</p>
+                        </div>
                     </div>
-                    <div v-if="comment.editMode" class="d-flex flex-row">
-                        <p @click="editComment(comment, comment.sprintID)"
-                            class="small me-2 cursor-pointer font-weight-bold">save</p>
-                        <p @click="commentToggler(comment)" class="small cursor-pointer font-weight-bold">cancel</p>
+                    <div v-if="!comment.editMode" class="d-flex flex-row mb-4" style="margin-left:40px; margin-top: -10px;">
+                        <p @click="commentToggler(comment)" class="text-sm me-2 font-weight-bold cursor-pointer">Edit</p>
+                        <p @click="deleteComment(comment.commentID, comment.sprintID)"
+                            class="text-sm font-weight-bold cursor-pointer">Delete</p>
                     </div>
-                </div>
-                <div v-if="!comment.editMode" class="d-flex flex-row mb-4" style="margin-left:40px; margin-top: -10px;">
-                    <p @click="commentToggler(comment)" class="text-sm me-2 font-weight-bold cursor-pointer">Edit</p>
-                    <p @click="deleteComment(comment.commentID, comment.sprintID)"
-                        class="text-sm font-weight-bold cursor-pointer">Delete</p>
                 </div>
             </div>
-        </div>
         </div>
 
     </div>
@@ -205,8 +216,8 @@ export default {
             comments: [],
             selectedFiles: [],
             isCommentFocused: false,
-            sprintId:null,
-            commentDesc:''
+            sprintId: null,
+            commentDesc: ''
         };
     },
     components: {
@@ -280,19 +291,61 @@ export default {
                 this.$store.commit('hideLoader');
             }
         },
+        extractFilename(response) {
+            const contentDisposition = response.headers['content-disposition'];
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
+                return filenameMatch ? filenameMatch[1] : 'download.zip';
+            } else {
+                return 'download.zip';
+            }
+        },
+        async downloadCommentAttachments(event, commentID) {
+            event.preventDefault();
+            try {
+                const response = await axios.get(`${BASE_URL}api/development/comments/download?commentID=${commentID}`, {
+                    headers: {
+                        token: this.authToken
+                    },
+                    responseType: 'arraybuffer',
+                });
+                if (response && response.status === 200 && response.data) {
+                    const filename = this.extractFilename(response);
+                    const blob = new Blob([response.data], { type: 'application/zip' });
+
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    Swal.fire({
+                        title: `Downloaded successfully!`,
+                        icon: 'success',
+                    });
+                }
+            } catch (error) {
+                new Noty({
+                    text: 'An error occurred',
+                    timeout: 500,
+                }).show();
+            }
+        },
         commentToggler(comment) {
             comment.editMode = !comment.editMode
         },
         handleFileChange(e) {
             this.selectedFiles = e.target.files
         },
-        handleKeyDown(event){
-            if(event.key==='C' && !this.isCommentFocused){
+        handleKeyDown(event) {
+            if (event.key === 'C' && !this.isCommentFocused) {
                 event.preventDefault()
                 this.$refs.doComment.focus()
             }
         },
-        async postComment(){
+        async postComment() {
             try {
                 this.$store.commit('showLoader');
                 const formData = new FormData()
@@ -309,7 +362,7 @@ export default {
                         token: this.authToken,
                     }
                 });
-                if (response.status===201){
+                if (response.status === 201) {
                     this.isCommentFocused = false
                     this.selectedFiles = []
                     this.commentDesc = ''
@@ -393,9 +446,9 @@ export default {
     },
     mounted() {
         this.getAllProjects();
-        document.addEventListener('keydown',this.handleKeyDown)
+        document.addEventListener('keydown', this.handleKeyDown)
     },
-    beforeUnmountm() {
+    beforeUnmount() {
         document.removeEventListener('keydown', this.handleKeyDown)
     },
 };

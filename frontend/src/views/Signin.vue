@@ -139,7 +139,10 @@ export default {
           }).show()
           this.storeAuthToken(response.headers['token'], response.data.user)
           setTimeout(() => {
-            router.push('/dashboard')
+          if (this.authUser.role=="development"){
+            router.push('/projects')
+          }
+          else{router.push('/dashboard')}
           }, 1000);
           this.$store.commit('hideLoader')
         }

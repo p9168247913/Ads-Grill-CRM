@@ -14,7 +14,7 @@ class Users(AbstractBaseUser, PermissionsMixin):
     role = models.ForeignKey(Roles, on_delete=models.PROTECT)
     designation = models.CharField(max_length=20, null=True, blank=False)
     contact_no = models.CharField(max_length=15, null=True, blank=False )
-    profile_pic = models.FileField(upload_to='uploads/', null=True, blank=True)
+    profile_pic = models.FileField(upload_to='uploads/users/profile/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     groups = models.ManyToManyField('auth.Group', related_name='users_set', blank=True)

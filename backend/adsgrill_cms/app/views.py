@@ -1,4 +1,4 @@
-from app.models import Users
+from app.models import Users, Roles
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.conf import settings
@@ -20,12 +20,13 @@ class UserCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
+        designation = serializer.validated_data['designation']
         if Users.objects.filter(email=email, is_deleted=False):
             return JsonResponse({'message':'User with this email already exists'})
         send_password = serializer.validated_data['password']
         with transaction.atomic():
             self.perform_create(serializer)
-        send_email = threading.Thread(target=self.send_login_credentials, args=(serializer.validated_data['email'],send_password))
+        send_email = threading.Thread(target=self.send_login_credentials, args=(serializer.validated_data['email'],send_password, designation))
         send_email.start()
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
@@ -35,8 +36,13 @@ class UserCreateView(generics.CreateAPIView):
         serializer.validated_data['password'] = hashed_password
         super().perform_create(serializer)
 
-    def send_login_credentials(self, username, password):
-        subject = "Adsgrill crm login credentials"
+    def send_login_credentials(self, username, password, designation):
+        subject = ''
+        print(designation, type(designation))
+        if designation == 'client':
+            subject = "Adsgrill crm Client login credentials"
+        else:
+            subject = "Adsgrill crm login credentials"
         message = f'Your username is: {username} and password is: {password}'
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [username]

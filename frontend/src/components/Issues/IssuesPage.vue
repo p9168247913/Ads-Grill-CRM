@@ -97,9 +97,8 @@
                                             <label for="team lead" class="form-label">Team Lead</label>
                                             <select class="form-select" v-model="issueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
-                                                <option value="7">Shyam</option>
-                                                <!-- <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
-                                                    lead.name }}</option> -->
+                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
+                                                    lead.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -132,7 +131,7 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <label for="issueName" class="form-label">Files</label>
+                                            <label for="issueName" class="form-label">Add Files</label>
                                             <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control"
                                                 multiple @change="handleFileChange">
                                         </div>
@@ -217,9 +216,8 @@
                                             <label for="team lead" class="form-label">Team Lead</label>
                                             <select class="form-select" v-model="editIssueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
-                                                <option value="7">Shyam</option>
-                                                <!-- <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
-                                                    lead.name }}</option> -->
+                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
+                                                    lead.name }}</option>
                                             </select>
                                         </div>
 
@@ -475,6 +473,8 @@
                     </div>
                 </div>
 
+                <comments ref="commentsView"/>
+
                 <!--Table-->
                 <div class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
@@ -558,6 +558,7 @@
                                               @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i> -->
                                             <i @click="deleteIssue(issue.id)" class="fas fa-trash text-danger m-3 fa-xs"
                                                 style="cursor: pointer;"></i>
+                                                <i @click="sendDataToComments(issue.id, issue.sprint.id)" class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal" data-bs-target="#comments" style="cursor: pointer;"></i>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -573,6 +574,7 @@
 </template>
       
 <script>
+import comments from './comments.vue';
 import { BASE_URL } from '../../config/apiConfig';
 import axios from 'axios';
 import Noty from 'noty';
@@ -583,7 +585,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 export default {
-    name: "backlogs",
+    name: "IssuePage",
     data() {
         return {
             isEditIssueModalVisible: false,
@@ -642,6 +644,7 @@ export default {
     components: {
         QuillEditor,
         vSelect,
+        comments
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
@@ -704,7 +707,7 @@ export default {
                     });
                 }
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 new Noty({
                     text: 'An error occurred',
                     timeout: 500,
@@ -729,7 +732,7 @@ export default {
                     id = Allissue.id
                 }
             });
-            console.log("issue", issue);
+            // console.log("issue", issue);
             if (id !== '') {
                 try {
                     this.$store.commit('showLoader')
@@ -738,7 +741,6 @@ export default {
                             token: this.authToken,
                         },
                     })
-                    console.log(response);
                     //111
                     if (response.data.Data.parentIssues.length > 0 && response.data.Data.childIssues.length > 0 && response.data.Data.linked_issues.length > 0) {
                         this.parent_issues = response.data.Data.parentIssues;
@@ -789,7 +791,7 @@ export default {
                     }
                     this.$store.commit('hideLoader');
                 } catch (error) {
-                    console.log(error);
+                    // console.log(error);
                     new Noty({
                         type: 'error',
                         text: error.message,
@@ -860,7 +862,7 @@ export default {
                 this.issueData.exp_duration = '';
                 return;
             }
-            console.log(match);
+            // console.log(match);
         },
         onParentIssuesChange(selectedParents) {
             const parentIds = selectedParents.map(parent => parent.id);
@@ -881,6 +883,7 @@ export default {
                 attachments: null,
             }
             this.parent_issues = []
+            this.selected_parent_issues = []
         },
         saveContent(e) {
             e.preventDefault()
@@ -919,6 +922,7 @@ export default {
             }
         },
         async createIssues(e) {
+            console.log('heelo')
             e.preventDefault()
             try {
                 let project_id = localStorage.getItem('projectId')
@@ -1058,7 +1062,7 @@ export default {
             if (quillEditor) {
                 quillEditor.setHTML(issue.description);
             }
-            console.log("selectedData", this.editIssueData);
+            // console.log("selectedData", this.editIssueData);
         },
         async editIssue(e) {
             e.preventDefault()
@@ -1069,7 +1073,6 @@ export default {
                 const htmlContent = quillEditor.getHTML();
                 this.editIssueData.description = htmlContent
             }
-            console.log(this.selectedUpdateFiles);
             try {
                 let formData = new FormData();
                 formData.append('id', this.editIssueData.id);
@@ -1096,7 +1099,7 @@ export default {
                         formData.append('attachments', this.selectedUpdateFiles[i]);
                     }
                 }
-                console.log("finalData", this.editIssueData);
+                // console.log("finalData", this.editIssueData);
 
                 this.$store.commit('showLoader');
                 const response = await axios.put(`${BASE_URL}api/development/issues`, formData, {
@@ -1109,7 +1112,6 @@ export default {
                         this.uploadProgress = percentCompleted;
                     },
                 });
-                console.log("apiresp",response);
                 if (response.status === 200) {
                     Swal.fire({
                         title: response.data.message,
@@ -1126,7 +1128,7 @@ export default {
                 }
                 this.$store.commit('hideLoader');
             } catch (error) {
-                console.log(error);
+                // console.log(error);
                 new Noty({
                     type: 'error',
                     text: error.message,
@@ -1153,7 +1155,6 @@ export default {
                             }
                         })
                         this.getIssue();
-                        console.log(response);
                         Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
                         this.getIssue();
@@ -1270,6 +1271,11 @@ export default {
             this.issueData.key = uniqueKey;
             this.editIssueData.key = uniqueKey2;
         },
+
+        // comments component methods
+        sendDataToComments(issueID, sprintID){
+            this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
+        }
     },
     mounted() {
         this.getSprint();
@@ -1285,6 +1291,7 @@ export default {
 <style scoped>
 ::v-deep .ql-container {
     max-height: 500px;
+    display: block;
 }
 
 ::v-deep .ql-editor img {

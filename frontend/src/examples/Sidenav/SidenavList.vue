@@ -27,14 +27,14 @@
           class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled" :class="{ 'show': isCollapseShow }"
           data-parent="#iq-sidebar-toggle">
           <li class="nav-item">
-            <sidenav-item class="emp-li" :url="getRoutePath('Development')"
+            <sidenav-item class="emp-li" :url="getRoutePath('development')"
               :class="getRoute() === 'dashboard collapsed' ? 'active' : ''"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
               aria-expanded="false">
               <template v-slot:icon>
                 <i class="fas fa-code text-info text-sm opacity-10"></i>
               </template>
-              <router-link :to="getRoutePath('Development')"> <span class="ml-0">Development</span></router-link>
+              <router-link :to="getRoutePath('development')"> <span class="ml-0">Development</span></router-link>
             </sidenav-item>
           </li>
           <li class=" " v-if="authUser.role !== 'development'">

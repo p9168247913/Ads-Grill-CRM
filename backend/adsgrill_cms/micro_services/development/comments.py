@@ -35,7 +35,7 @@ class CommentsView(CsrfExemptMixin, APIView):
             if sprintID:
                 sprintInstance = Sprint.objects.get(pk=sprintID)
                 projectInstance = sprintInstance.project
-            if currentUser.role.name == 'client' or currentUser.role.name == 'Project Manager' or assignee==currentUser:
+            if currentUser.role.name == 'client' or currentUser.designation == 'project_manager' or assignee==currentUser:
                 attachments = request.FILES.getlist('attachments', [])
                 attachment_file_names = []
                 if attachments:
@@ -68,10 +68,10 @@ class CommentsView(CsrfExemptMixin, APIView):
                         commentInstance['sprint'] = sprintInstance
                     if issueID:
                         commentInstance['issue'] = issueInstance
+                        commentInstance['sprint'] = sprintInstance
                     if attachment_file_names:
                         commentInstance['attachment'] = attachment_file_names
                     commentInstance = Comment.objects.create(**commentInstance)
-                    # commentInstance.save()
             else:
                 return JsonResponse({"message":"You dont have access to comment on other's issues"})
         except IndentationError as i:
@@ -97,10 +97,11 @@ class CommentsView(CsrfExemptMixin, APIView):
                 allComments = Comment.objects.filter(
                     Q(sprint=sprintInstance, author__role__name = 'client') |
                     Q(sprint=sprintInstance, author__role__name = 'development') &
-                    Q(sprint=sprintInstance, author__designation = 'Product Manager')
+                    Q(sprint=sprintInstance, author__designation = 'project_manager')
                     ).order_by('-created_at')
 
             if current_user_role == 'development':
+                print('yes development department')
                 value = request.GET.get('key')
                 issueID = request.GET.get('issueID')
                 if not issueID:
@@ -110,11 +111,14 @@ class CommentsView(CsrfExemptMixin, APIView):
                     allComments = Comment.objects.filter(
                         Q(issue=issueInstance, author__role__name='client') |
                         Q(issue=issueInstance, author__role__name='development') &
-                        Q(issue=issueInstance, author__designation='Product Manager')
+                        Q(issue=issueInstance, author__designation='project_manager')
                         ).order_by('-created_at')
+                    print('client', allComments)
                 if value == 'developers':
                     issueInstance = Issue.objects.get(pk=issueID)
                     allComments = Comment.objects.filter(issue=issueInstance, author__role__name='development').order_by('-created_at')
+                    print('developers', allComments)
+
             responseData = [{
                 "commentID": comment.pk,
                 "sprintID":comment.sprint.pk if comment.sprint else None,
@@ -142,7 +146,7 @@ class CommentsView(CsrfExemptMixin, APIView):
             sprintInstance = commentInstance.sprint
             projectInstance = sprintInstance.project
 
-            if currentUser.role.name == 'client' or currentUser.role.name == 'Project Manager' or commentInstance.issue.assignee == currentUser:
+            if currentUser.role.name == 'client' or (currentUser.role.name == 'development' and currentUser.designation == 'project_manager') or commentInstance.issue.assignee == currentUser:
                 attachments = request.FILES.getlist('attachments')
                 attachment_file_names = []
                 if attachments:
@@ -196,7 +200,6 @@ class CommentsView(CsrfExemptMixin, APIView):
                 directory_path = os.path.join('media', 'uploads', 'Development', 'comments', str(f"{projectInstance.key}_{sprintInstance.key}_{issueInstance.key}"))
             if sprintInstance:
                 directory_path = os.path.join('media', 'uploads', 'Development', 'client', 'comments', str(f"{projectInstance.key}_{sprintInstance.key}"))
-            print('directory-path', directory_path)
             if os.path.exists(directory_path):
                 if not os.listdir(directory_path):
                     os.rmdir(directory_path)

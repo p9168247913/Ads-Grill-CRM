@@ -20,7 +20,8 @@
           <div class="row gx-4">
             <div class="col-auto">
               <div class="avatar avatar-xl position-relative">
-                <img src="../assets/img/team-1.jpg" alt="profile_image" class="shadow-sm w-100 border-radius-lg" />
+                <img :src="'data:image/jpeg;base64,' + userData.profile_pic" alt="profile_image"
+                  class="shadow-sm w-100 border-radius-lg" />
               </div>
             </div>
             <div class="col-auto my-auto">
@@ -60,7 +61,7 @@
               <p class="text-uppercase text-sm">User Information</p>
               <div class="mb-3 col-md-6">
                 <label for="profileImage" class="form-label">Profile Picture</label>
-                <input type="file" class="form-control" id="profileImage" @change="onImageChange" />
+                <input type="file" class="form-control" id="profileImage" @change="onImageChange($event)" />
               </div>
               <div class="row">
                 <div class="col-md-6">
@@ -105,7 +106,7 @@
                 </div>
                 <div class="col-md-4">
                   <label for="example-text-input" class="form-control-label">Confirm Password</label>
-                  <input class="form-control" type="password" :disabled="!userData.oldPassword"
+                  <input class="form-control" type="password" :disabled="!userData.oldPassword && userData.newPassword"
                     v-model="userData.confirmPassword" />
                 </div>
               </div>
@@ -124,6 +125,7 @@ import setTooltip from "@/assets/js/tooltip.js";
 import ArgonButton from "@/components/ArgonButton.vue";
 import { mapState, mapMutations, mapActions } from "vuex";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import Noty from "noty";
 import router from "@/router";
 import { BASE_URL } from "../config/apiConfig";
@@ -139,12 +141,15 @@ export default {
   data() {
     return {
       showMenu: false,
+      selectedFiles: [],
       userData: {
+        id:'',
         name: '',
         email: '',
         designation: '',
         role: '',
         contact_no: '',
+        profile_pic:'',
         pincode: '',
         password: '',
         oldPassword: '',
@@ -180,39 +185,88 @@ export default {
         })
     },
     async saveChanges() {
-      if (this.userData.newPassword && this.userData.newPassword !== this.confirmPassword) {
+      try {
+        this.$store.commit('showLoader');
+        const formData = new FormData();
+        if (this.userData.oldPassword && this.userData.newPassword !== this.userData.confirmPassword) {
+          new Noty({
+            type: 'error',
+            text: "Confirm Password should be the same as New Password!",
+            timeout: 1000,
+            layout: 'topCenter'
+          }).show();
+          this.$store.commit('hideLoader')
+          return;
+        }
+        formData.append('userID', this.userData.id)
+        formData.append('name', this.userData.name)
+        formData.append('email', this.userData.email)
+        formData.append('designation', this.userData.designation)
+        formData.append('role', this.userData.role)
+        formData.append('contact_no', this.userData.contact_no)
+        formData.append('pincode', this.userData.pincode)
+        formData.append('oldPassword', this.userData.oldPassword)
+        formData.append('newPassword', this.userData.newPassword)
+        formData.append('confirmPassword', this.userData.confirmPassword)
+        if (this.selectedFiles.length) {
+          for (let i = 0; i < this.selectedFiles.length; i++) {
+            formData.append('profile_pic', this.selectedFiles[i])
+          }
+        }
+        const response = await axios.put(`${BASE_URL}api/users/`, formData, {
+          headers: {
+            'Content-Type': "multipart/form-data",
+            token: this.authToken,
+          }
+        });
+        if (response.status == 200) {
+          console.log(response)
+          Swal.fire({
+            title: response.data.message,
+            icon: 'success',
+          })
+          this.userData.oldPassword = ''
+          this.userData.newPassword = ''
+          this.userData.confirmPassword = ''
+          setTimeout(()=>{
+            new Noty({
+          type: 'info',
+          text: 'Please re-login to see profile changes',
+          timeout: 1000,
+        }).show()
+          },1500)
+        }
+        this.$store.commit('hideLoader');
+      }
+      catch (error) {
         new Noty({
           type: 'error',
-          text: "Confirm Password should be the same as New Password!",
-          timeout: 1000,
-          layout: 'topCenter'
-        }).show();
-        return;
+          text: error.response.data.detail,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader');
       }
-      // console.log(this.userData);
-      // try {
-      //   const response =  await axios.put(`${BASE_URL}api/user`, this.userData)
-      //   console.log(response.data);
-      // } catch (error) {
-      //   console.log(error);
-      // }
     },
-    onImageChange(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          this.userData.profileImage = reader.result;
-        };
-        reader.readAsDataURL(file);
-      }
-    }
+    onImageChange(e) {
+      this.selectedFiles = e.target.files
+    },
+    setUserDataFromLocalStorage(){
+    this.userData.id = this.authUser.id
+    this.userData.name = this.authUser.name
+    this.userData.email = this.authUser.email
+    this.userData.designation = this.authUser.designation
+    this.userData.contact_no = this.authUser.contact_no
+    this.userData.role = this.authUser.role
+    this.userData.pincode = this.authUser.pincode
+    this.userData.profile_pic = this.authUser.profile_pic
+  }
   },
   mounted() {
     this.$store.state.isAbsolute = true;
     setNavPills();
     setTooltip();
-    this.userData = { ...this.authUser };
+    // this.userData = { ...this.authUser };
+    this.setUserDataFromLocalStorage();
   },
   beforeMount() {
     this.$store.state.imageLayout = "profile-overview";
@@ -231,5 +285,4 @@ export default {
   }
 };
 </script>
-<style>
-</style>
+<style></style>

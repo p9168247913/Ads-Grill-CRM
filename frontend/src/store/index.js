@@ -16,7 +16,8 @@ export default createStore({
       name: localStorage.getItem('name') || "",
       contact_no: localStorage.getItem('contact_no') || "",
       pincode: localStorage.getItem('pincode') || "",
-      designation: localStorage.getItem('designation') || ""
+      designation: localStorage.getItem('designation') || "",
+      profile_pic:localStorage.getItem('profile_pic') || ""
     },
     hideConfigButton: false,
     isPinned: true,
@@ -74,6 +75,7 @@ export default createStore({
       localStorage.setItem('contact_no', user.contact_no)
       localStorage.setItem('pincode', user.pincode)
       localStorage.setItem('designation', user.designation)
+      localStorage.setItem('profile_pic', user.profile_pic)
     },
     setAuthClient(state, user) {
       state.authClient = user
@@ -102,6 +104,7 @@ export default createStore({
       localStorage.removeItem('contact_no')
       localStorage.removeItem('pincode')
       localStorage.removeItem('designation')
+      localStorage.removeItem('profile_pic')
     },
     clearAuthToken(){
       localStorage.removeItem("token")

@@ -245,12 +245,16 @@ class IssueView(CsrfExemptMixin, APIView):
                 return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
             
             
-            if(request.user.designation=="project_manager" and request.user.role.name=="development"):
+            if(request.user.designation=="Product Manager" and request.user.role.name=="development"):
                 if requestData.get("status")=="done":
-                   total_org_duration=WorkLog.objects.filter(issue=upd_issue).aggregate(Sum('logged_time'))['logged_time__sum']
-                   upd_issue.org_duration=total_org_duration
-            
-            
+                    worklogs=WorkLog.objects.filter(issue=upd_issue).order_by('-created_at')
+                    if worklogs:
+                        total_org_duration=worklogs.aggregate(Sum('logged_time'))['logged_time__sum']
+                        upd_issue.org_duration=total_org_duration
+                    else:
+                        upd_issue.org_duration=None
+                        return JsonResponse({"message":"No worklogs found for this issue, can't change status to done"})
+                    
             with transaction.atomic():
                 upd_issue.sprint=sprint_instance
                 upd_issue.project=project_instance
@@ -389,7 +393,7 @@ class IssueMetaData(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
-            id=request.data.get('id')
+            id=request.GET.get('id')
             issue=Issue.objects.get(pk=id)
 
             issue_data={
@@ -466,7 +470,7 @@ class IssueMetaData(APIView):
                 } for child_issue in child_issues]
             else : issue_data["childIssues"]=[]
                 
-            linked_issues = LinkedIssue.objects.filter(destination__in=id)
+            linked_issues = LinkedIssue.objects.filter(destination__in=[id])
             if linked_issues:
                 issue_data['linked_issues']=[{
                     "id":linked_issue.source.pk,

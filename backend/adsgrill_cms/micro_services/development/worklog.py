@@ -53,8 +53,8 @@ class WorklogView(CsrfExemptMixin, APIView):
             assignee_instance = request.user
             logged_time = requestData.get('logged_time')
             attachments = request.FILES.getlist('attachments', [])
-            # if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance:
-            #     return JsonResponse({'message': 'Invalid User'})
+            if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance:
+                return JsonResponse({'message': 'Invalid User'})
             if convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
                 extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
                 logged_time = '7h 30m 0s'
