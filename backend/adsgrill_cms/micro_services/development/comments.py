@@ -25,16 +25,25 @@ class CommentsView(CsrfExemptMixin, APIView):
         try:
             currentUser = request.user
             requestData = request.data
-            issueID = requestData.get('issueID')
-            sprintID = requestData.get('sprintID')
-            if issueID:
-                issueInstance = Issue.objects.get(pk=issueID)
-                assignee = issueInstance.assignee
-                sprintInstance = issueInstance.sprint
-                projectInstance = sprintInstance.project
-            if sprintID:
+            sprintID=None
+            issueID=None
+            print(dict(requestData))
+            value = requestData.get('key')
+            if value == 'client':
+                sprintID = requestData.get('sprintID')
+                if not sprintID:
+                    return JsonResponse({'message':'Invalid credentials(sprintID)'}, status=status.HTTP_400_BAD_REQUEST)
                 sprintInstance = Sprint.objects.get(pk=sprintID)
                 projectInstance = sprintInstance.project
+            if value =='developers':
+                issueID = requestData.get('issueID')
+                if not issueID:
+                    return JsonResponse({'message':'Invalid credentials(issueID)'}, status=status.HTTP_400_BAD_REQUEST)
+                issueInstance = Issue.objects.get(pk=issueID)
+                sprintInstance = issueInstance.sprint
+                assignee = issueInstance.assignee
+                projectInstance = issueInstance.project
+            
             if currentUser.role.name == 'client' or currentUser.designation == 'project_manager' or assignee==currentUser:
                 attachments = request.FILES.getlist('attachments', [])
                 attachment_file_names = []
@@ -68,7 +77,6 @@ class CommentsView(CsrfExemptMixin, APIView):
                         commentInstance['sprint'] = sprintInstance
                     if issueID:
                         commentInstance['issue'] = issueInstance
-                        commentInstance['sprint'] = sprintInstance
                     if attachment_file_names:
                         commentInstance['attachment'] = attachment_file_names
                     commentInstance = Comment.objects.create(**commentInstance)
@@ -77,6 +85,8 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IndentationError as i:
             return JsonResponse({"error":str(i)})
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({"message":str(e)})
 
         return JsonResponse({"message":"Comment added succussfully"}, status=status.HTTP_201_CREATED)
@@ -101,23 +111,24 @@ class CommentsView(CsrfExemptMixin, APIView):
                     ).order_by('-created_at')
 
             if current_user_role == 'development':
-                print('yes development department')
                 value = request.GET.get('key')
-                issueID = request.GET.get('issueID')
-                if not issueID:
-                        return JsonResponse({'message':'Invalid credentials(issueID)'}, status=status.HTTP_400_BAD_REQUEST)
                 if value == 'client':
-                    issueInstance = Issue.objects.get(pk=issueID)
+                    sprintID = request.GET.get('sprintID')
+                    if not sprintID:
+                        return JsonResponse({'message':'Invalid credentials(sprintID)'}, status=status.HTTP_400_BAD_REQUEST)
+                    sprintInstance = Sprint.objects.get(pk=sprintID)
                     allComments = Comment.objects.filter(
-                        Q(issue=issueInstance, author__role__name='client') |
-                        Q(issue=issueInstance, author__role__name='development') &
-                        Q(issue=issueInstance, author__designation='project_manager')
+                        Q(sprint=sprintInstance, author__role__name='client') |
+                        Q(sprint=sprintInstance, author__role__name='development') &
+                        Q(sprint=sprintInstance, author__designation='project_manager')
                         ).order_by('-created_at')
-                    print('client', allComments)
+
                 if value == 'developers':
+                    issueID = request.GET.get('issueID')
+                    if not issueID:
+                        return JsonResponse({'message':'Invalid credentials(issueID)'}, status=status.HTTP_400_BAD_REQUEST)
                     issueInstance = Issue.objects.get(pk=issueID)
                     allComments = Comment.objects.filter(issue=issueInstance, author__role__name='development').order_by('-created_at')
-                    print('developers', allComments)
 
             responseData = [{
                 "commentID": comment.pk,
@@ -133,6 +144,8 @@ class CommentsView(CsrfExemptMixin, APIView):
             }for comment in allComments]
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         return JsonResponse({"comments":responseData}, status=status.HTTP_200_OK)
 
@@ -144,7 +157,10 @@ class CommentsView(CsrfExemptMixin, APIView):
             desc = requestData.get('desc')
             issueInstance = commentInstance.issue
             sprintInstance = commentInstance.sprint
-            projectInstance = sprintInstance.project
+            if issueInstance:
+                projectInstance = issueInstance.project
+            if sprintInstance:
+                projectInstance = sprintInstance.project
 
             if currentUser.role.name == 'client' or (currentUser.role.name == 'development' and currentUser.designation == 'project_manager') or commentInstance.issue.assignee == currentUser:
                 attachments = request.FILES.getlist('attachments')
@@ -180,6 +196,8 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IntegrityError as i:
             return JsonResponse({"message":str(i)})
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         
         return JsonResponse({"message":"Comment updated successfully"}, status=status.HTTP_200_OK)  
@@ -189,7 +207,10 @@ class CommentsView(CsrfExemptMixin, APIView):
             commentInstance = Comment.objects.get(pk=request.GET.get('commentID'))
             issueInstance = commentInstance.issue
             sprintInstance = commentInstance.sprint
-            projectInstance = sprintInstance.project
+            if issueInstance:
+                projectInstance = issueInstance.project
+            if sprintInstance:
+                projectInstance = sprintInstance.project
             file_paths = commentInstance.attachment
 
             if file_paths:

@@ -37,36 +37,42 @@ def convert_to_duration(duration_str):
         seconds=components.get('seconds', 0)
     )
     return duration
+
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
+    
 class WorklogView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             requestData = request.data
-            if 'sprint_id' not in requestData or 'logged_time' not in requestData or 'issue_id' not in requestData:
-                return JsonResponse({'message': 'Missing required fields'})
+            worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
+            lastWorklogRemainingTime = worklogs.first().remaining_time
+            if lastWorklogRemainingTime < timedelta(0):
+                return JsonResponse({"message":"You can't add more logs because of issue expected duration ends"}, status=status.HTTP_400_BAD_REQUEST)
+            if 'sprint_id' not in requestData and 'logged_time' not in requestData and 'issue_id' not in requestData:
+                return JsonResponse({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             sprint_instance = Sprint.objects.get(pk=requestData.get('sprint_id'))
             issue_instance = Issue.objects.get(pk=requestData.get('issue_id'))
             assignee_instance = request.user
             logged_time = requestData.get('logged_time')
             attachments = request.FILES.getlist('attachments', [])
             if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance:
-                return JsonResponse({'message': 'Invalid User'})
+                return JsonResponse({'message': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
             if convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
                 extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
                 logged_time = '7h 30m 0s'
             else:
                 extra_effort = timedelta(0)
-            worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
             if worklogs:
                 saved_logged_time = worklogs.aggregate(Sum('logged_time'))['logged_time__sum']
             else:
                 saved_logged_time = timedelta(0)
             checkDays = issue_instance.exp_duration - (saved_logged_time)
-            if checkDays.days:
+            if checkDays.days or checkDays > convert_to_duration('7h 30m 0s'):
                 upd_logged_time = convert_to_duration(logged_time)+convert_to_duration('16h 30m 0s')
             else:
                 upd_logged_time = convert_to_duration(logged_time)
@@ -106,6 +112,7 @@ class WorklogView(CsrfExemptMixin, APIView):
             transaction.set_rollback(True)
             return JsonResponse({'error': str(e)})
         return JsonResponse({'message': 'Worklog created successfully'},status=status.HTTP_200_OK)
+
     def get(self, request):
         try:
             issue_id = request.data.get('issue_id')
@@ -137,6 +144,7 @@ class WorklogView(CsrfExemptMixin, APIView):
         except Exception as e:
             return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return response
+
     def put(self, request):
         try:
             requestData = request.data
@@ -166,10 +174,14 @@ class WorklogView(CsrfExemptMixin, APIView):
                 upd_logged_time = convert_to_duration(logged_time)+convert_to_duration('16h 30m 0s')
             elif logged_time:
                 upd_logged_time = convert_to_duration(logged_time)
+            remaining_time = issue_instance.exp_duration-(saved_logged_time+upd_logged_time)
+            if remaining_time < timedelta(0):
+                remaining_time = timedelta(0)
             with transaction.atomic():
                 if upd_logged_time and extra_effort:
                     upd_worklog.logged_time = upd_logged_time
                     upd_worklog.extra_efforts = extra_effort
+                    upd_worklog.remaining_time = remaining_time
                 else:
                     pass
                 upd_worklog.description = description
@@ -198,6 +210,7 @@ class WorklogView(CsrfExemptMixin, APIView):
             traceback.print_exc()
             return JsonResponse({'error': str(e)})
         return JsonResponse({"message": "Worklog updated successfully"})
+    
     def delete(self, request):
         try:
             del_worklog = WorkLog.objects.get(pk=request.data.get('id'))

@@ -8,59 +8,140 @@
     <div class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
         aria-hidden="true" role="dialog" data-backdrop="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content"> 
                 <div class="modal-header">
                     <h5 class="modal-title" id="createProjectLabel">Comments</h5>
-                    <button @click="comments = [], resetValues()" ref="closeModal" type="button"
+                    <button @click="comments = [], resetValues(), filterKey=''" ref="closeModal" type="button"
                         class="btn-close bg-dark text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body modalBody">
-                    <div class="row">
-                        <div class="col-md-10 mb-3">
-                            <input v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
-                                style="height: 35px;" placeholder=" Add Comments..." type="text" class="form-control"
-                                required>
-                        </div>
-                        <div v-if="isCommentFocused" class="col-md-2 mb-3">
-                            <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
-                                accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
-                                class="form-control w-auto d-none">
-                            <label for="fileInput1"
-                                class="p-2 text-xs rounded border border-1 border-dark font-weight-bold cursor-pointer"
-                                title="Attach">Attach</label>
-                        </div>
-                        <div v-if="!isCommentFocused" style="margin-top: -8px;">
-                            <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press <span
-                                    class="font-weight-bold text-dark">C</span> to comment</p>
-                        </div>
-                    </div>
-                    <div v-if="isCommentFocused" class="row" style="margin-top: -15px;">
-                        <div style="margin-right: -12px;" class="col-sm-1 col-lg-1 col-md-1">
-                            <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold">save</p>
-                        </div>
-                        <div class="col-sm-1 col-lg-1 col-md-1">
-                            <p @click="isCommentFocused = false, resetValues()"
-                                class="cursor-pointer ms-1 text-sm font-weight-bold">
-                                cancel</p>
-                        </div>
-                    </div>
                     <div>
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button @click="getComments('client')" class="nav-link active" id="list1-tab"
-                                    data-bs-toggle="tab" data-bs-target="#filteredComments" type="button" role="tab"
-                                    aria-controls="list1" aria-selected="true">Client</button>
+                                <button v-if="authUser.role=='development' && authUser.designation=='project_manager' | authUser.role=='client'" @click="getComments('client'), resetValues()" class="nav-link" id="list1-tab"
+                                    data-bs-toggle="tab" data-bs-target="#filteredCommentsClient" type="button" role="tab"
+                                    aria-controls="list1" aria-selected="true" title="click me">Client</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button @click="getComments('developers')" class="nav-link" id="list2-tab"
-                                    data-bs-toggle="tab" data-bs-target="#filteredComments" type="button" role="tab"
-                                    aria-controls="list2" aria-selected="false">Development</button>
+                                <button @click="getComments('developers'), resetValues()" class="nav-link" id="list2-tab"
+                                    data-bs-toggle="tab" data-bs-target="#filteredCommentsClient" type="button" role="tab"
+                                    aria-controls="list2" aria-selected="false" title="click me">Development</button>
                             </li>
                         </ul>
                     </div>
                     <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade" id="filteredComments" role="tabpanel" aria-labelledby="list2-tab">
-                            <!-- Content for List 2 -->
+                        <div class="tab-pane fade" id="filteredCommentsClient" role="tabpanel" aria-labelledby="list2-tab">
+                            <!-- Content for List 1 -->
+                            <div v-if="filterKey" class="row mt-3">
+                                <div class="col-md-10 mb-3">
+                                    <textarea v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
+                                        style="height: 40px; resize: none; max-height: auto;" placeholder=" Add Comments..." type="text"
+                                        class="form-control" required></textarea>
+                                </div>
+                                <div v-if="isCommentFocused" class="col-md-2 mb-3">
+                                    <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
+                                        accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
+                                        class="form-control w-auto d-none">
+                                    <label for="fileInput1"
+                                        class="text-xs rounded border border-1 border-dark font-weight-bold cursor-pointer"
+                                        title="Attach" style="padding:11px;">Attach</label>
+                                </div>
+                                <div v-if="!isCommentFocused" style="margin-top: -8px;">
+                                    <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press <span
+                                            class="font-weight-bold text-dark">C</span> to comment</p>
+                                </div>
+                            </div>
+                            <div v-if="isCommentFocused && filterKey" class="row" style="margin-top: -15px;">
+                                <div style="margin-right: -12px;" class="col-sm-1 col-lg-1 col-md-1">
+                                    <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold">save</p>
+                                </div>
+                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                    <p @click="isCommentFocused = false, resetValues()"
+                                        class="cursor-pointer ms-1 text-sm font-weight-bold">
+                                        cancel</p>
+                                </div>
+                            </div>
+                            <div v-if="comments.length" class="mt-3 overflow-y-auto pt-2" style="max-height: 200px;">
+                                <div v-for="(comment, index) in comments" :key="index">
+                                    <div class="d-flex flex-row text text-dark">
+                                        <span
+                                            style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
+                                            class="small font-weight-bold me-2 pt-1">{{
+                                                comment.author.name.charAt(0).toUpperCase()
+                                            }}</span>
+                                        <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
+                                        <p class="small">Posted {{ comment.created_at }}</p>
+                                        <a v-if="comment.attachments.length"
+                                            @click="downloadCommentAttachments($event, comment.commentID)">
+                                            <i class="fas fa-download ms-3 cursor-pointer" title="download attachments"></i>
+                                        </a>
+                                    </div>
+                                    <div class="d-flex flex-column" style="margin-left: 40px;">
+                                        <div v-if="!comment.editMode" class="d-flex flex-column" style="margin-top: -5px;">
+                                            <p class="small">{{ comment.description }}</p>
+                                        </div>
+                                        <div v-if="comment.editMode" class="d-flex flex-row">
+                                            <textarea @keyup.enter="editComment(comment,)" type="text" placeholder="Edit Comment..."
+                                                v-model="comment.description"
+                                                class="form-control small w-50 me-3"
+                                                style="height:40px; resize: none;"></textarea>
+
+                                            <input @change="handleFileChange($event)" id="fileInput2" type="file" multiple
+                                                accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
+                                                class="form-control w-auto d-none">
+                                            <label for="fileInput2"
+                                                class="text-xs rounded border border-1 border-dark font-weight-bold me-2"
+                                                title="Add files" style="padding:11px">Add Files</label>
+                                        </div>
+                                        <div v-if="comment.editMode" class="d-flex flex-row">
+                                            <p @click="editComment(comment)"
+                                                class="small me-2 cursor-pointer font-weight-bold">save</p>
+                                            <p @click="commentToggler(comment)"
+                                                class="small cursor-pointer font-weight-bold">cancel</p>
+                                        </div>
+                                    </div>
+                                    <div v-if="!comment.editMode" class="d-flex flex-row"
+                                        style="margin-left:40px; margin-top: -10px;">
+                                        <p @click="commentToggler(comment)"
+                                            class="text-sm me-2 font-weight-bold cursor-pointer">Edit</p>
+                                        <p @click="deleteComment(comment.commentID)"
+                                            class="text-sm font-weight-bold cursor-pointer">Delete</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="tab-pane fade" id="filteredCommentsDevelopers" role="tabpanel" aria-labelledby="list2-tab">
+                            Content for List 2
+                            <div v-if="filterKey" class="row mt-3">
+                                <div class="col-md-10 mb-3">
+                                    <input v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
+                                        style="height: 35px;" placeholder=" Add Comments..." type="text"
+                                        class="form-control" required>
+                                </div>
+                                <div v-if="isCommentFocused" class="col-md-2 mb-3">
+                                    <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
+                                        accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
+                                        class="form-control w-auto d-none">
+                                    <label for="fileInput1"
+                                        class="p-2 text-xs rounded border border-1 border-dark font-weight-bold cursor-pointer"
+                                        title="Attach">Attach</label>
+                                </div>
+                                <div v-if="!isCommentFocused" style="margin-top: -8px;">
+                                    <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press <span
+                                            class="font-weight-bold text-dark">C</span> to comment</p>
+                                </div>
+                            </div>
+                            <div v-if="isCommentFocused && filterKey" class="row" style="margin-top: -15px;">
+                                <div style="margin-right: -12px;" class="col-sm-1 col-lg-1 col-md-1">
+                                    <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold">save</p>
+                                </div>
+                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                    <p @click="isCommentFocused = false, resetValues()"
+                                        class="cursor-pointer ms-1 text-sm font-weight-bold">
+                                        cancel</p>
+                                </div>
+                            </div>
                             <div v-if="comments.length" class="mt-3 overflow-y-auto pt-2" style="max-height: 200px;">
                                 <div v-for="(comment, index) in comments" :key="index">
                                     <div class="d-flex flex-row text text-dark">
@@ -93,7 +174,7 @@
                                                 title="Add files">Add Files</label>
                                         </div>
                                         <div v-if="comment.editMode" class="d-flex flex-row">
-                                            <p @click="editComment(comment, comment.sprintID)"
+                                            <p @click="editComment(comment)"
                                                 class="small me-2 cursor-pointer font-weight-bold">save</p>
                                             <p @click="commentToggler(comment)"
                                                 class="small cursor-pointer font-weight-bold">cancel</p>
@@ -103,12 +184,12 @@
                                         style="margin-left:40px; margin-top: -10px;">
                                         <p @click="commentToggler(comment)"
                                             class="text-sm me-2 font-weight-bold cursor-pointer">Edit</p>
-                                        <p @click="deleteComment(comment.commentID, comment.sprintID)"
+                                        <p @click="deleteComment(comment.commentID)"
                                             class="text-sm font-weight-bold cursor-pointer">Delete</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -137,7 +218,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['authToken'])
+        ...mapState(['authToken', 'authUser'])
     },
     methods: {
         getDataFromIssuePage(issueID, sprintID) {
@@ -165,13 +246,19 @@ export default {
             try {
                 this.$store.commit('showLoader');
                 const formData = new FormData()
+                formData.append('desc', this.commentDesc)
+                formData.append('key', this.filterKey)
+                if (this.filterKey == 'client') {
+                    formData.append('sprintID', this.sprintID)
+                }
+                if (this.filterKey == 'developers') {
+                    formData.append('issueID', this.issueID)
+                }
                 if (this.selectedFiles.length) {
                     for (let i = 0; i < this.selectedFiles.length; i++) {
                         formData.append('attachments', this.selectedFiles[i])
                     }
                 }
-                formData.append('desc', this.commentDesc)
-                formData.append('issueID', this.issueID)
                 const response = await axios.post(`${BASE_URL}api/development/comments`, formData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
@@ -179,8 +266,8 @@ export default {
                     }
                 });
                 if (response.status === 201) {
-                    this.resetValues
-                    this.$refs.closeModal.click()
+                    this.resetValues()
+                    // this.$refs.closeModal.click()
                     Swal.fire({
                         title: response.data.message,
                         icon: 'success',
@@ -200,19 +287,31 @@ export default {
         async getComments(filterKey) {
             this.filterKey = filterKey
             try {
-                this.$store.commit('showLoader');
-                const response = await axios.get(`${BASE_URL}api/development/comments?issueID=${this.issueID}&key=${this.filterKey}`, {
-                    headers: {
-                        'Content-Type': "multipart/form-data",
-                        token: this.authToken,
-                    }
-                });
-                this.comments = response.data.comments
+                if (this.filterKey == 'client') {
+                    this.$store.commit('showLoader');
+                    const response = await axios.get(`${BASE_URL}api/development/comments?sprintID=${this.sprintID}&key=${this.filterKey}`, {
+                        headers: {
+                            'Content-Type': "multipart/form-data",
+                            token: this.authToken,
+                        }
+                    });
+                    this.comments = response.data.comments
+                }
+                if (this.filterKey == 'developers') {
+                    this.$store.commit('showLoader');
+                    const response = await axios.get(`${BASE_URL}api/development/comments?issueID=${this.issueID}&key=${this.filterKey}`, {
+                        headers: {
+                            'Content-Type': "multipart/form-data",
+                            token: this.authToken,
+                        }
+                    });
+                    this.comments = response.data.comments
+                }
                 console.log('comments', this.comments)
                 if (!this.comments.length) {
                     new Noty({
                         type: 'warning',
-                        text: "No comments found for selected sprint",
+                        text: "No comments found!!",
                         timeout: 500,
                     }).show()
                     this.$store.commit('hideLoader');
@@ -261,6 +360,74 @@ export default {
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
+            }
+        },
+        async deleteComment(commentID) {
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.delete(`${BASE_URL}api/development/comments?commentID=${commentID}`, {
+                    headers: {
+                        token: this.authToken,
+                    }
+                });
+                if (response.status == 200) {
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    })
+                    this.getComments(this.filterKey)
+                }
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.detail,
+                    timeout: 500,
+                }).show()
+                this.$store.commit('hideLoader');
+            }
+        },
+        extractFilename(response) {
+            const contentDisposition = response.headers['content-disposition'];
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
+                return filenameMatch ? filenameMatch[1] : 'download.zip';
+            } else {
+                return 'download.zip';
+            }
+        },
+        async downloadCommentAttachments(e, commentID){
+            e.preventDefault();
+            try {
+                const response = await axios.get(`${BASE_URL}api/development/comments/download?commentID=${commentID}`, {
+                    headers: {
+                        token: this.authToken
+                    },
+                    responseType: 'arraybuffer',
+                });
+                if (response && response.status === 200 && response.data) {
+                    console.log(response, '-----------downlaod Response--------------')
+                    const filename = this.extractFilename(response);
+                    const blob = new Blob([response.data], { type: 'application/zip' });
+
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    Swal.fire({
+                        title: `Downloaded successfully!`,
+                        icon: 'success',
+                    });
+                }
+            } catch (error) {
+                new Noty({
+                    text: 'An error occurred',
+                    timeout: 500,
+                }).show();
             }
         },
         commentToggler(comment) {
@@ -345,4 +512,5 @@ export default {
         max-width: 50%;
         margin: auto;
     }
-}</style>
+}
+</style>

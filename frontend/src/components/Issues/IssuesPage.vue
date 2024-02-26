@@ -473,7 +473,7 @@
                     </div>
                 </div>
 
-                <comments ref="commentsView"/>
+                <comments ref="commentsView" />
 
                 <!--Table-->
                 <div class="card" style="margin-top: 2rem;">
@@ -558,7 +558,16 @@
                                               @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i> -->
                                             <i @click="deleteIssue(issue.id)" class="fas fa-trash text-danger m-3 fa-xs"
                                                 style="cursor: pointer;"></i>
-                                                <i @click="sendDataToComments(issue.id, issue.sprint.id)" class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal" data-bs-target="#comments" style="cursor: pointer;"></i>
+
+                                                <!-- Comment Section Button-->
+                                            <i @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal"
+                                                data-bs-target="#comments" style="cursor: pointer;"></i>
+
+                                                    <!-- Worklog Section Button-->
+                                                <i @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal"
+                                                data-bs-target="#comments" style="cursor: pointer;"></i>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1273,7 +1282,7 @@ export default {
         },
 
         // comments component methods
-        sendDataToComments(issueID, sprintID){
+        sendDataToComments(issueID, sprintID) {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
         }
     },
@@ -1317,17 +1326,19 @@ export default {
     overflow-y: auto;
     z-index: 99;
 }
+
 ::v-deep .ql-editor img {
-  width: 200px;
-  height: auto;
-  margin: 5px;
-  border-radius: 8px;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-  transition: transform 0.3s ease-in-out;
+    width: 200px;
+    height: auto;
+    margin: 5px;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    transition: transform 0.3s ease-in-out;
 }
 
 ::v-deep .ql-editor img:hover {
-  transform: scale(2.5); /* Adjust the scale factor as needed */
+    transform: scale(2.5);
+    /* Adjust the scale factor as needed */
 }
 
 .modal-title-input {
@@ -1413,6 +1424,5 @@ export default {
     color: blue !important;
     text-decoration: underline;
     transform: scale(1.1);
-}
-</style>
+}</style>
       
