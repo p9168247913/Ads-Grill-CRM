@@ -49,14 +49,17 @@ class WorklogView(CsrfExemptMixin, APIView):
     def post(self, request):
         try:
             requestData = request.data
+            issue_instance = Issue.objects.get(pk=requestData.get('issue_id'))
+            
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
-            lastWorklogRemainingTime = worklogs.first().remaining_time
-            if lastWorklogRemainingTime < timedelta(0):
-                return JsonResponse({"message":"You can't add more logs because of issue expected duration ends"}, status=status.HTTP_400_BAD_REQUEST)
+            if worklogs:
+                lastWorklogRemainingTime = worklogs.first().remaining_time
+                if lastWorklogRemainingTime <= timedelta(0):
+                    return JsonResponse({"message":"You can't add more logs because of issue expected duration ends"}, status=status.HTTP_400_BAD_REQUEST)
             if 'sprint_id' not in requestData and 'logged_time' not in requestData and 'issue_id' not in requestData:
                 return JsonResponse({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
             sprint_instance = Sprint.objects.get(pk=requestData.get('sprint_id'))
-            issue_instance = Issue.objects.get(pk=requestData.get('issue_id'))
+            
             assignee_instance = request.user
             logged_time = requestData.get('logged_time')
             attachments = request.FILES.getlist('attachments', [])
@@ -109,7 +112,6 @@ class WorklogView(CsrfExemptMixin, APIView):
         except Issue.DoesNotExist:
             return JsonResponse({'message': "Requested Issue not exist"})
         except Exception as e:
-            transaction.set_rollback(True)
             return JsonResponse({'error': str(e)})
         return JsonResponse({'message': 'Worklog created successfully'},status=status.HTTP_200_OK)
 
@@ -154,6 +156,12 @@ class WorklogView(CsrfExemptMixin, APIView):
             description = requestData.get('description') if requestData.get('description') else None
             upd_logged_time = None
             extra_effort = None
+            
+            issue_instance = upd_worklog.issue
+            worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
+            
+            if worklogs.filter(remaining_time__lte =timedelta(0)):
+                return JsonResponse({"message":"can not update time as remaining time is zero"})
             if upd_worklog.created_at.date() != datetime.now().date() and logged_time:
                 return JsonResponse({"message": "You can update logged time at the same day only, rest of the fields could be update"})
             if logged_time and convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
@@ -161,8 +169,7 @@ class WorklogView(CsrfExemptMixin, APIView):
                 logged_time = '7h 30m 0s'
             elif logged_time:
                 extra_effort = timedelta(0)
-            issue_instance = upd_worklog.issue
-            worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
+                    
             if worklogs and logged_time:
                 saved_logged_time=worklogs.exclude(pk=upd_worklog.pk).aggregate(Sum('logged_time'))['logged_time__sum']
                 if saved_logged_time is None:
@@ -175,7 +182,8 @@ class WorklogView(CsrfExemptMixin, APIView):
             elif logged_time:
                 upd_logged_time = convert_to_duration(logged_time)
             remaining_time = issue_instance.exp_duration-(saved_logged_time+upd_logged_time)
-            if remaining_time < timedelta(0):
+            
+            if remaining_time <= timedelta(0):
                 remaining_time = timedelta(0)
             with transaction.atomic():
                 if upd_logged_time and extra_effort:
