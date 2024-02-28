@@ -474,6 +474,8 @@
                 </div>
 
                 <comments ref="commentsView" />
+                <worklog />
+                
 
                 <!--Table-->
                 <div class="card" style="margin-top: 2rem;">
@@ -567,7 +569,7 @@
                                                     <!-- Worklog Section Button-->
                                                 <i @click="sendDataToComments(issue.id, issue.sprint.id)"
                                                 class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal"
-                                                data-bs-target="#comments" style="cursor: pointer;"></i>
+                                                data-bs-target="#worklog" style="cursor: pointer;"></i>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -584,6 +586,7 @@
       
 <script>
 import comments from './comments.vue';
+import worklog from './worklog.vue';
 import { BASE_URL } from '../../config/apiConfig';
 import axios from 'axios';
 import Noty from 'noty';
@@ -653,7 +656,8 @@ export default {
     components: {
         QuillEditor,
         vSelect,
-        comments
+        comments,
+        worklog
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
