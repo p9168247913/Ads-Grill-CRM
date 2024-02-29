@@ -474,7 +474,7 @@
                 </div>
 
                 <comments ref="commentsView" />
-                <worklog />
+                <worklog ref="workLogView"/>
                 
 
                 <!--Table-->
@@ -1288,6 +1288,7 @@ export default {
         // comments component methods
         sendDataToComments(issueID, sprintID) {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
+            this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID);
         }
     },
     mounted() {

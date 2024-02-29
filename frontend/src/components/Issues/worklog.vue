@@ -17,17 +17,17 @@
                 <div class="modal-body modalBody">
                     <form @submit="postLogs($event)">
                         <div class="row">
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="expected time" class="form-label">Add Log Time</label>
-                                <input placeholder="Please use format: 4h 20m 45s ('hh mm ss')" required type="text" class="form-control" v-model="logTime"
+                                <input placeholder="Format: 4h 20m 45s ('hh mm ss')" required type="text" class="form-control" v-model="logTime"
                                     @change="checkDurationValidity">
                             </div>
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Add Files</label>
                                 <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control" multiple
                                     @change="handleFileChange">
                             </div>
-                            <div class="col-md-12 mb-3" style="height: auto; overflow: auto;">
+                            <div class="col-md-12 mb-3" style="height: auto; overflow: auto; min-height: 100px;">
                                 <label for="description" class="form-label">Description</label>
                                 <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
                             </div>
@@ -35,6 +35,13 @@
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Save</button>
+                            </div>
+                            <div class="">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h1>this is baigain</h1>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
@@ -45,10 +52,10 @@
 </template>
 
 <script>
-// import { BASE_URL } from '../../config/apiConfig';
-// import axios from 'axios';
-// import Noty from 'noty';
-// import Swal from 'sweetalert2';
+import { BASE_URL } from '../../config/apiConfig';
+import axios from 'axios';
+import Noty from 'noty';
+import Swal from 'sweetalert2';
 import { mapState } from 'vuex';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { QuillEditor } from '@vueup/vue-quill';
@@ -63,6 +70,7 @@ export default {
             sprintID: '',
             issueID: '',
             logTime: '',
+            logDescription:'',
             selectedFiles: []
         }
     },
@@ -70,6 +78,10 @@ export default {
         ...mapState(['authToken', 'authUser'])
     },
     methods: {
+        getDataFromIssuePage(issueID, sprintID) {
+            this.sprintID = sprintID
+            this.issueID = issueID
+        },
         checkDurationValidity() {
             if (this.logTime) {
                 const durationRegex = /^(?:(\d{1,2})h\s*)?(?:(\d{1,2})m\s*)?(?:(\d{1,2})s\s*)?$/;
@@ -99,8 +111,46 @@ export default {
         handleFileChange(e) {
             this.selectedFiles = e.target.files
         },
-        postLogs(e){
+        async postLogs(e){
             e.preventDefault()
+            try {
+                this.$store.commit('showLoader');
+                const quillHtml = this.$refs.editor
+            if (quillHtml){
+                this.logDescription = quillHtml.getHTML();
+            }
+                const formData = new FormData()
+                formData.append('desc', this.commentDesc)
+                formData.append('key', this.filterKey)
+                if (this.selectedFiles.length) {
+                    for (let i = 0; i < this.selectedFiles.length; i++) {
+                        formData.append('attachments', this.selectedFiles[i])
+                    }
+                }
+                const response = await axios.post(`${BASE_URL}api/development/comments`, formData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                });
+                if (response.status === 201) {
+                    this.resetValues()
+                    // this.$refs.closeModal.click()
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    })
+                    this.getComments(this.filterKey)
+                }
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.detail,
+                    timeout: 500,
+                }).show()
+                this.$store.commit('hideLoader');
+            }
         }
         // getDataFromIssuePage(issueID, sprintID) {
         //     this.sprintID = sprintID
