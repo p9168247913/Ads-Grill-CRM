@@ -402,7 +402,6 @@ export default {
         }
     },
     methods: {
-
         async startSprint(e, sprint) {
             e.preventDefault();
             if (this.startedSprintKey) {
@@ -557,6 +556,7 @@ export default {
             e.preventDefault();
             const quillEditor = this.$refs.editEditor;
             this.updatedSprintData.project_id = this.projectKey
+            this.updatedSprintData.is_started = "False"
             if (quillEditor) {
                 const htmlContent = quillEditor.getHTML();
                 this.updatedSprintData.description = htmlContent
