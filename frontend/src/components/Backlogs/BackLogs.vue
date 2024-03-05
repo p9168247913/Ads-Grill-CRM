@@ -1,4 +1,5 @@
 <template>
+
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -24,9 +25,10 @@
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
                                 <button type="button" style="width: auto; height: 40px !important;"
-                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createSprint">
-                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active"
+                                    data-bs-toggle="modal" data-bs-target="#createSprint">
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp;
+                                    &nbsp;Create
                                     Sprint
                                 </button>
                             </div>
@@ -40,9 +42,10 @@
                         <div style="padding-bottom: 5px;" class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createProjectLabel">Create Sprint</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-top: 20px; ">
+                            <div class="modal-body modalBody" style="padding-top: 20px;">
                                 <form @submit="createSprints($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -63,8 +66,9 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
-                                            <input type="datetime-local" class="form-control" v-model="sprintData.end_date"
-                                                :min="sprintData.start_date" :disabled="sprintData.start_date === ''">
+                                            <input type="datetime-local" class="form-control"
+                                                v-model="sprintData.end_date" :min="sprintData.start_date"
+                                                :disabled="sprintData.start_date === ''">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -89,7 +93,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row" style="max-height: 300px; overflow: auto;">
+                                    <div class="row" style="height: 300px; overflow: auto;">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editor" :modules="modules" theme="snow"
@@ -115,7 +119,8 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createProjectLabel">Edit Sprint</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody" style="padding-top: 20px; ">
                                 <form @submit="editSprint($event)">
@@ -127,16 +132,16 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Key</label>
-                                            <input type="text" class="form-control" v-model="updatedSprintData.key" disabled
-                                                required>
+                                            <input type="text" class="form-control" v-model="updatedSprintData.key"
+                                                disabled required>
                                         </div>
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Start Date</label>
                                             <input type="datetime-local" class="form-control"
-                                                v-model="updatedSprintData.start_date" :min="updatedSprintData.start_date"
-                                                required>
+                                                v-model="updatedSprintData.start_date"
+                                                :min="updatedSprintData.start_date" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
@@ -160,7 +165,8 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="projectName" class="form-label">Reporter</label>
-                                            <select class="form-control" v-model="updatedSprintData.reporter_id" required>
+                                            <select class="form-control" v-model="updatedSprintData.reporter_id"
+                                                required>
                                                 <option value="">Select Type</option>
                                                 <option value="18">Abhishek</option>
                                                 <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
@@ -168,7 +174,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row" style="max-height: 300px; overflow: auto;">
+                                    <div class="row" style="height: 300px; overflow: auto;">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editEditor" :modules="modules" theme="snow"
@@ -178,7 +184,8 @@
                                     <div class="modal-footer" style="z-index:99999999;">
                                         <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
-                                        <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
+                                        <button type="submit" data-bs-dismiss="modal"
+                                            class="btn btn-primary">Save</button>
                                     </div>
                                 </form>
                             </div>
@@ -195,7 +202,8 @@
                         <div class="table-responsive p-1">
                             <div class="align-items-center mb-0 sprint-card" v-for="(sprint, index) in filteredSprints"
                                 :key="index">
-                                <div class="align-items-center mb-0" style="display:flex; justify-content: space-between;">
+                                <div class="align-items-center mb-0"
+                                    style="display:flex; justify-content: space-between;">
                                     <div style="display: flex; gap: 20px; align-items: center;">
                                         <div class="d-flex flex-row justify-content-center">
                                             <span class="mb-0 text-sm"><i @click="toggleDropdown(index)"
@@ -209,23 +217,29 @@
                                         </div>
                                         <div class="d-flex flex-row justify-content-center ">
                                             <p class="mb-0 text-sm" style="font-size: smaller; white-space: nowrap;">{{
-                                                formatDate(sprint.start_date)
-                                            }} - {{ formatDate(sprint.end_date) }}</p>
+            formatDate(sprint.start_date)
+        }} - {{ formatDate(sprint.end_date) }}</p>
                                         </div>
                                         <div class="d-flex flex-row justify-content-center">
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">({{
-                                                sprint.issues.length }}
+            sprint.issues.length }}
                                                 issues)</p>
                                         </div>
                                     </div>
                                     <div class="col text-end ">
                                         <div class="col text-end" style="white-space: nowrap;">
-                                            <span v-if="sprint.is_started"
+                                            <button v-if="!isAnySprintStarted && sprint.key !== startedSprintKey"
+                                                @click="startSprint($event, sprint)" class="btn btn-link">
+                                                Start
+                                            </button>
+                                            <span v-else-if="sprint.is_started"
                                                 style="height: 30px; padding: 2px 5px;border-radius: 4px;font-weight: bold; font-size: small; background-color: rgb(215, 215, 215);">
                                                 Started
                                             </span>
+
                                             <button class="btn btn-link dropdown-open" type="button"
-                                                id="dropdownMenuButton2" data-bs-toggle="dropdown" aria-expanded="false">
+                                                id="dropdownMenuButton2" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end"
@@ -234,7 +248,8 @@
                                                     data-bs-target="#editSprint"><a class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li>
-                                                <li @click="deleteSprint(sprint.id)"><a class="dropdown-item" href="#"><i
+                                                <li @click="deleteSprint(sprint.id)"><a class="dropdown-item"
+                                                        href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -271,7 +286,7 @@
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
-                                                                issue.title }}</h6>
+            issue.title }}</h6>
                                                         </div>
                                                     </td>
                                                     <td style="padding-left: 25px;">
@@ -310,7 +325,7 @@
         </div>
     </div>
 </template>
-      
+
 <script>
 import { BASE_URL } from '../../config/apiConfig';
 import axios from 'axios';
@@ -353,8 +368,10 @@ export default {
                 end_date: '',
                 goal: '',
                 status: '',
+                is_started: '',
             },
             projectKey: localStorage.getItem("projectId"),
+            startedSprintKey: null,
         };
     },
     components: {
@@ -362,15 +379,17 @@ export default {
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
+        isAnySprintStarted() {
+            return this.allSprints.some(sprint => sprint.is_started);
+        },
         filteredSprints() {
             return this.allSprints.filter(sprint => {
-                const searchLowerCase = this.searchTerm.toLowerCase() || ''
+                const searchLowerCase = this.searchTerm.toLowerCase() || '';
                 return (
                     sprint.name.toLowerCase().includes(searchLowerCase) ||
                     sprint.start_date.toLowerCase().includes(searchLowerCase)
                 );
             });
-
         },
     },
     created() {
@@ -383,6 +402,201 @@ export default {
         }
     },
     methods: {
+        async startSprint(e, sprint) {
+            e.preventDefault();
+            if (this.startedSprintKey) {
+                alert("Only one sprint can be started at a time.");
+                return;
+            }
+            this.startedSprintKey = sprint.is_started;
+            this.updatedSprintData = {
+                id: sprint.id,
+                name: sprint.name,
+                reporter_id: sprint.reporter.id,
+                key: sprint.key,
+                goal: sprint.goal,
+                status: sprint.status,
+            }
+            this.updatedSprintData.start_date = new Date(sprint.start_date).toISOString().slice(0, 16);
+            this.updatedSprintData.end_date = new Date(sprint.end_date).toISOString().slice(0, 16);
+            this.updatedSprintData.exp_duration = sprint.exp_duration;
+            this.updatedSprintData.is_started = "True"
+            const quillEditor = this.$refs.editEditor;
+            if (quillEditor) {
+                const htmlContent = quillEditor.getHTML();
+                this.updatedSprintData.description = htmlContent
+            }
+            this.updatedSprintData.project_id = this.projectKey
+            console.log("update", this.updatedSprintData)
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.put(`${BASE_URL}api/development/sprints`, this.updatedSprintData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                })
+                console.log("response", response);
+                if (response.status === 200) {
+                    this.getAllSprints();
+                    this.resetValues()
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    });
+                    this.$refs.createSprintModal.classList.remove('show');
+                    this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
+                    this.$refs.createSprintModal.style.display = 'none';
+                    this.removeModalBackdrop();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        text: response.data.message,
+                        timeout: 500,
+                    }).show()
+                }
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                this.$store.commit('hideLoader');
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
+            } finally {
+                this.startedSprintKey = null;
+
+                this.getAllSprints();
+            }
+        },
+        async getAllSprints() {
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.get(`${BASE_URL}api/development/sprints?key=backlog&id=${this.projectKey}`, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                });
+                this.allSprints = response.data.sprintAndIssues
+                console.log("ll", this.allSprints);
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                console.log(error);
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.detail,
+                    timeout: 500,
+                }).show()
+                this.$store.commit('hideLoader');
+            }
+        },
+        async createSprints(e) {
+            e.preventDefault();
+            const description = this.saveContent(e);
+            const project_id = localStorage.getItem("projectId");
+            this.sprintData.description = description;
+            this.sprintData.project_id = project_id;
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.post(`${BASE_URL}api/development/sprints`, this.sprintData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                })
+                console.log(response);
+                if (response.status === 201) {
+                    this.getAllSprints();
+                    this.resetValues()
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    });
+                    this.$refs.createSprintModal.classList.remove('show');
+                    this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
+                    this.$refs.createSprintModal.style.display = 'none';
+                    this.removeModalBackdrop();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        text: response.data.message,
+                        timeout: 500,
+                    }).show()
+                }
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                this.$store.commit('hideLoader');
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
+            }
+        },
+        setSprint(sprint) {
+            this.updatedSprintData = {
+                id: sprint.id,
+                name: sprint.name,
+                reporter_id: sprint.reporter.id,
+                key: sprint.key,
+                goal: sprint.goal,
+                status: sprint.status,
+            }
+            this.updatedSprintData.start_date = new Date(sprint.start_date).toISOString().slice(0, 16);
+            this.updatedSprintData.end_date = new Date(sprint.end_date).toISOString().slice(0, 16);
+            this.updatedSprintData.exp_duration = sprint.exp_duration;
+            const quillEditor = this.$refs.editEditor;
+            if (quillEditor) {
+                quillEditor.setHTML(sprint.description);
+
+            }
+        },
+        async editSprint(e) {
+            e.preventDefault();
+            const quillEditor = this.$refs.editEditor;
+            this.updatedSprintData.project_id = this.projectKey
+            this.updatedSprintData.is_started = "False"
+            if (quillEditor) {
+                const htmlContent = quillEditor.getHTML();
+                this.updatedSprintData.description = htmlContent
+            }
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.put(`${BASE_URL}api/development/sprints`, this.updatedSprintData, {
+                    headers: {
+                        'Content-Type': "multipart/form-data",
+                        token: this.authToken,
+                    }
+                })
+                if (response.status === 200) {
+                    this.getAllSprints();
+                    this.resetValues()
+                    Swal.fire({
+                        title: response.data.message,
+                        icon: 'success',
+                    });
+                    this.$refs.createSprintModal.classList.remove('show');
+                    this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
+                    this.$refs.createSprintModal.style.display = 'none';
+                    this.removeModalBackdrop();
+                } else {
+                    new Noty({
+                        type: 'error',
+                        text: response.data.message,
+                        timeout: 500,
+                    }).show()
+                }
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                this.$store.commit('hideLoader');
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message,
+                    timeout: 500,
+                }).show()
+            }
+        },
         saveContent(e) {
             e.preventDefault()
             if (this.$refs.editor) {
@@ -526,111 +740,7 @@ export default {
 
             return formattedDuration.trim();
         },
-        async createSprints(e) {
-            e.preventDefault();
-            const description = this.saveContent(e);
-            const project_id = localStorage.getItem("projectId");
-            this.sprintData.description = description;
-            this.sprintData.project_id = project_id;
-            try {
-                this.$store.commit('showLoader');
-                const response = await axios.post(`${BASE_URL}api/development/sprints`, this.sprintData, {
-                    headers: {
-                        'Content-Type': "multipart/form-data",
-                        token: this.authToken,
-                    }
-                })
-                console.log(response);
-                if (response.status === 201) {
-                    this.getAllSprints();
-                    this.resetValues()
-                    Swal.fire({
-                        title: response.data.message,
-                        icon: 'success',
-                    });
-                    this.$refs.createSprintModal.classList.remove('show');
-                    this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
-                    this.$refs.createSprintModal.style.display = 'none';
-                    this.removeModalBackdrop();
-                } else {
-                    new Noty({
-                        type: 'error',
-                        text: response.data.message,
-                        timeout: 500,
-                    }).show()
-                }
-                this.$store.commit('hideLoader');
-            } catch (error) {
-                this.$store.commit('hideLoader');
-                new Noty({
-                    type: 'error',
-                    text: error.response.data.message,
-                    timeout: 500,
-                }).show()
-            }
-        },
-        setSprint(sprint) {
-            this.updatedSprintData = {
-                id: sprint.id,
-                name: sprint.name,
-                reporter_id: sprint.reporter.id,
-                key: sprint.key,
-                goal: sprint.goal,
-                status: sprint.status,
-            }
-            this.updatedSprintData.start_date = new Date(sprint.start_date).toISOString().slice(0, 16);
-            this.updatedSprintData.end_date = new Date(sprint.end_date).toISOString().slice(0, 16);
-            this.updatedSprintData.exp_duration = sprint.exp_duration;
-            const quillEditor = this.$refs.editEditor;
-            if (quillEditor) {
-                quillEditor.setHTML(sprint.description);
 
-            }
-        },
-        async editSprint(e) {
-            e.preventDefault();
-            const quillEditor = this.$refs.editEditor;
-            this.updatedSprintData.project_id = this.projectKey
-            if (quillEditor) {
-                const htmlContent = quillEditor.getHTML();
-                this.updatedSprintData.description = htmlContent
-            }
-            try {
-                this.$store.commit('showLoader');
-                const response = await axios.put(`${BASE_URL}api/development/sprints`, this.updatedSprintData, {
-                    headers: {
-                        'Content-Type': "multipart/form-data",
-                        token: this.authToken,
-                    }
-                })
-                if (response.status === 200) {
-                    this.getAllSprints();
-                    this.resetValues()
-                    Swal.fire({
-                        title: response.data.message,
-                        icon: 'success',
-                    });
-                    this.$refs.createSprintModal.classList.remove('show');
-                    this.$refs.createSprintModal.setAttribute('aria-hidden', 'true');
-                    this.$refs.createSprintModal.style.display = 'none';
-                    this.removeModalBackdrop();
-                } else {
-                    new Noty({
-                        type: 'error',
-                        text: response.data.message,
-                        timeout: 500,
-                    }).show()
-                }
-                this.$store.commit('hideLoader');
-            } catch (error) {
-                this.$store.commit('hideLoader');
-                new Noty({
-                    type: 'error',
-                    text: error.response.data.message,
-                    timeout: 500,
-                }).show()
-            }
-        },
         async deleteSprint(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -667,27 +777,7 @@ export default {
         toggleDropdown(index) {
             this.allSprints[index].showDropdown = !this.allSprints[index].showDropdown;
         },
-        async getAllSprints() {
-            try {
-                this.$store.commit('showLoader');
-                const response = await axios.get(`${BASE_URL}api/development/sprints?key=backlog&id=${this.projectKey}`, {
-                    headers: {
-                        'Content-Type': "multipart/form-data",
-                        token: this.authToken,
-                    }
-                });
-                this.allSprints = response.data.sprintAndIssues
-                this.$store.commit('hideLoader');
-            } catch (error) {
-                console.log(error);
-                new Noty({
-                    type: 'error',
-                    text: error.response.data.detail,
-                    timeout: 500,
-                }).show()
-                this.$store.commit('hideLoader');
-            }
-        },
+
         showSweetAlert() {
             Swal.fire({
                 icon: 'info',
@@ -856,4 +946,3 @@ export default {
     border-radius: 8px;
 }
 </style>
-      

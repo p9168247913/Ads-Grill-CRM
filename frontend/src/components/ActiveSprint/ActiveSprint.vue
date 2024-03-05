@@ -2,8 +2,8 @@
     <div class="wrapper" style="margin-bottom: 80px;">
         <div v-if="projectKey !== ''" class="content-page">
             <div class="container-fluid" style="margin-top: 30px;">
-                <h5 class="sprint-head">{{ sprintData.activeSprint ? sprintData.activeSprint.name : "" }}</h5>
-                <div class="row">
+                <h5 style="margin-left: 1rem;" class="sprint-head">{{ sprintData.activeSprint ? sprintData.activeSprint.name : "" }}</h5>
+                <!-- <div class="row">
                     <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
                         <div class="input-group">
                             <span class="input-group-text text-body">
@@ -13,8 +13,8 @@
                                 placeholder="Search Issue..." />
                         </div>
                     </div>
-                </div>
-                <div class="row">
+                </div> -->
+                <div style="margin-top: 3rem;" class="row">
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
                             <p class="card-head">TO DO</p>
@@ -27,14 +27,14 @@
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
+                                            <ul style="background-color: gainsboro;" class="dropdown-menu dropdown-menu-end"
                                                 aria-labelledby="dropdownMenuButton">
-                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                <!-- <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
-                                                </li>
+                                                </li> -->
                                                 <li @click="deleteIssue(issue.id)"><a class="dropdown-item" href="#"><i
-                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                            class="fas fa-trash-alt text-danger" ></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -63,12 +63,12 @@
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
+                                            <ul style="background-color: gainsboro;" class="dropdown-menu dropdown-menu-end"
                                                 aria-labelledby="dropdownMenuButton">
-                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                <!-- <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
-                                                </li>
+                                                </li> -->
                                                 <li ><a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
@@ -99,12 +99,12 @@
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
+                                            <ul style="background-color: gainsboro;" class="dropdown-menu dropdown-menu-end"
                                                 aria-labelledby="dropdownMenuButton">
-                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                <!-- <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
-                                                </li>
+                                                </li> -->
                                                 <li><a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
@@ -355,6 +355,7 @@ export default {
                     }
                 })
                 this.sprintData = response.data.activeSprintAndIssues
+                console.log(this.sprintData);
                 if (this.sprintData === undefined) {
                     this.showNoActiveSprintAlert();
                 }

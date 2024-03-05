@@ -1,5 +1,7 @@
 <!-- Home.vue -->
+
 <template>
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -40,7 +42,7 @@
         <!-- Modal for Create Project -->
         <div class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
-          <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Project</h5>
@@ -61,7 +63,7 @@
                         <!-- <option value="18">Abhishek</option> -->
                         <!-- <option value="Pawan">Pawan</option> -->
                         <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
-                          manager.name }}</option>
+          manager.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -90,9 +92,9 @@
                       <label for="team_lead_id" class="form-label">Team Lead</label>
                       <select class="form-control" v-model="projectData.team_lead_id" required>
                         <option value="">Select Team Lead</option>
-                        <option value="7">Shyam</option>
-                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option> -->
+                        <!-- <option value="7">Shyam</option> -->
+                        <option v-for="(tag, index) in team_lead" :key="index" :value="tag.id">{{
+          tag.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -127,7 +129,7 @@
         <!-- Modal for Edit Project -->
         <div class="modal fade" ref="createProjectModal" id="editProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="editProjects">
-          <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Edit Project</h5>
@@ -146,20 +148,20 @@
                       <select class="form-control" v-model="updateProjectData.reporter_id">
                         <option value="">Select Manager</option>
                         <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
-                          manager.name }}</option>
+          manager.name }}</option>
                       </select>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label for="name" class="form-label">Project Name</label>
-                      <input style="cursor:not-allowed;" type="text" class="form-control" v-model="updateProjectData.name"
-                        @input="generateKey" required disabled>
+                      <input style="cursor:not-allowed;" type="text" class="form-control"
+                        v-model="updateProjectData.name" @input="generateKey" required disabled>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="key" class="form-label">Key</label>
-                      <input style="cursor:not-allowed;" type="text" class="form-control" v-model="updateProjectData.key"
-                        disabled required>
+                      <input style="cursor:not-allowed;" type="text" class="form-control"
+                        v-model="updateProjectData.key" disabled required>
                     </div>
                   </div>
                   <div class="row">
@@ -178,8 +180,8 @@
                       <select class="form-control" v-model="updateProjectData.team_lead_id" required>
                         <option value="">Select Team Lead</option>
                         <!-- <option value="7">Shyam</option> -->
-                        <option v-for="(tag, index) in team_lead" :key="index" :value="tag.id">{{
-                          tag.name }}</option>
+                        <option v-for="(lead, index) in team_lead" :key="index" :value="lead.id">{{
+          lead.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -216,7 +218,7 @@
         <!-- Modal for Create Client -->
         <div class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
-          <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Client</h5>
@@ -269,7 +271,8 @@
                     <th style="color: #344767 !important;"
                       class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                       v-for="(head) in headers" :key="head">{{ head }}</th>
-                    <th style="color: #344767 !important;" class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head">
+                    <th style="color: #344767 !important;"
+                      class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head">
                       Actions</th>
                   </tr>
                 </thead>
@@ -283,8 +286,8 @@
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-row justify-content-left project-name">
                         <h6 style="margin-top: 14px;" @click="openProject(project.id)" class="mb-0 text-sm">{{
-                          project.name ?
-                          limitedTeamMembers(project.name) : '' }}
+          project.name ?
+            limitedTeamMembers(project.name) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.name && project.name.length > 15" data-bs-toggle="modal"
                           data-bs-target="#showTeam" @mouseover="openModal(project.name)">
@@ -315,7 +318,7 @@
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-row justify-content-left">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.team_members ?
-                          limitedTeamMembers(project.team_members) : '' }}
+          limitedTeamMembers(project.team_members) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.team_members && project.team_members.length > 15"
                           data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.team_members)">
@@ -383,8 +386,8 @@
         </div>
 
         <!-- Modal for detailed view -->
-        <div class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1" aria-labelledby="createProjectLabel"
-          aria-hidden="true">
+        <div class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1"
+          aria-labelledby="createProjectLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <span class="close" data-bs-dismiss="modal"
@@ -397,7 +400,7 @@
     </div>
   </div>
 </template>
-    
+
 <script>
 import { BASE_URL } from '../config/apiConfig';
 import axios from 'axios';
@@ -432,10 +435,7 @@ export default {
       allProjects: [],
       existingKeys: [],
       projectManager: [],
-      team_lead: [{
-        id: 7,
-        name: "Shyam",
-      }],
+      team_lead: [],
       projectData: {
         client_id: '',
         name: '',
@@ -615,7 +615,6 @@ export default {
         })
         this.allProjects = response.data.projects;
         this.$store.commit('hideLoader');
-        console.log(this.allProjects);
       } catch (error) {
         new Noty({
           type: 'error',
@@ -646,11 +645,11 @@ export default {
         formData.append('reporter_id', this.projectData.reporter_id);
         formData.append('host_address', this.projectData.host_address);
         formData.append('tech_stacks', this.projectData.tech_stacks);
+        formData.append('team_lead_id', this.projectData.team_lead_id);
 
         for (let i = 0; i < this.selectedFiles.length; i++) {
           formData.append('attachments', this.selectedFiles[i]);
         }
-        console.log("postData", formData);
         const response = await axios.post(`${BASE_URL}api/development/projects`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -693,7 +692,6 @@ export default {
       try {
         this.$store.commit('showLoader');
         let updateFormData = new FormData();
-        console.log("formData1", updateFormData);
         updateFormData.append('id', this.updateProjectData.id);
         updateFormData.append('client_id', this.updateProjectData.client.id);
         updateFormData.append('name', this.updateProjectData.name);
@@ -738,7 +736,7 @@ export default {
       }
     },
     editModal(project) {
-      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id, };
+      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id, team_lead_id: project.team_lead.id };
       this.selectedClient = project.client
       this.selectedUpdateFiles = []
       this.isEditModalOpen = true;
@@ -807,10 +805,33 @@ export default {
     //     }).show()
     //   }
     // },
+
+    async getTeamLead() {
+      try {
+        const response = await axios.get(`${BASE_URL}api/development/getTeamLeaders`, {
+          headers: {
+            token: this.authToken
+          }
+        })
+        if (response.status === 200) {
+          this.team_lead = response.data.team_leaders
+        }
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.message,
+          timeout: 500,
+        }).show()
+      }
+    },
     async getClients() {
       try {
         this.$store.commit('showLoader')
-        const response = await axios.get(`${BASE_URL}api/client/`)
+        const response = await axios.get(`${BASE_URL}api/client/`, {
+          headers: {
+            token: this.authToken,
+          }
+        })
         this.allClients = response.data.clients
         this.$store.commit('hideLoader')
       } catch (error) {
@@ -858,7 +879,12 @@ export default {
           return;
         }
       } catch (error) {
-        console.log(error);
+        new Noty({
+          type: 'error',
+          text: error,
+          timeout: 2000,
+          position: "top-center"
+        }).show();
       }
     }
   },
@@ -866,11 +892,12 @@ export default {
     this.getClients();
     this.getProjectManagers();
     this.getProjects();
+    this.getTeamLead();
   }
 };
 </script>
 
-<style >
+<style>
 :root {
   --vs-line-height: 1.8;
 }
@@ -987,9 +1014,11 @@ export default {
     z-index: 1;
     position: relative;
   }
+
   .action-head {
-  position: relative;
-  
-  z-index: 1;
+    position: relative;
+
+    z-index: 1;
+  }
 }
-}</style>
+</style>

@@ -21,9 +21,10 @@
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
                                 <button type="button" style="width: auto; height: 40px !important;"
-                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createIssue">
-                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active"
+                                    data-bs-toggle="modal" data-bs-target="#createIssue">
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp;
+                                    &nbsp;Create
                                     Issue
                                 </button>
                             </div>
@@ -37,7 +38,8 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createProjectLabel">Create Issue</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody">
                                 <form @submit="createIssues($event)">
@@ -60,7 +62,7 @@
                                                 <option value="">Select sprint</option>
                                                 <option v-for="(sprint, index) in allSprints" :key="index"
                                                     :value="sprint.id">{{
-                                                        sprint.name }}</option>
+                                    sprint.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -69,7 +71,7 @@
                                                 <option value="">Select Reporter</option>
                                                 <option v-for="(manager, index) in projectManagers" :key="index"
                                                     :value="manager.id">{{
-                                                        manager.name }}</option>
+                                    manager.name }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -97,8 +99,9 @@
                                             <label for="team lead" class="form-label">Team Lead</label>
                                             <select class="form-select" v-model="issueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
-                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
-                                                    lead.name }}</option>
+                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
+                                                    {{
+                                    lead.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -114,7 +117,7 @@
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
-                                                        assignee.name }}</option>
+                                    assignee.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -132,8 +135,8 @@
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label for="issueName" class="form-label">Add Files</label>
-                                            <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control"
-                                                multiple @change="handleFileChange">
+                                            <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt"
+                                                class="form-control" multiple @change="handleFileChange">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -187,7 +190,7 @@
                                                 <option value="">Select sprint</option>
                                                 <option v-for="(sprint, index) in allSprints" :key="index"
                                                     :value="sprint.id">{{
-                                                        sprint.name }}</option>
+                                    sprint.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -196,7 +199,7 @@
                                                 <option value="">Select Reporter</option>
                                                 <option v-for="(manager, index) in projectManagers" :key="index"
                                                     :value="manager.id">{{
-                                                        manager.name }}</option>
+                                    manager.name }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -216,8 +219,9 @@
                                             <label for="team lead" class="form-label">Team Lead</label>
                                             <select class="form-select" v-model="editIssueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
-                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">{{
-                                                    lead.name }}</option>
+                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
+                                                    {{
+                                    lead.name }}</option>
                                             </select>
                                         </div>
 
@@ -234,7 +238,7 @@
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
-                                                        assignee.name }}</option>
+                                    assignee.name }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -266,8 +270,8 @@
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label for="issueName" class="form-label">Files</label>
-                                            <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt" class="form-control"
-                                                multiple @change="handleUpdateFileChange">
+                                            <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt"
+                                                class="form-control" multiple @change="handleUpdateFileChange">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -311,26 +315,26 @@
                                                             <div @click="dataChanger(issue), openEditModal()"
                                                                 class="d-flex flex-column justify-content-center parent-title">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.title }}</h6>
+                                    issue.title }}</h6>
 
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.status }}</h6>
+                                    issue.status }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.priority }}</h6>
+                                    issue.priority }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.assignee }}</h6>
+                                    issue.assignee }}</h6>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -373,26 +377,26 @@
                                                             <div @click="dataChanger(issue), openEditModal()"
                                                                 class="d-flex flex-column justify-content-center parent-title">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.title }}</h6>
+                                    issue.title }}</h6>
 
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.status }}</h6>
+                                    issue.status }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.priority }}</h6>
+                                    issue.priority }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.assignee }}</h6>
+                                    issue.assignee }}</h6>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -435,25 +439,25 @@
                                                             <div @click="dataChanger(issue), openEditModal()"
                                                                 class="d-flex flex-column justify-content-center parent-title">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.title }}</h6>
+                                    issue.title }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.status }}</h6>
+                                    issue.status }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.priority }}</h6>
+                                    issue.priority }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
                                                                 <h6 class="mb-0 text-xs">{{
-                                                                    issue.assignee }}</h6>
+                                    issue.assignee }}</h6>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -465,7 +469,8 @@
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
-                                        <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
+                                        <button type="submit" data-bs-dismiss="modal"
+                                            class="btn btn-primary">Save</button>
                                     </div>
                                 </form>
                             </div>
@@ -474,8 +479,7 @@
                 </div>
 
                 <comments ref="commentsView" />
-                <worklog ref="workLogView"/>
-                
+                <worklog ref="workLogView" />
 
                 <!--Table-->
                 <div class="card" style="margin-top: 2rem;">
@@ -490,12 +494,12 @@
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                                             v-for="(head) in headers" :key="head">{{ head }}</th>
-                                        <th style="color: #344767 !important;"
+                                        <th style="color: #344767 !important;text-align: center;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head">
                                             Action</th>
                                     </tr>
                                 </thead>
-                                <tbody v-for="(issue, index) in allIssues" :key="index">
+                                <tbody v-for="(issue, index) in paginatedIssues" :key="index">
                                     <tr>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
@@ -539,7 +543,7 @@
                                         </td>
                                         <td style="padding-left: 30px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <a v-if="issue.attachments.length"
+                                                <a title="Download Files" v-if="issue.attachments.length"
                                                     @click="getAttachmentUrl($event, issue.id)">
                                                     <i class="fas fa-download"></i>
                                                 </a>
@@ -547,43 +551,40 @@
                                             </div>
                                         </td>
                                         <td class="align-middle d-md-table-cell actions">
-                                            <!-- <i v-if="authUser.role == 'admin'"
-                                              class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
-                                              data-bs-toggle="modal" data-bs-target="#edituser"
-                                              style="margin-left: 20px; cursor: pointer;" ></i> -->
-                                            <i class="fas fa-pencil-alt text-primary fa-xs pr-4" data-bs-toggle="modal"
+                                            <i title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3" data-bs-toggle="modal"
                                                 data-bs-target="#editIssue" @click="editData(issue)"
-                                                style="color: dodgerblue !important; margin-left: 20px; cursor: pointer"></i>
+                                                style="color: dodgerblue !important; cursor: pointer;"></i>
 
-                                            <!-- <i v-if="authUser.role == 'admin'"
-                                              class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"
-                                              @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i> -->
-                                            <i @click="deleteIssue(issue.id)" class="fas fa-trash text-danger m-3 fa-xs"
+                                            <i title="Delete Issue" @click="deleteIssue(issue.id)"
+                                                class="fas fa-trash text-danger fa-md mx-3"
                                                 style="cursor: pointer;"></i>
 
-                                                <!-- Comment Section Button-->
-                                            <i @click="sendDataToComments(issue.id, issue.sprint.id)"
-                                                class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal"
-                                                data-bs-target="#comments" style="cursor: pointer;"></i>
+                                            <!-- Comment Section Button -->
+                                            <i title="Comments" class="fas fa-comment text-info fa-md mx-3" data-bs-toggle="modal"
+                                                data-bs-target="#comments"
+                                                @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                style="cursor: pointer;"></i>
 
-                                                    <!-- Worklog Section Button-->
-                                                <i @click="sendDataToComments(issue.id, issue.sprint.id), getWorkLogs()"
-                                                class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal"
-                                                data-bs-target="#worklog" style="cursor: pointer;"></i>
+                                            <!-- Worklog Section Button -->
+                                            <i title="Worklog" class="fas fa-clock text-success fa-md mx-3" data-bs-toggle="modal"
+                                                data-bs-target="#worklog"
+                                                @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                style="cursor: pointer;"></i>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <!-- <PaginationComponent :currentPage="currentPage" :itemsPerPage="itemsPerPage" :filteredUsers="filteredUsers"
-                      :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" /> -->
+                    <PaginationComponent v-if="paginatedIssues.length >= 10" :currentPage="currentPage"
+                        :itemsPerPage="itemsPerPage" :filteredUsers="filteredIssues" :prevPage="prevPage"
+                        :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
             </div>
         </div>
     </div>
 </template>
-      
+
 <script>
 import comments from './comments.vue';
 import worklog from './worklog.vue';
@@ -594,6 +595,7 @@ import Swal from 'sweetalert2';
 import { mapState } from 'vuex';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import PaginationComponent from '../Paginator/PaginatorComponent.vue';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
 export default {
@@ -632,7 +634,6 @@ export default {
                 exp_duration: '',
                 assignee_id: '',
             },
-            filteredIssues: [],
             editIssueData: {
                 id: '',
                 project_id: '',
@@ -651,13 +652,16 @@ export default {
             parent_issues: [],
             child_issues: [],
             linked_issues: [],
+            currentPage: 1,
+            itemsPerPage: 10,
         };
     },
     components: {
         QuillEditor,
         vSelect,
         comments,
-        worklog
+        worklog,
+        PaginationComponent,
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
@@ -687,12 +691,42 @@ export default {
                 !currentParentIssueIds.includes(issue.id)
             );
         },
-
         isEditParentDropdownDisabled: function () {
             return this.editIssueData.type === 'epic';
         },
+        paginatedIssues() {
+            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+            return this.filteredIssues.slice(startIndex, startIndex + this.itemsPerPage);
+        },
+        filteredIssues() {
+            const searchLowerCase = this.searchTerm.toLowerCase() || ''
+            return this.allIssues.filter(issue => {
+                return (
+                    issue.title.toLowerCase().includes(searchLowerCase) ||
+                    issue.type.toLowerCase().includes(searchLowerCase) ||
+                    issue.status.toLowerCase().includes(searchLowerCase) ||
+                    issue.assignee.name.toLowerCase().includes(searchLowerCase)
+                );
+            });
+        },
     },
     methods: {
+        nextPage() {
+            if (this.currentPage * this.itemsPerPage < this.filteredUsers.length) {
+                this.currentPage++;
+            }
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        goToPage(page) {
+            this.currentPage = page;
+            const startIndex = (page - 1) * this.itemsPerPage;
+            const endIndex = startIndex + this.itemsPerPage;
+            this.displayedUsers = this.filteredUsers.slice(startIndex, endIndex);
+        },
         async getAttachmentUrl(e, id) {
             e.preventDefault();
             try {
@@ -935,7 +969,6 @@ export default {
             }
         },
         async createIssues(e) {
-            console.log('heelo')
             e.preventDefault()
             try {
                 let project_id = localStorage.getItem('projectId')
@@ -973,6 +1006,7 @@ export default {
                         this.uploadProgress = percentCompleted;
                     },
                 });
+                console.log("resp", response);
                 if (response.status === 201) {
                     Swal.fire({
                         title: response.data.message,
@@ -983,15 +1017,17 @@ export default {
                     new Noty({
                         type: 'error',
                         text: response.data.message,
-                        timeout: 1000,
+                        timeout: 2000,
                     }).show();
                 }
                 this.$store.commit('hideLoader');
+                this.getIssue();
             } catch (error) {
+                console.log(error);
                 new Noty({
                     type: 'error',
                     text: error.response.data.message,
-                    timeout: 1000,
+                    timeout: 2000,
                 }).show();
                 this.$store.commit('hideLoader');
             }
@@ -1075,7 +1111,6 @@ export default {
             if (quillEditor) {
                 quillEditor.setHTML(issue.description);
             }
-            // console.log("selectedData", this.editIssueData);
         },
         async editIssue(e) {
             e.preventDefault()
@@ -1127,7 +1162,7 @@ export default {
                 });
                 if (response.status === 200) {
                     Swal.fire({
-                        title: response.data.message,
+                        title: "Issue updated successfully!",
                         icon: 'success',
                     });
                     this.resetValues();
@@ -1284,8 +1319,6 @@ export default {
             this.issueData.key = uniqueKey;
             this.editIssueData.key = uniqueKey2;
         },
-
-        // comments component methods
         sendDataToComments(issueID, sprintID) {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
             this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID);
@@ -1432,5 +1465,5 @@ export default {
     color: blue !important;
     text-decoration: underline;
     transform: scale(1.1);
-}</style>
-      
+}
+</style>
