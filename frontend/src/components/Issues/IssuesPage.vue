@@ -567,7 +567,7 @@
                                                 data-bs-target="#comments" style="cursor: pointer;"></i>
 
                                                     <!-- Worklog Section Button-->
-                                                <i @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                <i @click="sendDataToComments(issue.id, issue.sprint.id), getWorkLogs()"
                                                 class="fas fa-trash text-danger m-1 fa-xs" data-bs-toggle="modal"
                                                 data-bs-target="#worklog" style="cursor: pointer;"></i>
                                         </td>
@@ -1289,6 +1289,9 @@ export default {
         sendDataToComments(issueID, sprintID) {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
             this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID);
+        },
+        getWorkLogs(){
+            this.$refs.workLogView.getWorkLogs()
         }
     },
     mounted() {

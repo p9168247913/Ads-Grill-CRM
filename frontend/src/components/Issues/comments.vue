@@ -8,17 +8,19 @@
     <div class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
         aria-hidden="true" role="dialog" data-backdrop="false">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content"> 
+            <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="createProjectLabel">Comments</h5>
-                    <button @click="comments = [], resetValues(), filterKey=''" ref="closeModal" type="button"
+                    <button @click="comments = [], resetValues(), filterKey = ''" ref="closeModal" type="button"
                         class="btn-close bg-dark text-xs" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body modalBody">
                     <div>
                         <ul class="nav nav-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button v-if="authUser.role=='development' && authUser.designation=='project_manager' | authUser.role=='client'" @click="getComments('client'), resetValues()" class="nav-link" id="list1-tab"
+                                <button
+                                    v-if="authUser.role == 'development' && authUser.designation == 'project_manager' | authUser.role == 'client'"
+                                    @click="getComments('client'), resetValues()" class="nav-link" id="list1-tab"
                                     data-bs-toggle="tab" data-bs-target="#filteredCommentsClient" type="button" role="tab"
                                     aria-controls="list1" aria-selected="true" title="click me">Client</button>
                             </li>
@@ -35,8 +37,8 @@
                             <div v-if="filterKey" class="row mt-3">
                                 <div class="col-md-10 mb-3">
                                     <textarea v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
-                                        style="height: 40px; resize: none; max-height: auto;" placeholder=" Add Comments..." type="text"
-                                        class="form-control" required></textarea>
+                                        style="height: 40px; resize: none; max-height: auto;" placeholder=" Add Comments..."
+                                        type="text" class="form-control" required></textarea>
                                 </div>
                                 <div v-if="isCommentFocused" class="col-md-2 mb-3">
                                     <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
@@ -81,8 +83,8 @@
                                             <p class="small">{{ comment.description }}</p>
                                         </div>
                                         <div v-if="comment.editMode" class="d-flex flex-row">
-                                            <textarea @keyup.enter="editComment(comment,)" type="text" placeholder="Edit Comment..."
-                                                v-model="comment.description"
+                                            <textarea @keyup.enter="editComment(comment,)" type="text"
+                                                placeholder="Edit Comment..." v-model="comment.description"
                                                 class="form-control small w-50 me-3"
                                                 style="height:40px; resize: none;"></textarea>
 
@@ -396,7 +398,7 @@ export default {
                 return 'download.zip';
             }
         },
-        async downloadCommentAttachments(e, commentID){
+        async downloadCommentAttachments(e, commentID) {
             e.preventDefault();
             try {
                 const response = await axios.get(`${BASE_URL}api/development/comments/download?commentID=${commentID}`, {

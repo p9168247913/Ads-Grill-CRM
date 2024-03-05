@@ -183,8 +183,8 @@ class SprintView(CsrfExemptMixin, APIView):
             end_date_str = request.data.get('end_date')
             upd_sprint = Sprint.objects.get(pk=requestData.get('id'))
 
-            if Sprint.objects.filter(project__pk=requestData.get('project_id'), name=request.data.get('name')).exists():
-                return JsonResponse({'message':'Sprint with this name already exists'})
+            # if Sprint.objects.filter(project__pk=requestData.get('project_id'), name=request.data.get('name')).exists():
+            #     return JsonResponse({'message':'Sprint with this name already exists'})
     
             if start_date_str:
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M')
@@ -214,6 +214,7 @@ class SprintView(CsrfExemptMixin, APIView):
                 upd_sprint.start_date = start_date
                 upd_sprint.end_date = end_date
                 upd_sprint.goal = requestData.get('goal')
+                upd_sprint.is_started = requestData.get('is_started')
     
                 upd_sprint.save()
     
