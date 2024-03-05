@@ -51,7 +51,7 @@ class IssueView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def send_issue_details(self,title, issue_type,priority,created_at,reporter,link,email,event):
+    def send_issue_details(self,title, issue_type,priority,created_at,reporter,link,email):
         local_time=created_at.astimezone(timezone.get_current_timezone())
         time=local_time.strftime('%d-%m-%y  %H:%M:%S')
         subject = f'{title}'
@@ -160,7 +160,7 @@ class IssueView(CsrfExemptMixin, APIView):
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
                                        
                 url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
-                send_email = threading.Thread(target=self.send_issue_details, args=((issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email,event)))
+                send_email = threading.Thread(target=self.send_issue_details, args=((issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)))
                 send_email.start()
         
         except Project.DoesNotExist:
