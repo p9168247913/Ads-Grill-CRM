@@ -494,7 +494,7 @@
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                                             v-for="(head) in headers" :key="head">{{ head }}</th>
-                                        <th style="color: #344767 !important;"
+                                        <th style="color: #344767 !important;text-align: center;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head">
                                             Action</th>
                                     </tr>
@@ -969,7 +969,6 @@ export default {
             }
         },
         async createIssues(e) {
-            console.log('heelo')
             e.preventDefault()
             try {
                 let project_id = localStorage.getItem('projectId')
@@ -1007,6 +1006,7 @@ export default {
                         this.uploadProgress = percentCompleted;
                     },
                 });
+                console.log("resp", response);
                 if (response.status === 201) {
                     Swal.fire({
                         title: response.data.message,
@@ -1017,15 +1017,17 @@ export default {
                     new Noty({
                         type: 'error',
                         text: response.data.message,
-                        timeout: 1000,
+                        timeout: 2000,
                     }).show();
                 }
                 this.$store.commit('hideLoader');
+                this.getIssue();
             } catch (error) {
+                console.log(error);
                 new Noty({
                     type: 'error',
                     text: error.response.data.message,
-                    timeout: 1000,
+                    timeout: 2000,
                 }).show();
                 this.$store.commit('hideLoader');
             }
@@ -1109,7 +1111,6 @@ export default {
             if (quillEditor) {
                 quillEditor.setHTML(issue.description);
             }
-            // console.log("selectedData", this.editIssueData);
         },
         async editIssue(e) {
             e.preventDefault()
@@ -1161,7 +1162,7 @@ export default {
                 });
                 if (response.status === 200) {
                     Swal.fire({
-                        title: response.data.message,
+                        title: "Issue updated successfully!",
                         icon: 'success',
                     });
                     this.resetValues();
