@@ -808,7 +808,6 @@ export default {
     mounted() {
         this.getAllSprints();
         this.filteredSprints
-
     },
     watch: {
         'sprintData.start_date': function (newStartDate) {
