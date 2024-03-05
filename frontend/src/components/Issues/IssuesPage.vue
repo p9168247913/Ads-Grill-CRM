@@ -568,7 +568,7 @@
                                             <!-- Worklog Section Button -->
                                             <i title="Worklog" class="fas fa-clock text-success fa-md mx-3" data-bs-toggle="modal"
                                                 data-bs-target="#worklog"
-                                                @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                @click="sendDataToComments(issue.id, issue.sprint.id), getWorkLogs()"
                                                 style="cursor: pointer;"></i>
                                         </td>
                                     </tr>
