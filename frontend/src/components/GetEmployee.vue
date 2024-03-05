@@ -17,7 +17,7 @@
                                 <span class="input-group-text text-body">
                                     <i class="fas fa-search" aria-hidden="true"></i>
                                 </span>
-                                <input type="text" v-model="searchTerm" @change="filterUsers" class="form-control"
+                                <input type="text" v-model="searchTerm" class="form-control"
                                     placeholder="Search by name, role, designation or number..." />
                             </div>
                         </div>
@@ -417,7 +417,6 @@ export default {
             const endIndex = startIndex + this.itemsPerPage;
             this.displayedUsers = this.filteredUsers.slice(startIndex, endIndex);
         },
-        filterUsers() { },
         resetValues() {
             this.closeModal
             this.email = ''

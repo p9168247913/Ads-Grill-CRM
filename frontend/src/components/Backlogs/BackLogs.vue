@@ -42,7 +42,7 @@
                                 <h5 class="modal-title" id="createProjectLabel">Create Sprint</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-top: 20px; ">
+                            <div class="modal-body modalBody" style="padding-top: 20px;">
                                 <form @submit="createSprints($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -89,7 +89,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row" style="max-height: 300px; overflow: auto;">
+                                    <div class="row" style="height: 300px; overflow: auto;">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editor" :modules="modules" theme="snow"
@@ -168,7 +168,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row" style="max-height: 300px; overflow: auto;">
+                                    <div class="row" style="height: 300px; overflow: auto;">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editEditor" :modules="modules" theme="snow"
