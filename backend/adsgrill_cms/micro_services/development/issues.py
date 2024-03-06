@@ -245,7 +245,7 @@ class IssueView(CsrfExemptMixin, APIView):
                 return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
             
             
-            if(request.user.designation=="Product Manager" and request.user.role.name=="development"):
+            if(request.user.designation=="project_manager" and request.user.role.name=="development"):
                 if requestData.get("status")=="done":
                     worklogs=WorkLog.objects.filter(issue=upd_issue).order_by('-created_at')
                     if worklogs:

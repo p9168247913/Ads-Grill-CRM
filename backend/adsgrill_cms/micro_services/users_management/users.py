@@ -27,7 +27,7 @@ class UsersView(CsrfExemptMixin, APIView):
                 user_data = []
                 imageData = None
                 role = request.GET.get('role')
-                requestedUsers = Users.objects.filter(is_deleted=False).order_by('-created_at')
+                requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
                 for user in requestedUsers:
                     if user.profile_pic:
                         imagePath = user.profile_pic.path
