@@ -1,5 +1,7 @@
 <!-- Home.vue -->
+
 <template>
+
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
@@ -140,7 +142,7 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-12 mb-3" style="height: 400px; overflow: auto;">
+                                        <div class="col-md-12 mb-3">
                                             <label for="description" class="form-label">Description</label>
                                             <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
                                         </div>
@@ -482,7 +484,7 @@
                 <worklog ref="workLogView" />
 
                 <!--Table-->
-                <div class="card" style="margin-top: 2rem;">
+                <div v-if="filteredIssues.length" class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
                         <h6>ISSUES</h6>
                     </div>
@@ -551,23 +553,24 @@
                                             </div>
                                         </td>
                                         <td class="align-middle d-md-table-cell actions">
-                                            <i title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3" data-bs-toggle="modal"
-                                                data-bs-target="#editIssue" @click="editData(issue)"
+                                            <i title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3 icon"
+                                                data-bs-toggle="modal" data-bs-target="#editIssue"
+                                                @click="editData(issue)"
                                                 style="color: dodgerblue !important; cursor: pointer;"></i>
 
                                             <i title="Delete Issue" @click="deleteIssue(issue.id)"
-                                                class="fas fa-trash text-danger fa-md mx-3"
+                                                class="fas fa-trash text-danger fa-md mx-3 icon"
                                                 style="cursor: pointer;"></i>
 
                                             <!-- Comment Section Button -->
-                                            <i title="Comments" class="fas fa-comment text-info fa-md mx-3" data-bs-toggle="modal"
-                                                data-bs-target="#comments"
+                                            <i title="Comments" class="fas fa-comment text-info fa-md mx-3 icon"
+                                                data-bs-toggle="modal" data-bs-target="#comments"
                                                 @click="sendDataToComments(issue.id, issue.sprint.id)"
                                                 style="cursor: pointer;"></i>
 
                                             <!-- Worklog Section Button -->
-                                            <i title="Worklog" class="fas fa-clock text-success fa-md mx-3" data-bs-toggle="modal"
-                                                data-bs-target="#worklog"
+                                            <i title="Worklog" class="fas fa-clock text-success fa-md mx-3 icon"
+                                                data-bs-toggle="modal" data-bs-target="#worklog"
                                                 @click="sendDataToComments(issue.id, issue.sprint.id), getWorkLogs()"
                                                 style="cursor: pointer;"></i>
                                         </td>
@@ -579,6 +582,9 @@
                     <PaginationComponent v-if="paginatedIssues.length >= 10" :currentPage="currentPage"
                         :itemsPerPage="itemsPerPage" :filteredUsers="filteredIssues" :prevPage="prevPage"
                         :nextPage="nextPage" :goToPage="goToPage" />
+                </div>
+                <div v-else>
+                    <p>No issues found</p>
                 </div>
             </div>
         </div>
@@ -957,6 +963,7 @@ export default {
                 })
                 if (response.status === 200) {
                     this.allIssues = response.data.issues
+                    console.log(this.allIssues);
                 }
                 this.$store.commit('hideLoader');
             } catch (error) {
@@ -1202,8 +1209,10 @@ export default {
                                 token: this.authToken
                             }
                         })
-                        this.getIssue();
-                        Swal.fire('Deleted!', response.data.message, 'success');
+                        if (response.status === 200) {
+                            this.getIssue();
+                            Swal.fire('Deleted!', response.data.message, 'success');
+                        }
                     } catch (error) {
                         this.getIssue();
                         Swal.fire('Error!', error.response.data.message, 'error');
@@ -1323,7 +1332,7 @@ export default {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
             this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID);
         },
-        getWorkLogs(){
+        getWorkLogs() {
             this.$refs.workLogView.getWorkLogs()
         }
     },
@@ -1340,7 +1349,7 @@ export default {
 
 <style scoped>
 ::v-deep .ql-container {
-    max-height: 500px;
+    max-height: 300px;
     display: block;
 }
 
@@ -1354,9 +1363,10 @@ export default {
 
 ::v-deep .ql-editor {
     height: auto;
-    max-height: 500px;
+    max-height: 300px;
     overflow-y: auto;
     color: black;
+    height: 300px;
 }
 
 ::v-deep .ql-tooltip {
@@ -1379,7 +1389,10 @@ export default {
 
 ::v-deep .ql-editor img:hover {
     transform: scale(2.5);
-    /* Adjust the scale factor as needed */
+}
+
+.icon:hover{
+    transform: scale(1.1);
 }
 
 .modal-title-input {

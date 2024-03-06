@@ -87,13 +87,13 @@
                                             <label for="projectName" class="form-label">Reporter</label>
                                             <select class="form-control" v-model="sprintData.reporter_id">
                                                 <option value="">Select Type</option>
-                                                <option value="18">Abhishek</option>
-                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                                    tag.name }}</option> -->
+                                                <option v-for="(manager, index) in projectManagers" :key="index"
+                                                    :value="manager.id">{{
+            manager.name }}</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row" style="height: 300px; overflow: auto;">
+                                    <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editor" :modules="modules" theme="snow"
@@ -168,13 +168,13 @@
                                             <select class="form-control" v-model="updatedSprintData.reporter_id"
                                                 required>
                                                 <option value="">Select Type</option>
-                                                <option value="18">Abhishek</option>
-                                                <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                                    tag.name }}</option> -->
+                                                <option v-for="(manager, index) in projectManagers" :key="index"
+                                                    :value="manager.id">{{
+            manager.name }}</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="row" style="height: 300px; overflow: auto;">
+                                    <div class="row">
                                         <div class="col-md-12 mb-3">
                                             <label for="projectName" class="form-label">Description</label>
                                             <QuillEditor required ref="editEditor" :modules="modules" theme="snow"
@@ -226,17 +226,22 @@
                                                 issues)</p>
                                         </div>
                                     </div>
-                                    <div class="col text-end ">
+                                    <div class="col text-end">
                                         <div class="col text-end" style="white-space: nowrap;">
-                                            <button v-if="!isAnySprintStarted && sprint.key !== startedSprintKey"
+                                            <button
+                                                v-if="!isAnySprintStarted && sprint.key !== startedSprintKey && sprint.status !== 'done'"
                                                 @click="startSprint($event, sprint)" class="btn btn-link">
                                                 Start
                                             </button>
-                                            <span v-else-if="sprint.is_started"
-                                                style="height: 30px; padding: 2px 5px;border-radius: 4px;font-weight: bold; font-size: small; background-color: rgb(215, 215, 215);">
+                                            <button v-else-if="sprint.is_started && sprint.status !== 'done'"
+                                                style="height: 30px; padding: 2px 5px; border-radius: 4px; font-weight: bold; font-size: small; background-color: rgb(215, 215, 215);"
+                                                @click="completeSprint(sprint)">
                                                 Started
-                                            </span>
-
+                                            </button>
+                                            <button v-else-if="sprint.status === 'done'"
+                                                style="height: 30px; padding: 2px 5px; border-radius: 4px; font-weight: bold; font-size: small; background-color: green; color: white;">
+                                                Completed
+                                            </button>
                                             <button class="btn btn-link dropdown-open" type="button"
                                                 id="dropdownMenuButton2" data-bs-toggle="dropdown"
                                                 aria-expanded="false">
@@ -286,7 +291,7 @@
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
-            issue.title }}</h6>
+                                                                issue.title }}</h6>
                                                         </div>
                                                     </td>
                                                     <td style="padding-left: 25px;">
@@ -372,6 +377,7 @@ export default {
             },
             projectKey: localStorage.getItem("projectId"),
             startedSprintKey: null,
+            projectManagers: [],
         };
     },
     components: {
@@ -380,10 +386,10 @@ export default {
     computed: {
         ...mapState(['authUser', 'authToken']),
         isAnySprintStarted() {
-            return this.allSprints.some(sprint => sprint.is_started);
+            return this.allSprints?.some(sprint => sprint.is_started);
         },
         filteredSprints() {
-            return this.allSprints.filter(sprint => {
+            return this.allSprints?.filter(sprint => {
                 const searchLowerCase = this.searchTerm.toLowerCase() || '';
                 return (
                     sprint.name.toLowerCase().includes(searchLowerCase) ||
@@ -427,7 +433,6 @@ export default {
                 this.updatedSprintData.description = htmlContent
             }
             this.updatedSprintData.project_id = this.projectKey
-            console.log("update", this.updatedSprintData)
             try {
                 this.$store.commit('showLoader');
                 const response = await axios.put(`${BASE_URL}api/development/sprints`, this.updatedSprintData, {
@@ -436,12 +441,11 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log("response", response);
                 if (response.status === 200) {
                     this.getAllSprints();
                     this.resetValues()
                     Swal.fire({
-                        title: response.data.message,
+                        title: "Sprint started!!",
                         icon: 'success',
                     });
                     this.$refs.createSprintModal.classList.remove('show');
@@ -479,13 +483,11 @@ export default {
                     }
                 });
                 this.allSprints = response.data.sprintAndIssues
-                console.log("ll", this.allSprints);
                 this.$store.commit('hideLoader');
             } catch (error) {
-                console.log(error);
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -505,7 +507,6 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log(response);
                 if (response.status === 201) {
                     this.getAllSprints();
                     this.resetValues()
@@ -542,6 +543,7 @@ export default {
                 key: sprint.key,
                 goal: sprint.goal,
                 status: sprint.status,
+                is_started: sprint.is_started === true ? "True" : "False"
             }
             this.updatedSprintData.start_date = new Date(sprint.start_date).toISOString().slice(0, 16);
             this.updatedSprintData.end_date = new Date(sprint.end_date).toISOString().slice(0, 16);
@@ -556,7 +558,7 @@ export default {
             e.preventDefault();
             const quillEditor = this.$refs.editEditor;
             this.updatedSprintData.project_id = this.projectKey
-            this.updatedSprintData.is_started = "False"
+
             if (quillEditor) {
                 const htmlContent = quillEditor.getHTML();
                 this.updatedSprintData.description = htmlContent
@@ -597,6 +599,25 @@ export default {
                 }).show()
             }
         },
+        async getProjectManagers() {
+            try {
+                this.$store.commit('showLoader');
+                const response = await axios.get(`${BASE_URL}api/development/getProjectManagers`, {
+                    headers: {
+                        token: this.authToken,
+                    }
+                })
+                this.projectManagers = response.data.project_managers;
+                this.$store.commit('hideLoader');
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.message,
+                    timeout: 500,
+                }).show()
+                this.$store.commit('hideLoader');
+            }
+        },
         saveContent(e) {
             e.preventDefault()
             if (this.$refs.editor) {
@@ -605,10 +626,18 @@ export default {
                     const htmlContent = quillEditor.getHTML();
                     return htmlContent
                 } else {
-                    console.error('rootHTML method is not available');
+                    new Noty({
+                        type: 'error',
+                        text: 'rootHTML method is not available',
+                        timeout: 500,
+                    }).show()
                 }
             } else {
-                console.error('Quill editor reference not found');
+                new Noty({
+                    type: 'error',
+                    text: 'Quill editor reference not found',
+                    timeout: 500,
+                }).show()
             }
         },
         formatDate(dateString) {
@@ -632,7 +661,11 @@ export default {
                 const htmlContent = quillEditor.setHTML("");
                 htmlContent
             } else {
-                console.error('rootHTML method is not available');
+                new Noty({
+                    type: 'error',
+                    text: 'rootHTML method is not available',
+                    timeout: 500,
+                }).show()
             }
         },
         generateKey() {
@@ -740,7 +773,6 @@ export default {
 
             return formattedDuration.trim();
         },
-
         async deleteSprint(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -777,7 +809,6 @@ export default {
         toggleDropdown(index) {
             this.allSprints[index].showDropdown = !this.allSprints[index].showDropdown;
         },
-
         showSweetAlert() {
             Swal.fire({
                 icon: 'info',
@@ -808,6 +839,7 @@ export default {
     mounted() {
         this.getAllSprints();
         this.filteredSprints
+        this.getProjectManagers();
     },
     watch: {
         'sprintData.start_date': function (newStartDate) {
@@ -827,6 +859,7 @@ export default {
 <style scoped>
 ::v-deep .ql-container {
     max-height: 300px;
+    display: block;
 }
 
 ::v-deep .ql-editor img {
@@ -842,6 +875,7 @@ export default {
     max-height: 300px;
     overflow-y: auto;
     color: black;
+    height: 300px;
 }
 
 ::v-deep .ql-tooltip {
@@ -851,6 +885,19 @@ export default {
     max-height: 500px;
     overflow-y: auto;
     z-index: 99;
+}
+
+::v-deep .ql-editor img {
+    width: 200px;
+    height: auto;
+    margin: 5px;
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    transition: transform 0.3s ease-in-out;
+}
+
+::v-deep .ql-editor img:hover {
+    transform: scale(2.5);
 }
 
 .priority-icon {

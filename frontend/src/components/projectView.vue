@@ -30,7 +30,7 @@
                   data-bs-target="#createProject">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Project
                 </button>
-                <button type="button" style="width: auto; height: 40px !important;"
+                <button @click="getClientRole" type="button" style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createClient">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Client
@@ -42,7 +42,7 @@
         <!-- Modal for Create Project -->
         <div class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Project</h5>
@@ -129,7 +129,7 @@
         <!-- Modal for Edit Project -->
         <div class="modal fade" ref="createProjectModal" id="editProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="editProjects">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Edit Project</h5>
@@ -218,7 +218,7 @@
         <!-- Modal for Create Client -->
         <div class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Client</h5>
@@ -370,9 +370,9 @@
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
                                             style="cursor: not-allowed;"></i> -->
                       <i data-bs-toggle="modal" data-bs-target="#editProject" @click="editModal(project)"
-                        class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
+                        class="fas fa-pencil-alt text-primary fa-xs pr-4"
                         style="margin-left: 20px; cursor: pointer;"></i>
-                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 fa-xs"
                         style="cursor: pointer;"></i>
                     </td>
                   </tr>
@@ -514,6 +514,31 @@ export default {
         ? teamMembers.substring(0, maxLength) + " "
         : teamMembers;
     },
+    async getClientRole() {
+      try {
+        this.$store.commit('showLoader')
+        let response = await axios.get(`${BASE_URL}api/roles/`);
+        let clientRole = response.data.roles.find((role) => {
+          return role.name == 'client'
+        })
+        if (clientRole) {
+          this.$store.commit('hideLoader')
+          this.clientRoleID = clientRole.id
+        }
+        else {
+          this.$store.commit('hideLoader')
+          this.clientRoleID = null;
+        }
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.response.data.message,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+      this.$store.commit('hideLoader')
+    },
     openModal(teamMembers) {
       this.detailedTeamMembers = teamMembers;
       this.modalOpen = true;
@@ -614,6 +639,7 @@ export default {
           }
         })
         this.allProjects = response.data.projects;
+        console.log("allpro", this.allProjects);
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
@@ -777,12 +803,22 @@ export default {
     async createClient(e) {
       e.preventDefault();
       try {
-        const response = await axios.post(`${BASE_URL}api/client/`, this.clientData)
+        this.$store.commit('showLoader');
+        this.clientData.role = this.clientRoleID
+        this.clientData.designation = 'client'
+        const response = await axios.post(`${BASE_URL}api/create/user/`, this.clientData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          }
+        })
         if (response.status == 201) {
           Swal.fire({
             title: "Client created successfully!",
             icon: 'success',
           })
+          this.resetValues()
+          this.getClients()
+          this.$store.commit('hideLoader')
         }
       } catch (error) {
         new Noty({
@@ -790,6 +826,7 @@ export default {
           text: error.message,
           timeout: 500,
         }).show()
+        this.$store.commit('hideLoader')
       }
     },
     // async getLeadsInfo() {
@@ -934,6 +971,11 @@ export default {
   animation: loader 1.2s linear infinite;
 }
 
+.modalBody {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+}
+
 @keyframes loader {
   0% {
     transform: rotate(0deg);
@@ -1019,6 +1061,29 @@ export default {
     position: relative;
 
     z-index: 1;
+  }
+
+  .modal-dialog {
+    max-width: 99%;
+    margin: auto;
+  }
+
+  .sprint-card {
+    gap: 40px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 992px) {
+  .modal-dialog {
+    max-width: 80%;
+    margin: auto;
+  }
+}
+
+@media (min-width: 993px) {
+  .modal-dialog {
+    max-width: 50%;
+    margin: auto;
   }
 }
 </style>
