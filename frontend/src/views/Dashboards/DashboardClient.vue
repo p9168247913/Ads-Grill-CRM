@@ -120,7 +120,6 @@
             </div>
         </div>
 
-        
         <!--COMMENT SECTION-->
         <div class="d-flex flex-column justify-content-center mt-8">
             <h5 class="mb-2">Comments</h5>
@@ -207,7 +206,6 @@ import 'bootstrap/dist/js/bootstrap.min.js';
 import '@popperjs/core/dist/umd/popper.min.js';
 import Popper from 'popper.js';
 window.Popper = Popper;
-// import Swal from 'sweetalert2';
 export default {
     name: "dashboardClient",
     data() {
@@ -256,7 +254,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -285,7 +283,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -328,7 +326,8 @@ export default {
                 }
             } catch (error) {
                 new Noty({
-                    text: 'An error occurred',
+                    type:'error',
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show();
             }
@@ -376,7 +375,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -412,7 +411,7 @@ export default {
             catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -437,7 +436,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');

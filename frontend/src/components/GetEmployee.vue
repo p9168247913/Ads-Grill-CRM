@@ -432,12 +432,14 @@ export default {
             try {
                 this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/roles/`);
-                this.userRole = response.data.roles
+                if(response.status === 200){
+                    this.userRole = response.data.roles
+                }
                 this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
@@ -495,7 +497,7 @@ export default {
                 } catch (error) {
                     new Noty({
                         type: 'error',
-                        text: error.response.data.message,
+                        text: error.response.data.message? error.response.data.message : error.response.data.detail,
                         timeout: 500,
                     }).show()
                     this.$store.commit('hideLoader')
@@ -520,12 +522,12 @@ export default {
                                 userID: id
                             }
                         });
-                        if (response.status === 201) {
+                        if (response.status === 204) {
                             Swal.fire('Deleted!', 'The user has been deleted.', 'success');
                         }
                         this.$store.commit('hideLoader')
                     } catch (error) {
-                        Swal.fire('Error!', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error!', error.response.data.message? error.response.data.message : error.response.data.detail, 'error');
                         this.$store.commit('hideLoader')
                     }
                 }
@@ -576,7 +578,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
@@ -594,12 +596,14 @@ export default {
                     headers: { token: this.authToken },
                 },
                 )
-                this.users = response.data.users
+                if (response.status == 200) {
+                    this.users = response.data.users
+                }
                 this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')

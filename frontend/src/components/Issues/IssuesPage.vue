@@ -1,5 +1,7 @@
 <!-- Home.vue -->
+
 <template>
+
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
@@ -31,17 +33,19 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- Modal for Create Issue -->
-                <div class="modal fade" ref="createProjectModal" id="createIssue" tabindex="-1"
+                <div data-bs-backdrop="static" class="modal fade" ref="createProject" id="createIssue" tabindex="-1"
                     aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createSprints">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createProjectLabel">Create Issue</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                <button @click="resetValues" ref="createModal" type="button"
+                                    class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody">
+                            <div class="modal-body modalBodyCreate" style="padding-bottom: 0;">
                                 <form @submit="createIssues($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -140,16 +144,16 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-12 mb-3" style="height: 400px; overflow: auto;">
+                                        <div class="col-md-12 mb-3">
                                             <label for="description" class="form-label">Description</label>
                                             <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
-                                        <button type="submit" data-bs-dismiss="modal"
-                                            class="btn btn-primary">Create</button>
+                                        <button type="submit" class="btn btn-primary">Create</button>
                                     </div>
                                 </form>
                             </div>
@@ -158,30 +162,29 @@
                 </div>
 
                 <!-- Modal for edit Issue -->
-                <div class="modal fade" ref="createProjectModal" id="editIssue" tabindex="-1"
-                    aria-labelledby="createProjectLabel" aria-hidden="true" @hiddln="createSprints">
+                <div data-bs-backdrop="static" class="modal fade" ref="yourModalRef" id="editIssue" tabindex="-1"
+                    aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createSprints">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-
-                            <div class="modal-body modalBody">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createProjectLabel">Edit Issue</h5>
+                                <button @click="resetValues" ref="editModal" type="button"
+                                    class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body modalBody" style="padding-bottom: 0;">
                                 <form @submit="editIssue($event), resetValues()">
                                     <div class="row">
-                                        <!-- <h5 class="modal-title" id="createProjectLabel">Edit Issue</h5> -->
                                         <div class="col-md-6 mb-3">
                                             <input type="text" class="form-control modal-title-input"
                                                 v-model="editIssueData.title" @input="generateKey" required>
                                         </div>
-                                        <!-- <div class="col-md-6 mb-3">
-                                            <a href="#child">Child</a>
-                                        </div> -->
                                     </div>
                                     <div class="row" style="margin-top: -20px;">
                                         <div class="col-md-6 mb-3">
-                                            <!-- <label for="key" class="form-label">Key</label> -->
                                             <input type="text" class="form-control modal-key-input"
                                                 v-model="editIssueData.key" readonly="readonly" required>
                                         </div>
-
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -216,15 +219,11 @@
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="team lead" class="form-label">Team Lead</label>
-                                            <select class="form-select" v-model="editIssueData.team_lead_id">
-                                                <option value="">Select Team Lead</option>
-                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
-                                                    {{
-                                    lead.name }}</option>
-                                            </select>
+                                            <label for="parent" class="form-label">Parent</label>
+                                            <v-select v-model="selected_parent_issues" :options="validEditParentIssues"
+                                                label="title" :multiple="true" placeholder="Select parent..."
+                                                :disabled="isEditParentDropdownDisabled || isParentFieldDisabled"></v-select>
                                         </div>
-
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -255,27 +254,34 @@
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="parent" class="form-label">Parent</label>
-                                            <v-select v-model="selected_parent_issues" :options="validEditParentIssues"
-                                                label="title" :multiple="true" placeholder="Select parent(s)"
-                                                :disabled="isEditParentDropdownDisabled"></v-select>
-                                            <!-- <select class="form-select" v-model="editIssueData.parent_id"
-                                                :disabled="isEditParentDropdownDisabled" required>
-                                                <option value="">Select Parent</option>
-                                                <option v-for="(parent, index) in validEditParentIssues" :key="index"
-                                                    :value="parent.id">{{ parent.title }}</option>
-                                            </select> -->
+                                            <label for="team lead" class="form-label">Team Lead</label>
+                                            <select class="form-select" v-model="editIssueData.team_lead_id">
+                                                <option value="">Select Team Lead</option>
+                                                <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
+                                                    {{
+                                    lead.name }}</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-12 mb-3">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="status" class="form-label">Status</label>
+                                            <select class="form-select" v-model="editIssueData.status" required>
+                                                <option value="">Select Status</option>
+                                                <option value="to_do">To Do</option>
+                                                <option value="in_progress">In Progress</option>
+                                                <option v-if="authUser.designation === 'project_manager'" value="done">
+                                                    Done</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
                                             <label for="issueName" class="form-label">Files</label>
                                             <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt"
                                                 class="form-control" multiple @change="handleUpdateFileChange">
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-12 mb-3" style="height: 400px; overflow: auto;">
+                                        <div class="col-md-12 mb-3" style="height: 400px;">
                                             <label for="description" class="form-label">Description</label>
                                             <QuillEditor required ref="editEditor" :modules="modules" theme="snow"
                                                 toolbar="full" />
@@ -321,14 +327,20 @@
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{
-                                    issue.status }}</h6>
+                                                                <h6 class="mb-0 text-xs">{{ issue.status === "to_do" ?
+                                    "To Do" :
+                                    issue.status === "in_progress" ? "In Progress" :
+                                        issue.status === "done" ? "Done" : "" }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{
-                                    issue.priority }}</h6>
+                                                                <h6 class="mb-0 text-xs">{{ issue.priority === "low" ?
+                                    "Low" : issue.priority === "lowest" ?
+                                        "Lowest" : issue.priority === "medium" ? "Medium" :
+                                            issue.priority === "high" ? "High" :
+                                                issue.priority === "highest" ? "Highest" : "" }}
+                                                                </h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
@@ -383,14 +395,20 @@
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{
-                                    issue.status }}</h6>
+                                                                <h6 class="mb-0 text-xs">{{ issue.status === "to_do" ?
+                                    "To Do" :
+                                    issue.status === "in_progress" ? "In Progress" :
+                                        issue.status === "done" ? "Done" : "" }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{
-                                    issue.priority }}</h6>
+                                                                <h6 class="mb-0 text-xs">{{ issue.priority === "low" ?
+                                    "Low" : issue.priority === "lowest" ?
+                                        "Lowest" : issue.priority === "medium" ? "Medium" :
+                                            issue.priority === "high" ? "High" :
+                                                issue.priority === "highest" ? "Highest" : "" }}
+                                                                </h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
@@ -444,14 +462,20 @@
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{
-                                    issue.status }}</h6>
+                                                                <h6 class="mb-0 text-xs">{{ issue.status === "to_do" ?
+                                    "To Do" :
+                                    issue.status === "in_progress" ? "In Progress" :
+                                        issue.status === "done" ? "Done" : "" }}</h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
                                                             <div class="d-flex flex-column justify-content-center">
-                                                                <h6 class="mb-0 text-xs">{{
-                                    issue.priority }}</h6>
+                                                                <h6 class="mb-0 text-xs">{{ issue.priority === "low" ?
+                                    "Low" : issue.priority === "lowest" ?
+                                        "Lowest" : issue.priority === "medium" ? "Medium" :
+                                            issue.priority === "high" ? "High" :
+                                                issue.priority === "highest" ? "Highest" : "" }}
+                                                                </h6>
                                                             </div>
                                                         </td>
                                                         <td style="padding-left: 25px;">
@@ -466,9 +490,10 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                            @click="resetValues">Close</button>
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
+                                        <button ref="editModal" type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal" @click="resetValues">Close</button>
                                         <button type="submit" data-bs-dismiss="modal"
                                             class="btn btn-primary">Save</button>
                                     </div>
@@ -482,14 +507,14 @@
                 <worklog ref="workLogView" />
 
                 <!--Table-->
-                <div class="card" style="margin-top: 2rem;">
+                <div v-if="filteredIssues?.length" class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
-                        <h6>ISSUES</h6>
+                        <h6>{{ this.projectName ? `ISSUES of ${this.projectName}` : "ISSUES" }}</h6>
                     </div>
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
-                                <thead>
+                                <thead style="position: sticky; top: 0; background-color: white; z-index: 1;">
                                     <tr>
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
@@ -513,22 +538,33 @@
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ issue.type }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ issue.type === "story" ? "Story" :
+                                    issue.type === "epic" ? "Epic" : issue.type === "task" ? "Task" :
+                                        issue.type === "subtask" ? "Subtask" : issue.type === "bug" ? "Bug"
+                                                    : ""
+                                                    }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ issue.status }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ issue.status === "to_do" ? "To Do" :
+                                                    issue.status === "in_progress" ? "In Progress" :
+                                                    issue.status === "done" ? "Done" : "" }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ issue.exp_duration }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ issue.sprint.name }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ issue.org_duration }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ formatDuration(issue.exp_duration) }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 25px;">
+                                            <div class="d-flex flex-column justify-content-left">
+                                                <h6 class="mb-0 text-sm">{{ formatDuration(issue.org_duration) }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding: 25px;">
@@ -551,23 +587,24 @@
                                             </div>
                                         </td>
                                         <td class="align-middle d-md-table-cell actions">
-                                            <i title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3" data-bs-toggle="modal"
-                                                data-bs-target="#editIssue" @click="editData(issue)"
+                                            <i title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3 icon"
+                                                data-bs-toggle="modal" data-bs-target="#editIssue"
+                                                @click="editData(issue)"
                                                 style="color: dodgerblue !important; cursor: pointer;"></i>
 
                                             <i title="Delete Issue" @click="deleteIssue(issue.id)"
-                                                class="fas fa-trash text-danger fa-md mx-3"
+                                                class="fas fa-trash text-danger fa-md mx-3 icon"
                                                 style="cursor: pointer;"></i>
 
                                             <!-- Comment Section Button -->
-                                            <i title="Comments" class="fas fa-comment text-info fa-md mx-3" data-bs-toggle="modal"
-                                                data-bs-target="#comments"
+                                            <i title="Comments" class="fas fa-comment text-info fa-md mx-3 icon"
+                                                data-bs-toggle="modal" data-bs-target="#comments"
                                                 @click="sendDataToComments(issue.id, issue.sprint.id)"
                                                 style="cursor: pointer;"></i>
 
                                             <!-- Worklog Section Button -->
-                                            <i title="Worklog" class="fas fa-clock text-success fa-md mx-3" data-bs-toggle="modal"
-                                                data-bs-target="#worklog"
+                                            <i title="Worklog" class="fas fa-clock text-success fa-md mx-3 icon"
+                                                data-bs-toggle="modal" data-bs-target="#worklog"
                                                 @click="sendDataToComments(issue.id, issue.sprint.id), getWorkLogs()"
                                                 style="cursor: pointer;"></i>
                                         </td>
@@ -576,9 +613,12 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="paginatedIssues.length >= 10" :currentPage="currentPage"
+                    <PaginationComponent v-if="filteredIssues.length >= 10" :currentPage="currentPage"
                         :itemsPerPage="itemsPerPage" :filteredUsers="filteredIssues" :prevPage="prevPage"
                         :nextPage="nextPage" :goToPage="goToPage" />
+                </div>
+                <div v-else>
+                    <p>No issues found</p>
                 </div>
             </div>
         </div>
@@ -602,8 +642,9 @@ export default {
     name: "IssuePage",
     data() {
         return {
+            editModalOpened: false,
             isEditIssueModalVisible: false,
-            headers: ['S.No.', 'Title', 'Type', 'Status', 'Task duration', 'Actual duration', 'Reporting Manager', 'Assignee', 'Files'],
+            headers: ['S.No.', 'Title', 'Type', 'Status', 'Sprint', 'Task duration', 'Actual duration', 'Reporting Manager', 'Assignee', 'Files'],
             allIssues: [],
             selectedSprintId: '',
             selectedEditSprintId: '',
@@ -648,12 +689,14 @@ export default {
                 priority: '',
                 exp_duration: '',
                 assignee_id: '',
+                is_started: '',
             },
             parent_issues: [],
             child_issues: [],
             linked_issues: [],
             currentPage: 1,
             itemsPerPage: 10,
+            projectName: ''
         };
     },
     components: {
@@ -683,16 +726,12 @@ export default {
                 return [];
             }
             const validTypes = this.getValidParentTypes(this.editIssueData.type);
-            const currentParentIssueIds = this.parent_issues.map(parent => parent.id);
 
-            return this.allIssues.filter(issue =>
+            const data = this.allIssues.filter(issue =>
                 validTypes.includes(issue.type) &&
-                issue.sprint.id === this.editIssueData.sprint_id &&
-                !currentParentIssueIds.includes(issue.id)
+                issue.sprint.id === this.editIssueData.sprint_id
             );
-        },
-        isEditParentDropdownDisabled: function () {
-            return this.editIssueData.type === 'epic';
+            return data
         },
         paginatedIssues() {
             const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -705,12 +744,49 @@ export default {
                     issue.title.toLowerCase().includes(searchLowerCase) ||
                     issue.type.toLowerCase().includes(searchLowerCase) ||
                     issue.status.toLowerCase().includes(searchLowerCase) ||
-                    issue.assignee.name.toLowerCase().includes(searchLowerCase)
+                    issue.assignee.name.toLowerCase().includes(searchLowerCase) ||
+                    issue.sprint.name.toLowerCase().includes(searchLowerCase)
                 );
             });
         },
+        isEditParentDropdownDisabled: function () {
+            return this.editIssueData.type === 'epic' || !this.editIssueData.sprint_id;
+        },
+        isParentFieldDisabled() {
+            return this.editIssueData.sprint_id === "" || this.editIssueData.type === "" || this.editIssueData.type === 'epic';
+        },
     },
     methods: {
+        formatDuration(duration) {
+            const regex = /P(\d+D)?T(\d+H)?(\d+M)?(\d+S)?/;
+            const matches = duration?.match(regex);
+
+            if (!matches) {
+                return '';
+            }
+
+            const [, days, hours, minutes, seconds] = matches;
+
+            const formattedParts = [];
+
+            if (days) {
+                formattedParts.push(`${parseInt(days, 10)}d`);
+            }
+
+            if (hours) {
+                formattedParts.push(`${parseInt(hours, 10)}h`);
+            }
+
+            if (minutes) {
+                formattedParts.push(`${parseInt(minutes, 10)}m`);
+            }
+
+            if (seconds) {
+                formattedParts.push(`${parseInt(seconds, 10)}s`);
+            }
+
+            return formattedParts.join(' ');
+        },
         nextPage() {
             if (this.currentPage * this.itemsPerPage < this.filteredUsers.length) {
                 this.currentPage++;
@@ -754,9 +830,9 @@ export default {
                     });
                 }
             } catch (error) {
-                // console.log(error);
                 new Noty({
-                    text: 'An error occurred',
+                    type: 'error',
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show();
             }
@@ -779,7 +855,23 @@ export default {
                     id = Allissue.id
                 }
             });
-            // console.log("issue", issue);
+            this.editIssueData = {
+                id: id,
+                type: selectedIssue.type,
+                title: selectedIssue.title,
+                key: selectedIssue.key,
+                priority: selectedIssue.priority,
+                exp_duration: selectedIssue.exp_duration,
+                assignee_id: selectedIssue.assignee.id,
+                reporter_id: selectedIssue.reporter.id,
+                sprint_id: selectedIssue.sprint.id,
+                team_lead_id: selectedIssue.team_lead.id,
+                status: selectedIssue.status,
+            }
+            const quillEditor = this.$refs.editEditor;
+            if (quillEditor) {
+                quillEditor.setHTML(selectedIssue.description);
+            }
             if (id !== '') {
                 try {
                     this.$store.commit('showLoader')
@@ -836,31 +928,16 @@ export default {
                         this.child_issues = [];
                         this.linked_issues = []
                     }
+                    this.selected_parent_issues = this.parent_issues;
                     this.$store.commit('hideLoader');
                 } catch (error) {
-                    // console.log(error);
                     new Noty({
                         type: 'error',
-                        text: error.message,
-                        timeout: 1000,
+                        text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                        timeout: 2000,
                     }).show();
                     this.$store.commit('hideLoader');
                 }
-            }
-            this.editIssueData = {
-                type: selectedIssue.type,
-                title: selectedIssue.title,
-                key: selectedIssue.key,
-                priority: selectedIssue.priority,
-                exp_duration: selectedIssue.exp_duration,
-                assignee_id: selectedIssue.assignee.id,
-                reporter_id: selectedIssue.reporter.id,
-                sprint_id: selectedIssue.sprint.id,
-                team_lead_id: selectedIssue.team_lead.id,
-            }
-            const quillEditor = this.$refs.editEditor;
-            if (quillEditor) {
-                quillEditor.setHTML(selectedIssue.description);
             }
         },
         openEditModal() {
@@ -887,29 +964,65 @@ export default {
             return hierarchy.slice(0, childIndex);
         },
         checkDurationValidity() {
-            const durationRegex = /^(?:(\d{1,2})h\s*)?(?:(\d{1,2})m\s*)?(?:(\d{1,2})s\s*)?$/;
+            const durationRegex = /^(?:(\d+)d\s*)?(?:(\d{1,2})h\s*)?(?:(\d{1,2})m\s*)?(?:(\d{1,2})s\s*)?$/;
             const match = this.issueData.exp_duration.match(durationRegex);
+            const match2 = this.editIssueData.exp_duration.match(durationRegex);
 
-            if (!match) {
-                alert("Invalid duration format. Please use the format like '7h 20m 30s'.");
+            if (!match || !match2) {
+                new Noty({
+                    type: 'error',
+                    text: "Invalid duration format. Please use the format like '7d 5h 20m 30s'.",
+                    timeout: 5000,
+                    layout: 'topRight', 
+                    closeWith: ['click'], 
+                }).show();
                 this.issueData.exp_duration = '';
                 return;
             }
-            const hours = parseInt(match[1]) || 0;
-            const minutes = parseInt(match[2]) || 0;
-            const seconds = parseInt(match[3]) || 0;
 
-            const formattedMinutes = minutes > 0 ? `${minutes}m` : "0m";
-            const formattedSeconds = seconds > 0 ? `${seconds}s` : "0s";
-            const formattedDuration = `${hours}h ${formattedMinutes} ${formattedSeconds}`;
+            const days = parseInt(match[1]) || 0;
+            const hours = parseInt(match[2]) || 0;
+            const minutes = parseInt(match[3]) || 0;
+            const seconds = parseInt(match[4]) || 0;
+
+            const formattedDays = days > 0 ? `${days}d` : '0d';
+            const formattedHours = hours > 0 ? `${hours}h` : '0h';
+            const formattedMinutes = minutes > 0 ? `${minutes}m` : '0m';
+            const formattedSeconds = seconds > 0 ? `${seconds}s` : '0s';
+
+            const days2 = parseInt(match2[1]) || 0;
+            const hours2 = parseInt(match2[2]) || 0;
+            const minutes2 = parseInt(match2[3]) || 0;
+            const seconds2 = parseInt(match2[4]) || 0;
+
+            const formattedDays2 = days2 > 0 ? `${days2}d` : '0d';
+            const formattedHours2 = hours2 > 0 ? `${hours2}h` : '0h';
+            const formattedMinutes2 = minutes2 > 0 ? `${minutes2}m` : '0m';
+            const formattedSeconds2 = seconds2 > 0 ? `${seconds2}s` : '0s';
+
+
+            const formattedDuration = `${formattedDays} ${formattedHours} ${formattedMinutes} ${formattedSeconds}`;
+            const formattedDuration2 = `${formattedDays2} ${formattedHours2} ${formattedMinutes2} ${formattedSeconds2}`;
+
             this.issueData.exp_duration = formattedDuration;
+            this.editIssueData.exp_duration = formattedDuration2;
 
-            if (hours > 23 || minutes > 59 || seconds > 59) {
-                alert("Invalid time values. Hours should be between 0 and 23, and minutes/seconds should be between 0 and 59.");
+            if (days > 366 || hours > 23 || minutes > 59 || seconds > 59 || days2 > 366 || hours2 > 23 || minutes2 > 59 || seconds2 > 59) {
+                // alert();
+                new Noty({
+                    type: 'error',
+                    text: "Invalid time values. Days should be between 0 and 365, hours should be between 0 and 23, and minutes/seconds should be between 0 and 59.",
+                    timeout: 5000,
+                    closeWith: ['click', 'button'],
+                    buttons: [
+                        Noty.button('Close', 'btn btn-light', function (n) {
+                            n.close();
+                        })
+                    ],
+                }).show()
                 this.issueData.exp_duration = '';
                 return;
             }
-            // console.log(match);
         },
         onParentIssuesChange(selectedParents) {
             const parentIds = selectedParents.map(parent => parent.id);
@@ -922,14 +1035,39 @@ export default {
                 team_lead_id: '',
                 title: '',
                 key: '',
-                description: '',
                 type: '',
                 priority: '',
                 exp_duration: '',
                 assignee_id: '',
-                attachments: null,
+                attachments: [],
+                description: '',
             }
-            this.parent_issues = []
+            const quillEditor = this.$refs.editor;
+            if (quillEditor) {
+                const htmlContent = quillEditor.setHTML("");
+                this.issueData.description = htmlContent
+            } else {
+                new Noty({
+                    type: 'error',
+                    text: 'rootHTML method is not available',
+                    timeout: 5000,
+                }).show()
+            }
+            this.editIssueData = {
+                id: '',
+                project_id: '',
+                sprint_id: '',
+                reporter_id: '',
+                team_lead_id: '',
+                attachments: [],
+                title: '',
+                key: '',
+                type: '',
+                priority: '',
+                exp_duration: '',
+                assignee_id: '',
+            },
+                this.parent_issues = []
             this.selected_parent_issues = []
         },
         saveContent(e) {
@@ -940,41 +1078,51 @@ export default {
                     const htmlContent = quillEditor.getHTML();
                     return htmlContent
                 } else {
-                    console.error('rootHTML method is not available');
+                    new Noty({
+                        type: 'error',
+                        text: 'rootHTML method is not available',
+                        timeout: 500,
+                    }).show()
                 }
             } else {
-                console.error('Quill editor reference not found');
+                new Noty({
+                    type: 'error',
+                    text: 'Quill editor reference not found',
+                    timeout: 500,
+                }).show()
             }
         },
         async getIssue() {
             let id = localStorage.getItem('projectId')
-            try {
-                this.$store.commit('showLoader');
-                const response = await axios.get(`${BASE_URL}api/development/issues?project_id=${id}`, {
-                    headers: {
-                        token: this.authToken,
+            if (id) {
+                try {
+                    this.$store.commit('showLoader');
+                    const response = await axios.get(`${BASE_URL}api/development/issues?project_id=${id}`, {
+                        headers: {
+                            token: this.authToken,
+                        }
+                    })
+                    if (response.status === 200) {
+                        this.allIssues = response.data.issues
                     }
-                })
-                if (response.status === 200) {
-                    this.allIssues = response.data.issues
+                    this.$store.commit('hideLoader');
+                } catch (error) {
+                    new Noty({
+                        type: 'error',
+                        text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                        timeout: 500,
+                    }).show()
+                    this.$store.commit('hideLoader');
                 }
-                this.$store.commit('hideLoader');
-            } catch (error) {
-                new Noty({
-                    type: 'error',
-                    text: error.message,
-                    timeout: 500,
-                }).show()
-                this.$store.commit('hideLoader');
             }
         },
         async createIssues(e) {
             e.preventDefault()
             try {
+                this.$store.commit('showLoader');
                 let project_id = localStorage.getItem('projectId')
                 this.issueData.project_id = project_id
                 this.issueData.description = this.saveContent(e);
-
                 let formData = new FormData();
                 formData.append('project_id', this.issueData.project_id);
                 formData.append('sprint_id', this.issueData.sprint_id);
@@ -995,7 +1143,6 @@ export default {
                     formData.append('attachments', this.selectedFiles[i]);
                 }
 
-                this.$store.commit('showLoader');
                 const response = await axios.post(`${BASE_URL}api/development/issues`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -1006,13 +1153,14 @@ export default {
                         this.uploadProgress = percentCompleted;
                     },
                 });
-                console.log("resp", response);
                 if (response.status === 201) {
+                    this.$refs.createModal.click()
                     Swal.fire({
                         title: response.data.message,
                         icon: 'success',
                     });
                     this.resetValues();
+
                 } else {
                     new Noty({
                         type: 'error',
@@ -1023,17 +1171,35 @@ export default {
                 this.$store.commit('hideLoader');
                 this.getIssue();
             } catch (error) {
-                console.log(error);
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 2000,
                 }).show();
                 this.$store.commit('hideLoader');
             }
+            this.$store.commit('hideLoader');
         },
         async editData(issue) {
             let project_id = localStorage.getItem('projectId')
+            this.editIssueData = {
+                id: issue.id,
+                title: issue.title,
+                project_id: project_id,
+                key: issue.key,
+                type: issue.type,
+                priority: issue.priority,
+                exp_duration: this.formatDuration(issue.exp_duration),
+                assignee_id: issue.assignee.id,
+                reporter_id: issue.reporter.id,
+                sprint_id: issue.sprint.id,
+                team_lead_id: issue.team_lead.id,
+                status: issue.status,
+            };
+            const quillEditor = this.$refs.editEditor;
+            if (quillEditor) {
+                quillEditor.setHTML(issue.description);
+            }
             try {
                 this.$store.commit('showLoader');
                 const response = await axios.get(`${BASE_URL}api/development/issueMetaData?id=${issue.id}`, {
@@ -1081,36 +1247,18 @@ export default {
                     this.child_issues = [];
                     this.linked_issues = []
                 }
+                this.selected_parent_issues = this.parent_issues;
                 this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
             }
-            this.selected_parent_issues = this.parent_issues
-            this.selectedUpdateFiles = []
-            this.editIssueData = {
-                id: issue.id,
-                title: issue.title,
-                project_id: project_id,
-                key: issue.key,
-                type: issue.type,
-                priority: issue.priority,
-                exp_duration: issue.exp_duration,
-                assignee_id: issue.assignee.id,
-                reporter_id: issue.reporter.id,
-                sprint_id: issue.sprint.id,
-                team_lead_id: issue.team_lead.id,
-                status: issue.status
-            };
-            this.selectedEditSprintId = issue.sprint.id;
-            const quillEditor = this.$refs.editEditor;
-            if (quillEditor) {
-                quillEditor.setHTML(issue.description);
-            }
+            this.selectedUpdateFiles = [];
+
         },
         async editIssue(e) {
             e.preventDefault()
@@ -1147,8 +1295,6 @@ export default {
                         formData.append('attachments', this.selectedUpdateFiles[i]);
                     }
                 }
-                // console.log("finalData", this.editIssueData);
-
                 this.$store.commit('showLoader');
                 const response = await axios.put(`${BASE_URL}api/development/issues`, formData, {
                     headers: {
@@ -1161,6 +1307,7 @@ export default {
                     },
                 });
                 if (response.status === 200) {
+                    this.$refs.editModal.click()
                     Swal.fire({
                         title: "Issue updated successfully!",
                         icon: 'success',
@@ -1176,10 +1323,9 @@ export default {
                 }
                 this.$store.commit('hideLoader');
             } catch (error) {
-                // console.log(error);
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 1000,
                 }).show();
                 this.$store.commit('hideLoader');
@@ -1202,11 +1348,13 @@ export default {
                                 token: this.authToken
                             }
                         })
+                        if (response.status === 204) {
+                            Swal.fire('Deleted!', response.data.message, 'success');
+                        }
                         this.getIssue();
-                        Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
                         this.getIssue();
-                        Swal.fire('Error!', error.response.data.message, 'error');
+                        Swal.fire('Error!', error.response.data.message ? error.response.data.message : error.response.data.detail, 'error');
                     }
                 }
             });
@@ -1224,7 +1372,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -1243,7 +1391,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -1265,7 +1413,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -1282,10 +1430,11 @@ export default {
                 if (response.status === 200) {
                     this.assignees = response.data.assignees
                 }
+                this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -1323,7 +1472,7 @@ export default {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
             this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID);
         },
-        getWorkLogs(){
+        getWorkLogs() {
             this.$refs.workLogView.getWorkLogs()
         }
     },
@@ -1333,15 +1482,24 @@ export default {
         this.getProjectManagers();
         this.getTeamLead();
         this.getIssue();
+        this.projectName = localStorage.getItem("projectname")
+    },
+    watch: {
+        'editIssueData.type': function (newType, oldType) {
+            if (newType !== oldType) {
+                this.selected_parent_issues = [];
+            }
+        },
     },
 };
-
 </script>
 
 <style scoped>
 ::v-deep .ql-container {
-    max-height: 500px;
+    max-height: 300px;
     display: block;
+    z-index: 1;
+    position: relative;
 }
 
 ::v-deep .ql-editor img {
@@ -1354,9 +1512,11 @@ export default {
 
 ::v-deep .ql-editor {
     height: auto;
-    max-height: 500px;
+    max-height: 300px;
     overflow-y: auto;
     color: black;
+    height: 300px;
+    z-index: 1;
 }
 
 ::v-deep .ql-tooltip {
@@ -1375,11 +1535,19 @@ export default {
     border-radius: 8px;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
     transition: transform 0.3s ease-in-out;
+    z-index: 99;
 }
 
-::v-deep .ql-editor img:hover {
+/* ::v-deep .ql-editor img:hover {
     transform: scale(2.5);
-    /* Adjust the scale factor as needed */
+    transform-origin: center center;
+    transition: transform 0.3s ease-in-out;
+    z-index: 99;
+    position: relative;
+} */
+
+.icon:hover {
+    transform: scale(1.1);
 }
 
 .modal-title-input {
@@ -1390,7 +1558,6 @@ export default {
     background-color: transparent;
 }
 
-
 .modal-key-input {
     border: none;
     outline: none;
@@ -1400,7 +1567,12 @@ export default {
 }
 
 .modalBody {
-    max-height: calc(100vh - 200px);
+    height: calc(100vh - 200px);
+    overflow: auto;
+}
+
+.modalBodyCreate {
+    height: calc(100vh - 200px);
     overflow: auto;
 }
 
@@ -1408,7 +1580,7 @@ export default {
     margin-left: 15px !important;
     position: sticky;
     right: 0;
-    z-index: 1;
+    z-index: 0;
     background-color: white !important;
 }
 

@@ -25,12 +25,12 @@
             </div>
             <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
               <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                <button type="button" style="width: auto; height: 40px !important;"
+                <button v-if="this.authUser.designation==='project_manager'" type="button" style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createProject">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Project
                 </button>
-                <button type="button" style="width: auto; height: 40px !important;"
+                <button v-if="this.authUser.designation==='project_manager'" @click="getClientRole" type="button" style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createClient">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Client
@@ -40,15 +40,16 @@
           </div>
         </div>
         <!-- Modal for Create Project -->
-        <div class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button ref="modalClose" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
                 <form @submit="createProjects($event)">
                   <div class="row">
                     <div style="color: black;" class="col-md-6 mb-3">
@@ -115,10 +116,11 @@
                         @change="handleFileChange">
                     </div>
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer"
+                    style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                   </div>
                 </form>
               </div>
@@ -127,15 +129,16 @@
         </div>
 
         <!-- Modal for Edit Project -->
-        <div class="modal fade" ref="createProjectModal" id="editProject" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="editProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="editProjects">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Edit Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button ref="modalCloseBtn" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
                 <form @submit="editProjects($event, updateProjectData.id)">
                   <div class="row">
                     <div style="color: black;" class="col-md-6 mb-3">
@@ -145,7 +148,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="reporter_id" class="form-label">Manager</label>
-                      <select class="form-control" v-model="updateProjectData.reporter_id">
+                      <select class="form-control" v-model="updateProjectData.reporter_id" required>
                         <option value="">Select Manager</option>
                         <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
           manager.name }}</option>
@@ -202,10 +205,11 @@
                         @change="handleUpdateFileChange">
                     </div>
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer"
+                    style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                   </div>
                 </form>
               </div>
@@ -216,13 +220,14 @@
         <vue-progress-bar :progress="uploadProgress" />
 
         <!-- Modal for Create Client -->
-        <div class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
-          <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Client</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button ref="createClient" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
               </div>
               <div class="modal-body modalBody">
                 <form @submit="createClient($event), resetValues()">
@@ -266,7 +271,7 @@
           <div class="card-body px-0 pt-0 pb-2">
             <div class="table-responsive p-0">
               <table class="table align-items-center mb-0">
-                <thead>
+                <thead style="position: sticky; top: 0; background-color: white; z-index: 2;">
                   <tr>
                     <th style="color: #344767 !important;"
                       class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
@@ -277,7 +282,7 @@
                   </tr>
                 </thead>
                 <tbody v-for="(project, index) in paginatedProjects" :key="index">
-                  <tr>
+                  <tr class="tableRow" @click="openProject(project)">
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
@@ -285,12 +290,12 @@
                     </td>
                     <td style="padding-left: 25px;">
                       <div class="d-flex flex-row justify-content-left project-name">
-                        <h6 style="margin-top: 14px;" @click="openProject(project.id)" class="mb-0 text-sm">{{
+                        <h6 style="margin-top: 14px;" @click="openProject(project)" class="mb-0 text-sm">{{
           project.name ?
             limitedTeamMembers(project.name) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.name && project.name.length > 15" data-bs-toggle="modal"
-                          data-bs-target="#showTeam" @mouseover="openModal(project.name)">
+                          data-bs-target="#showTeam" @click="openModal(project.name)">
                           ...more
                         </p>
                       </div>
@@ -370,9 +375,9 @@
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
                                             style="cursor: not-allowed;"></i> -->
                       <i data-bs-toggle="modal" data-bs-target="#editProject" @click="editModal(project)"
-                        class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
+                        class="fas fa-pencil-alt text-primary mx-3 icon"
                         style="margin-left: 20px; cursor: pointer;"></i>
-                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 mx-3 icon"
                         style="cursor: pointer;"></i>
                     </td>
                   </tr>
@@ -386,7 +391,7 @@
         </div>
 
         <!-- Modal for detailed view -->
-        <div class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -409,7 +414,7 @@ import Swal from 'sweetalert2';
 import { mapState } from 'vuex'
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-import ArgonProgress from './ArgonProgress.vue'
+import ArgonProgress from './ArgonProgress.vue';
 import VueProgressBar from 'vue-progressbar';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import router from "@/router";
@@ -514,6 +519,31 @@ export default {
         ? teamMembers.substring(0, maxLength) + " "
         : teamMembers;
     },
+    async getClientRole() {
+      try {
+        this.$store.commit('showLoader')
+        let response = await axios.get(`${BASE_URL}api/roles/`);
+        let clientRole = response.data.roles.find((role) => {
+          return role.name == 'client'
+        })
+        if (clientRole) {
+          this.$store.commit('hideLoader')
+          this.clientRoleID = clientRole.id
+        }
+        else {
+          this.$store.commit('hideLoader')
+          this.clientRoleID = null;
+        }
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+      this.$store.commit('hideLoader')
+    },
     openModal(teamMembers) {
       this.detailedTeamMembers = teamMembers;
       this.modalOpen = true;
@@ -533,6 +563,19 @@ export default {
         team_lead_id: '',
         tech_stacks: this.tech_stacks,
         host_address: '',
+        attachments: []
+      }
+      this.updateProjectData = {
+        id: '',
+        client_id: '',
+        name: '',
+        reporter_id: '',
+        key: '',
+        type: '',
+        team_lead_id: '',
+        tech_stacks: '',
+        host_address: '',
+        status: '',
         attachments: []
       }
       this.clientData = {
@@ -555,7 +598,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader');
@@ -590,7 +633,8 @@ export default {
         }
       } catch (error) {
         new Noty({
-          text: 'An error occurred',
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show();
       }
@@ -618,7 +662,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader');
@@ -661,6 +705,7 @@ export default {
           },
         });
         if (response.status === 201) {
+          this.$refs.modalClose.click()
           Swal.fire({
             title: response.data.message,
             icon: 'success',
@@ -672,7 +717,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show();
         this.$store.commit('hideLoader');
@@ -718,6 +763,7 @@ export default {
         });
 
         if (response.status === 200) {
+          this.$refs.modalCloseBtn.click()
           Swal.fire({
             title: response.data.message,
             icon: 'success',
@@ -729,7 +775,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.response.data.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show();
         this.$store.commit('hideLoader');
@@ -758,12 +804,13 @@ export default {
                 token: this.authToken
               }
             })
-            this.getProjects();
-            Swal.fire('Deleted!', response.data.message, 'success');
+            if (response.status === 204) {
+              this.getProjects();
+              Swal.fire('Deleted!', response.data.message, 'success');
+            }
           } catch (error) {
             this.getProjects();
-            Swal.fire('Deleted!', error.response.data.message, 'success');
-
+            Swal.fire('Deleted!', error.response.data.message ? error.response.data.message : error.response.data.detail, 'success');
           }
         }
       });
@@ -777,35 +824,33 @@ export default {
     async createClient(e) {
       e.preventDefault();
       try {
-        const response = await axios.post(`${BASE_URL}api/client/`, this.clientData)
+        this.$store.commit('showLoader');
+        this.clientData.role = this.clientRoleID
+        this.clientData.designation = 'client'
+        const response = await axios.post(`${BASE_URL}api/create/user/`, this.clientData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          }
+        })
         if (response.status == 201) {
+          this.$refs.createClient.click()
           Swal.fire({
             title: "Client created successfully!",
             icon: 'success',
           })
+          this.resetValues()
+          this.getClients()
         }
+        this.$store.commit('hideLoader')
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
+        this.$store.commit('hideLoader')
       }
     },
-    // async getLeadsInfo() {
-    //   try {
-    //     const response = await axios.get(`${BASE_URL}api/leadinfo/`)
-    //     this.tags = response.data.leadInfoData['leadTag']
-
-    //   } catch (error) {
-    //     new Noty({
-    //       type: 'error',
-    //       text: error.message,
-    //       timeout: 500,
-    //     }).show()
-    //   }
-    // },
-
     async getTeamLead() {
       try {
         const response = await axios.get(`${BASE_URL}api/development/getTeamLeaders`, {
@@ -819,7 +864,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
       }
@@ -832,12 +877,14 @@ export default {
             token: this.authToken,
           }
         })
-        this.allClients = response.data.clients
+        if (response.status === 200) {
+          this.allClients = response.data.clients
+        }
         this.$store.commit('hideLoader')
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader')
@@ -858,10 +905,11 @@ export default {
       let uniqueKey = key ? `${key}_${randomNumber}` : '';
       this.projectData.key = uniqueKey;
     },
-    async openProject(id) {
-      localStorage.setItem('projectId', id)
+    async openProject(project) {
+      localStorage.setItem('projectId', project.id)
+      localStorage.setItem('projectname', project.name)
       try {
-        const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${id}`, {
+        const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${project.id}`, {
           headers: {
             'Content-Type': "multipart/form-data",
             token: this.authToken,
@@ -881,7 +929,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 2000,
           position: "top-center"
         }).show();
@@ -915,6 +963,18 @@ export default {
   line-height: var(--vs-line-height);
 }
 
+.icon:hover {
+  transform: scale(1.1);
+}
+
+.tableRow {
+  cursor: pointer;
+}
+
+.tableRow:hover {
+  background-color: rgb(244, 244, 244);
+}
+
 /* Loader styles */
 .loader {
   display: inline-block;
@@ -932,6 +992,12 @@ export default {
   border: 6px solid #ccc;
   border-color: #ccc transparent #ccc transparent;
   animation: loader 1.2s linear infinite;
+}
+
+.modalBody {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+  height: auto
 }
 
 @keyframes loader {
@@ -997,14 +1063,14 @@ export default {
   margin-left: 15px !important;
   position: sticky;
   right: 0;
-  z-index: 1;
+  z-index: 0;
   background-color: white !important;
 }
 
 .action-head {
   position: sticky;
   right: 0;
-  z-index: 1;
+  z-index: 999;
   background-color: white !important;
 }
 
@@ -1019,6 +1085,29 @@ export default {
     position: relative;
 
     z-index: 1;
+  }
+
+  .modal-dialog {
+    max-width: 99%;
+    margin: auto;
+  }
+
+  .sprint-card {
+    gap: 40px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 992px) {
+  .modal-dialog {
+    max-width: 80%;
+    margin: auto;
+  }
+}
+
+@media (min-width: 993px) {
+  .modal-dialog {
+    max-width: 50%;
+    margin: auto;
   }
 }
 </style>

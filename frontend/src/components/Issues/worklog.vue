@@ -6,31 +6,32 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
     <!-- Modal for post, read and delete Work log -->
-    <div class="modal fade" ref="createWorklogModal" id="worklog" tabindex="-1" aria-labelledby="createWorklogLabel"
-        aria-hidden="true" role="dialog" data-backdrop="false">
+    <div data-bs-backdrop="static" v-show="!editModalOpen" class="modal fade" ref="createWorklogModal" id="worklog"
+        tabindex="-1" aria-labelledby="createWorklogLabel" aria-hidden="true" role="dialog" @hidden="removeBackdrop">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                 <div class="modal-header">
                     <h5 class="modal-title" id="createWorklogLabel">Work Logs</h5>
                     <button @click="resetValues()" ref="closeModal" type="button" class="btn-close bg-dark text-xs"
                         data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body modalBody">
+                <div class="modal-body modalBodyWorklog" style="padding-bottom: 0;">
                     <div v-if="timeTracking" class="row mb-3">
                         <div class="col-md-3">
                             <span class="small text-xs text-dark font-weight-bolder">Time Tracking</span>
                         </div>
                         <div class="col-md-3">
-                            <span class="text-xs text-dark">{{ timeTracking.total_logged_time }}</span>
-                            <p class="text-xs text-dark font-weight-bolder">logged time</p>
+                            <span class="text-xs text-dark">{{ formatDuration(timeTracking.total_logged_time) }}</span>
+                            <p class="text-xs text-dark font-weight-bolder">Logged time</p>
                         </div>
                         <div class="col-md-3">
-                            <span class="text-xs text-dark">{{ timeTracking.actual_remaining_time }}</span>
-                            <p class="text-xs text-dark font-weight-bolder">time remaining</p>
+                            <span class="text-xs text-dark">{{ formatDuration(timeTracking.actual_remaining_time)
+                                }}</span>
+                            <p class="text-xs text-dark font-weight-bolder">Time remaining</p>
                         </div>
                         <div class="col-md-3">
-                            <span class="text-xs text-dark">{{ timeTracking.extra_efforts }}</span>
-                            <p class="text-xs text-dark font-weight-bolder">extra efforts</p>
+                            <span class="text-xs text-dark">{{ formatDuration(timeTracking.extra_efforts) }}</span>
+                            <p class="text-xs text-dark font-weight-bolder">Extra efforts</p>
                         </div>
                     </div>
                     <form @submit="postLogs($event)">
@@ -50,11 +51,7 @@
                                 <QuillEditor ref="editor" :modules="modules" theme="snow" toolbar="full" />
                             </div>
                             <div></div>
-                            <div class="modal-footer">
-                                <button @click="resetValues()" type="button" class="btn btn-secondary"
-                                    data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save</button>
-                            </div>
+
                             <div class="">
                                 <div class="row">
                                     <div class="col-md-12">
@@ -68,11 +65,12 @@
                                                 <span
                                                     style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
                                                     class="small font-weight-bold me-2 pt-1">{{
-                        worklog.author.charAt(0).toUpperCase()
-                    }}</span>
+        worklog.author.charAt(0).toUpperCase()
+    }}</span>
                                                 <p class="pe-2 small font-weight-bold">{{ worklog.author }}</p>
-                                                <p class="small"> logged {{ worklog.logged_time }} {{ worklog.created_at
-                                                    }}
+                                                <p class="small"> logged {{ formatDuration(worklog.logged_time) }} {{
+        worklog.created_at
+    }}
                                                 </p>
                                                 <a v-if="worklog.attachments.length"
                                                     @click="downloadCommentAttachments($event, worklog.id)">
@@ -100,16 +98,17 @@
                                                 </div>
                                                 <div v-if="worklog.editMode" class="d-flex flex-row">
                                                     <p @click="editComment(worklog)"
-                                                        class="small me-2 cursor-pointer font-weight-bold">save</p>
+                                                        class="small me-2 cursor-pointer font-weight-bold">Save</p>
                                                     <p @click="commentToggler(worklog)"
-                                                        class="small cursor-pointer font-weight-bold">cancel</p>
+                                                        class="small cursor-pointer font-weight-bold">Cancel</p>
                                                 </div>
                                             </div>
                                             <div v-if="!worklog.editMode" class="d-flex flex-row"
                                                 style="margin-left:40px; margin-top: -10px;">
-                                                <p @click="editedLog(worklog)"
+                                                <p @click="editedLog(worklog), openEditWorklogModal(worklog)"
                                                     class="text-sm me-2 font-weight-bold cursor-pointer"
-                                                    data-bs-target="#editWorklog" data-bs-toggle="modal" data-bs-dismiss="modal">Edit</p>
+                                                    data-bs-dismiss="modal" data-bs-target="#editWorklog"
+                                                    data-bs-toggle="modal">Edit</p>
                                                 <p @click="deleteWorkLog(worklog.id)"
                                                     class="text-sm font-weight-bold cursor-pointer">Delete</p>
                                             </div>
@@ -121,6 +120,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal-footer"
+                            style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
+                            <button @click="resetValues()" type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -128,8 +133,8 @@
     </div>
 
     <!--Modal for edit work log-->
-    <div class="modal fade" ref="editWorklogModal" id="editWorklog" tabindex="-1" aria-labelledby="editWorklogLable"
-        aria-hidden="true" role="dialog">
+    <div data-bs-backdrop="static" v-show="editModalOpen" class="modal fade" ref="editWorklogModal" id="editWorklog"
+        tabindex="-1" aria-labelledby="editWorklogLable" aria-hidden="true" @hidden="removeBackdrop">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -189,7 +194,7 @@ export default {
             logDescription: '',
             selectedFiles: [],
             workLogs: [],
-            updatedLog:[],
+            updatedLog: [],
             timeTracking: '',
         }
     },
@@ -197,6 +202,85 @@ export default {
         ...mapState(['authToken', 'authUser'])
     },
     methods: {
+        formatDuration(duration) {
+            const regex = /P(\d+D)?T(\d+H)?(\d+M)?(\d+S)?/;
+            const matches = duration?.match(regex);
+
+            if (!matches) {
+                return '';
+            }
+
+            const [, days, hours, minutes, seconds] = matches;
+
+            const formattedParts = [];
+
+            if (days) {
+                formattedParts.push(`${parseInt(days, 10)}d`);
+            }
+
+            if (hours) {
+                formattedParts.push(`${parseInt(hours, 10)}h`);
+            }
+
+            if (minutes) {
+                formattedParts.push(`${parseInt(minutes, 10)}m`);
+            }
+
+            if (seconds) {
+                formattedParts.push(`${parseInt(seconds, 10)}s`);
+            }
+
+            return formattedParts.join(' ');
+        },
+        openEditWorklogModal(worklog) {
+            const postWorklogModal = this.$refs.createWorklogModal;
+            if (postWorklogModal) {
+                postWorklogModal.hide();
+            }
+
+            this.editedLog(worklog);
+            const editWorklogModal = this.$refs.editWorklogModal;
+            if (editWorklogModal) {
+                editWorklogModal.show();
+            }
+        },
+        removeBackdrop() {
+            const postWorklogBackdrop = document.querySelector('[data-backdrop-ref="postWorklogBackdrop"]');
+            if (postWorklogBackdrop) {
+                postWorklogBackdrop.remove();
+            }
+        },
+        openEditModal() {
+            const editModal = this.$refs.editIssueModal;
+
+            if (editModal) {
+                editModal.classList.add('show');
+                editModal.addEventListener('click', this.closeEditModal);
+                document.addEventListener('keydown', this.closeEditModal);
+            }
+
+            // Close the Work Log modal
+            const workLogModal = this.$refs.createWorklogModal;
+            if (workLogModal) {
+                workLogModal.hide();
+            }
+        },
+        closeEditModal(event) {
+            const editModal = this.$refs.editIssueModal;
+
+            if (editModal && (event.target === editModal || event.key === 'Escape')) {
+                editModal.classList.remove('show');
+
+                editModal.removeEventListener('click', this.closeEditModal);
+                document.removeEventListener('keydown', this.closeEditModal);
+
+                // Optionally, open the Work Log modal
+                const workLogModal = this.$refs.createWorklogModal;
+                if (workLogModal) {
+                    workLogModal.show();
+                }
+            }
+        },
         getDataFromIssuePage(issueID, sprintID) {
             this.sprintID = sprintID
             this.issueID = issueID
@@ -245,6 +329,7 @@ export default {
             this.removeQuillHTML();
             this.workLogs = []
             this.timeTracking = ''
+            window.location.reload()
         },
         async postLogs(e) {
             e.preventDefault()
@@ -272,7 +357,6 @@ export default {
                 });
                 if (response.status === 201) {
                     this.resetValues()
-                    // this.$refs.closeModal.click()
                     Swal.fire({
                         title: response.data.message,
                         icon: 'success',
@@ -312,14 +396,14 @@ export default {
         },
         editedLog(worklog) {
             this.updatedLog = worklog
-            this.logTime = this.updatedLog.logged_time
+            this.logTime = this.formatDuration(this.updatedLog.logged_time)
             const quillHtml = this.$refs.logEditor
-                if (quillHtml) {
-                    quillHtml.setHTML(this.updatedLog.description)
-                }
+            if (quillHtml) {
+                quillHtml.setHTML(this.updatedLog.description)
+            }
             this.selectedFiles = []
         },
-        async editLogs(e){
+        async editLogs(e) {
             e.preventDefault()
             try {
                 this.$store.commit('showLoader');
@@ -342,11 +426,8 @@ export default {
                         token: this.authToken,
                     }
                 });
-                console.log(response, 'editLogs')
                 if (response.status === 200) {
-                    console.log('called after 200', response.data)
                     this.resetValues()
-                    // this.$refs.closeModal.click()
                     Swal.fire({
                         text: response.data.message,
                         icon: 'info',
@@ -355,7 +436,6 @@ export default {
                 }
                 this.$store.commit('hideLoader');
             } catch (error) {
-                console.log(error)
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
@@ -372,7 +452,6 @@ export default {
                         token: this.authToken,
                     }
                 });
-                console.log(response, 'delete response')
                 if (response.status == 200) {
                     Swal.fire({
                         title: response.data.message,
@@ -384,7 +463,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -427,122 +506,13 @@ export default {
                 }
             } catch (error) {
                 new Noty({
-                    text: 'An error occurred',
+                    type: 'error',
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 500,
                 }).show();
             }
         },
-        // async editComment(comment) {
-        //     try {
-        //         this.$store.commit('showLoader');
-        //         const formData = new FormData();
-        //         if (this.selectedFiles.length) {
-        //             for (let i = 0; i < this.selectedFiles.length; i++) {
-        //                 formData.append('attachments', this.selectedFiles[i])
-        //             }
-        //         }
-        //         formData.append('desc', comment.description)
-        //         formData.append('commentID', comment.commentID)
-        //         const response = await axios.put(`${BASE_URL}api/development/comments`, formData, {
-        //             headers: {
-        //                 'Content-Type': "multipart/form-data",
-        //                 token: this.authToken,
-        //             }
-        //         });
-        //         if (response.status == 200) {
-        //             comment.editMode = !comment.editMode
-        //             Swal.fire({
-        //                 title: response.data.message,
-        //                 icon: 'success',
-        //             })
-        //             this.getComments(this.filterKey)
-        //         }
-        //         this.$store.commit('hideLoader');
-        //     }
-        //     catch (error) {
-        //         new Noty({
-        //             type: 'error',
-        //             text: error.response.data.detail,
-        //             timeout: 500,
-        //         }).show()
-        //         this.$store.commit('hideLoader');
-        //     }
-        // },
-        // async deleteComment(commentID) {
-        //     try {
-        //         this.$store.commit('showLoader');
-        //         const response = await axios.delete(`${BASE_URL}api/development/comments?commentID=${commentID}`, {
-        //             headers: {
-        //                 token: this.authToken,
-        //             }
-        //         });
-        //         if (response.status == 200) {
-        //             Swal.fire({
-        //                 title: response.data.message,
-        //                 icon: 'success',
-        //             })
-        //             this.getComments(this.filterKey)
-        //         }
-        //         this.$store.commit('hideLoader');
-        //     } catch (error) {
-        //         new Noty({
-        //             type: 'error',
-        //             text: error.response.data.detail,
-        //             timeout: 500,
-        //         }).show()
-        //         this.$store.commit('hideLoader');
-        //     }
-        // },
-        // extractFilename(response) {
-        //     const contentDisposition = response.headers['content-disposition'];
-        //     if (contentDisposition) {
-        //         const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
-        //         return filenameMatch ? filenameMatch[1] : 'download.zip';
-        //     } else {
-        //         return 'download.zip';
-        //     }
-        // },
-        // async downloadCommentAttachments(e, commentID){
-        //     e.preventDefault();
-        //     try {
-        //         const response = await axios.get(`${BASE_URL}api/development/comments/download?commentID=${commentID}`, {
-        //             headers: {
-        //                 token: this.authToken
-        //             },
-        //             responseType: 'arraybuffer',
-        //         });
-        //         if (response && response.status === 200 && response.data) {
-        //             console.log(response, '-----------downlaod Response--------------')
-        //             const filename = this.extractFilename(response);
-        //             const blob = new Blob([response.data], { type: 'application/zip' });
-
-        //             const link = document.createElement('a');
-        //             link.href = window.URL.createObjectURL(blob);
-        //             link.download = filename;
-
-        //             document.body.appendChild(link);
-        //             link.click();
-        //             document.body.removeChild(link);
-
-        //             Swal.fire({
-        //                 title: `Downloaded successfully!`,
-        //                 icon: 'success',
-        //             });
-        //         }
-        //     } catch (error) {
-        //         new Noty({
-        //             text: 'An error occurred',
-        //             timeout: 500,
-        //         }).show();
-        //     }
-        // },
-        // commentToggler(comment) {
-        //     comment.editMode = !comment.editMode
-        // },
     },
-    // mounted() {
-    //     document.addEventListener('keydown', this.handleKeyDown)
-    // }
 }
 </script>
 
@@ -593,6 +563,13 @@ export default {
     max-height: calc(100vh - 200px);
     overflow: auto;
 }
+
+.modalBodyWorklog {
+    max-height: calc(100vh - 200px);
+    overflow: auto;
+    height: 75vh;
+}
+
 
 @media (max-width: 576px) {
     .modal-dialog {
