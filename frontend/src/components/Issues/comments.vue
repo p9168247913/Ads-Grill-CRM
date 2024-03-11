@@ -80,7 +80,7 @@
                         comment.author.name.charAt(0).toUpperCase()
                     }}</span>
                                         <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
-                                        <p class="small">Posted {{ comment.created_at }}</p>
+                                        <p class="small">Posted {{ formatDateTime(comment.created_at) }}</p>
                                         <a v-if="comment.attachments.length"
                                             @click="downloadCommentAttachments($event, comment.commentID)">
                                             <i class="fas fa-download ms-3 cursor-pointer"
@@ -153,6 +153,22 @@ export default {
         ...mapState(['authToken', 'authUser'])
     },
     methods: {
+        formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Kolkata'
+            };
+
+            return new Intl.DateTimeFormat('en-US', options).format(date);
+        },
         getDataFromIssuePage(issueID, sprintID) {
             this.sprintID = sprintID
             this.issueID = issueID
