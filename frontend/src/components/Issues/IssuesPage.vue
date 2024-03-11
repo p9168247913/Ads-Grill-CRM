@@ -287,7 +287,7 @@
                                                 toolbar="full" />
                                         </div>
                                     </div>
-                                    <div class="row" v-if="this.parent_issues.length > 0">
+                                    <div id="child" style="margin-top: 20px;" class="row" v-if="this.parent_issues.length > 0">
                                         <label for="description" class="form-label">Parent issue</label>
                                         <div class="col-md-12 mb-3" style="overflow: auto;">
                                             <table class="table align-items-center mb-0">

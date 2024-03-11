@@ -721,7 +721,7 @@ export default {
             }
         },
         formatDate(dateString) {
-            const options = { day: 'numeric', month: 'short' };
+            const options = { day: 'numeric', month: 'short', year:'numeric' };
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', options);
         },
@@ -780,7 +780,6 @@ export default {
             const endDate = new Date(this.sprintData.end_date);
 
             if (isNaN(startDate) || isNaN(endDate)) {
-                // If either date is missing, return an empty string
                 return '';
             }
 
