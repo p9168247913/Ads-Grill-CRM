@@ -10,6 +10,7 @@ from django.db.utils import IntegrityError
 from django.db.models import ObjectDoesNotExist, Count, Sum, Case, When, F, Value, IntegerField
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from django.core.files.storage import default_storage
 from braces.views import CsrfExemptMixin
 from io import BytesIO
@@ -22,8 +23,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class ProjectView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
@@ -243,7 +251,7 @@ class ProjectView(CsrfExemptMixin, APIView):
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
     
 class DownloadProjectAttchments(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
@@ -270,7 +278,7 @@ class DownloadProjectAttchments(CsrfExemptMixin, APIView):
     
 
 class GetProjectManagers(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
@@ -284,7 +292,7 @@ class GetProjectManagers(CsrfExemptMixin, APIView):
         return JsonResponse({'project_managers':res_data}, status=status.HTTP_200_OK)
     
 class GetAllAssignees(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
@@ -298,7 +306,7 @@ class GetAllAssignees(CsrfExemptMixin, APIView):
         return JsonResponse({'assignees':res_data}, status=status.HTTP_200_OK)
     
 class GetAllTeamLeaders(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -313,7 +321,7 @@ class GetAllTeamLeaders(CsrfExemptMixin, APIView):
         return JsonResponse({'team_leaders':res_data}, status=status.HTTP_200_OK)
 
 class GetAllClients(APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

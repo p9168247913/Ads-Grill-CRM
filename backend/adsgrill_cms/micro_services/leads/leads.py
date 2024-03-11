@@ -13,14 +13,22 @@ from os.path import basename
 import os
 import openpyxl
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class LeadView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         parser_classes = (MultiPartParser, FormParser)
@@ -201,7 +209,7 @@ class LeadView(CsrfExemptMixin, APIView):
         
         
 class LeadInfo(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         val = request.GET.get('key')

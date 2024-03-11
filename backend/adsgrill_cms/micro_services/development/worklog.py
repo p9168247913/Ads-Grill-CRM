@@ -2,6 +2,7 @@ from app.models import Users, Project, Sprint, Issue, LinkedIssue, WorkLog
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from braces.views import CsrfExemptMixin
 from django.http import JsonResponse, HttpResponse
 from django.db.models import ObjectDoesNotExist
@@ -47,8 +48,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
     
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+    
 class WorklogView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -246,7 +254,7 @@ class WorklogView(CsrfExemptMixin, APIView):
         return JsonResponse({"message": "Worklog deleted successfully"})
 
 class DownloadWorklogAttachments(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

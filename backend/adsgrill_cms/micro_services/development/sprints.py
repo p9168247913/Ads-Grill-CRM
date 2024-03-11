@@ -13,6 +13,7 @@ from os.path import basename
 import os
 import openpyxl
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, time
 from django.db.models import Sum
@@ -22,8 +23,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class SprintView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -177,14 +185,22 @@ class SprintView(CsrfExemptMixin, APIView):
     def put(self, request):
         try:
             requestData = request.data
-    
-            exp_duration = request.data.get('exp_duration')
-            start_date_str = request.data.get('start_date')
-            end_date_str = request.data.get('end_date')
+            exp_duration = requestData.get('exp_duration')
+            start_date_str = requestData.get('start_date')
+            end_date_str = requestData.get('end_date')
             upd_sprint = Sprint.objects.get(pk=requestData.get('id'))
+            is_started = requestData.get('is_started')
+            if is_started == 'true':
+                is_started = True
+            if is_started == 'false':
+                is_started = False
 
-            # if Sprint.objects.filter(project__pk=requestData.get('project_id'), name=request.data.get('name')).exists():
-            #     return JsonResponse({'message':'Sprint with this name already exists'})
+            if request.data.get('name') == upd_sprint.name:
+                if Sprint.objects.filter(project__pk=requestData.get('project_id')).exists():
+                    return JsonResponse({'message':'Sprint with this name already exists'})
+            elif request.data.get('name') != upd_sprint.name:
+                if Sprint.objects.filter(project__pk=requestData.get('project_id'), name=request.data.get('name')).exists():
+                    return JsonResponse({'message':'Sprint with this name already exists'})
     
             if start_date_str:
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M')
@@ -200,9 +216,11 @@ class SprintView(CsrfExemptMixin, APIView):
             
             if(request.user.designation=="project_manager" and request.user.role.name=="development"):
                 if requestData.get("status")=="done":
-                   total_org_duration=Issue.objects.filter(sprint=upd_sprint).aggregate(Sum('org_duration'))['org_duration__sum']
-                   upd_sprint.org_duration=total_org_duration
-                   upd_sprint.is_started=False
+                   with transaction.atomic():
+                        total_org_duration=Issue.objects.filter(sprint=upd_sprint).aggregate(Sum('org_duration'))['org_duration__sum']
+                        upd_sprint.org_duration=total_org_duration
+                        upd_sprint.is_started=False
+                        upd_sprint.save()
     
             with transaction.atomic():
                 upd_sprint.reporter = reporter_instance
@@ -214,7 +232,7 @@ class SprintView(CsrfExemptMixin, APIView):
                 upd_sprint.start_date = start_date
                 upd_sprint.end_date = end_date
                 upd_sprint.goal = requestData.get('goal')
-                upd_sprint.is_started = requestData.get('is_started')
+                upd_sprint.is_started = is_started
     
                 upd_sprint.save()
     
