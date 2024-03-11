@@ -38,7 +38,6 @@ class UserCreateView(generics.CreateAPIView):
 
     def send_login_credentials(self, username, password, designation):
         subject = ''
-        print(designation, type(designation))
         if designation == 'client':
             subject = "Adsgrill crm Client login credentials"
         else:

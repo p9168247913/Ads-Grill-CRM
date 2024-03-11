@@ -76,7 +76,7 @@ class WorklogView(CsrfExemptMixin, APIView):
             assignee_instance = request.user
             logged_time = requestData.get('logged_time')
             attachments = request.FILES.getlist('attachments', [])
-            if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance or issue_instance.assignee.designation !='project_manager':
+            if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance and issue_instance.assignee.designation !='project_manager':
                 return JsonResponse({"message": "You don't have access to log time on other's issue (Invalid user)"}, status=status.HTTP_400_BAD_REQUEST)
             if convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
                 extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
@@ -125,8 +125,6 @@ class WorklogView(CsrfExemptMixin, APIView):
         except Issue.DoesNotExist:
             return JsonResponse({'message': "Requested Issue not exist"})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({'error': str(e)})
         return JsonResponse({'message': 'Worklog created successfully'},status=status.HTTP_201_CREATED)
 
@@ -229,8 +227,6 @@ class WorklogView(CsrfExemptMixin, APIView):
         except Sprint.DoesNotExist:
             return JsonResponse({'message':'Requested sprint not exists'})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({'error': str(e)})
         return JsonResponse({"message": "Worklog updated successfully"})
     

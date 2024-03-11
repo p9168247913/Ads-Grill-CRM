@@ -64,7 +64,6 @@ class LeadView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Lead Created Successfully'},status=status.HTTP_201_CREATED)
         
         if val =='bulkUpload':
-            print('post')
             parser_class = (FileUploadParser,)
             up_file = request.FILES.get('file')
             upload_folder = 'uploads/leads'
@@ -79,7 +78,6 @@ class LeadView(CsrfExemptMixin, APIView):
             df = df.dropna(how='all')
             rowList = df.values.tolist()
             rowList = rowList[:-1]
-            print(rowList) 
             empty_cols = []
             try:
                 for (ind, col) in enumerate(rowList):
@@ -137,8 +135,6 @@ class LeadView(CsrfExemptMixin, APIView):
                 return JsonResponse({'message':f"No Sale's Manager Found At Row: {ind+2}"})
 
             except Exception as exc:
-            # import traceback
-            # traceback.print_exc()
                 return JsonResponse({'message': str(exc)}, status=400, safe=False)
             return JsonResponse({'message':f'{up_file.name} Uploaded Successfully',}, status=status.HTTP_201_CREATED)
     

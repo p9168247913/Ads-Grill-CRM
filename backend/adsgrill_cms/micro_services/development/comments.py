@@ -35,7 +35,6 @@ class CommentsView(CsrfExemptMixin, APIView):
             requestData = request.data
             sprintID=None
             issueID=None
-            print(dict(requestData))
             value = requestData.get('key')
             if value == 'client':
                 sprintID = requestData.get('sprintID')
@@ -93,8 +92,6 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IndentationError as i:
             return JsonResponse({"error":str(i)})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
 
         return JsonResponse({"message":"Comment added succussfully"}, status=status.HTTP_201_CREATED)
@@ -152,8 +149,6 @@ class CommentsView(CsrfExemptMixin, APIView):
             }for comment in allComments]
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         return JsonResponse({"comments":responseData}, status=status.HTTP_200_OK)
 
@@ -204,8 +199,6 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IntegrityError as i:
             return JsonResponse({"message":str(i)})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         
         return JsonResponse({"message":"Comment updated successfully"}, status=status.HTTP_200_OK)  

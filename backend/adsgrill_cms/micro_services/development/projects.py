@@ -97,8 +97,6 @@ class ProjectView(CsrfExemptMixin, APIView):
             return JsonResponse({'messge':str(i)})
         
         except Exception as e:
-            # import traceback
-            # traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Created Successfully'}, status=status.HTTP_201_CREATED)
@@ -135,7 +133,6 @@ class ProjectView(CsrfExemptMixin, APIView):
                         "tech_stacks": project.tech_stacks,
                         "created_at": project.created_at,
                     }
-                    print('issues of projects', project.issue_set.values_list('assignee', flat=True))
                     res_data.append(project_data)
             if val == 'client':
                 clientID = request.GET.get('clientID')

@@ -126,6 +126,9 @@ class SprintView(CsrfExemptMixin, APIView):
                     
                     activeSprintAndIssues['activeSprint'] = activeSprintData
                     activeSprintAndIssues['issues'] = {"to_do":to_do, "in_progress":in_progress, "done":done}
+
+                    if not len(activeSprintAndIssues):
+                        return JsonResponse({"message":"No data found in this project", "activeSprintAndIssues":activeSprintAndIssues}, status=status.HTTP_204_NO_CONTENT)
                 
                 except Sprint.DoesNotExist:
                     return JsonResponse({"message": "No active sprint found for this project"}, status=status.HTTP_204_NO_CONTENT)
@@ -172,8 +175,8 @@ class SprintView(CsrfExemptMixin, APIView):
                         
                         sprintsAndIssues.append(sprintData)
                     
-                    if not sprintsAndIssues:
-                        return JsonResponse({"message":"No data found in this project"}, status=status.HTTP_204_NO_CONTENT)
+                    if not len(sprintsAndIssues):
+                        return JsonResponse({"message":"No data found in this project", "sprintAndIssues":sprintsAndIssues}, status=status.HTTP_204_NO_CONTENT)
                     
                 except Sprint.DoesNotExist:
                     return JsonResponse({"message": "No Sprint data found in this project"}, status=status.HTTP_204_NO_CONTENT)
@@ -263,4 +266,4 @@ class SprintView(CsrfExemptMixin, APIView):
         except Exception as e:
             return JsonResponse({"message":str(e)})
         
-        return JsonResponse({"message":"Sprint Deleted Successfuly"},status=status.HTTP_201_CREATED)
+        return JsonResponse({"message":"Sprint Deleted Successfuly"},status=status.HTTP_204_NO_CONTENT)
