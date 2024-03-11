@@ -1,10 +1,11 @@
 <template>
+
     <head>
         <!-- Include necessary CSS files -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
-    <!-- Modal for Create Issue -->
+    <!-- Modal for Create Comments -->
     <div class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
         aria-hidden="true" role="dialog" data-backdrop="false">
         <div class="modal-dialog modal-dialog-centered">
@@ -21,24 +22,28 @@
                                 <button
                                     v-if="authUser.role == 'development' && authUser.designation == 'project_manager' | authUser.role == 'client'"
                                     @click="getComments('client'), resetValues()" class="nav-link" id="list1-tab"
-                                    data-bs-toggle="tab" data-bs-target="#filteredCommentsClient" type="button" role="tab"
-                                    aria-controls="list1" aria-selected="true" title="click me">Client</button>
+                                    data-bs-toggle="tab" data-bs-target="#filteredCommentsClient" type="button"
+                                    role="tab" aria-controls="list1" aria-selected="true"
+                                    title="click me">Client</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button @click="getComments('developers'), resetValues()" class="nav-link" id="list2-tab"
-                                    data-bs-toggle="tab" data-bs-target="#filteredCommentsClient" type="button" role="tab"
-                                    aria-controls="list2" aria-selected="false" title="click me">Development</button>
+                                <button @click="getComments('developers'), resetValues()" class="nav-link"
+                                    id="list2-tab" data-bs-toggle="tab" data-bs-target="#filteredCommentsClient"
+                                    type="button" role="tab" aria-controls="list2" aria-selected="false"
+                                    title="click me">Development</button>
                             </li>
                         </ul>
                     </div>
                     <div class="tab-content" id="myTabContent">
-                        <div class="tab-pane fade" id="filteredCommentsClient" role="tabpanel" aria-labelledby="list2-tab">
+                        <div class="tab-pane fade" id="filteredCommentsClient" role="tabpanel"
+                            aria-labelledby="list2-tab">
                             <!-- Content for List 1 -->
                             <div v-if="filterKey" class="row mt-3">
                                 <div class="col-md-10 mb-3">
                                     <textarea v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
-                                        style="height: 40px; resize: none; max-height: auto;" placeholder=" Add Comments..."
-                                        type="text" class="form-control" required></textarea>
+                                        style="height: 40px; resize: none; max-height: auto;"
+                                        placeholder=" Add Comments..." type="text" class="form-control"
+                                        required></textarea>
                                 </div>
                                 <div v-if="isCommentFocused" class="col-md-2 mb-3">
                                     <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
@@ -49,18 +54,21 @@
                                         title="Attach" style="padding:11px;">Attach</label>
                                 </div>
                                 <div v-if="!isCommentFocused" style="margin-top: -8px;">
-                                    <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press <span
-                                            class="font-weight-bold text-dark">C</span> to comment</p>
+                                    <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press
+                                        <span class="font-weight-bold text-dark">C</span> to comment
+                                    </p>
                                 </div>
                             </div>
                             <div v-if="isCommentFocused && filterKey" class="row" style="margin-top: -15px;">
                                 <div style="margin-right: -12px;" class="col-sm-1 col-lg-1 col-md-1">
-                                    <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold">save</p>
+                                    <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold icon">
+                                        Save
+                                    </p>
                                 </div>
                                 <div class="col-sm-1 col-lg-1 col-md-1">
                                     <p @click="isCommentFocused = false, resetValues()"
-                                        class="cursor-pointer ms-1 text-sm font-weight-bold">
-                                        cancel</p>
+                                        class="cursor-pointer ms-1 text-sm font-weight-bold icon">
+                                        Cancel</p>
                                 </div>
                             </div>
                             <div v-if="comments.length" class="mt-3 overflow-y-auto pt-2" style="max-height: 200px;">
@@ -69,17 +77,19 @@
                                         <span
                                             style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
                                             class="small font-weight-bold me-2 pt-1">{{
-                                                comment.author.name.charAt(0).toUpperCase()
-                                            }}</span>
+                        comment.author.name.charAt(0).toUpperCase()
+                    }}</span>
                                         <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
                                         <p class="small">Posted {{ comment.created_at }}</p>
                                         <a v-if="comment.attachments.length"
                                             @click="downloadCommentAttachments($event, comment.commentID)">
-                                            <i class="fas fa-download ms-3 cursor-pointer" title="download attachments"></i>
+                                            <i class="fas fa-download ms-3 cursor-pointer"
+                                                title="download attachments"></i>
                                         </a>
                                     </div>
                                     <div class="d-flex flex-column" style="margin-left: 40px;">
-                                        <div v-if="!comment.editMode" class="d-flex flex-column" style="margin-top: -5px;">
+                                        <div v-if="!comment.editMode" class="d-flex flex-column"
+                                            style="margin-top: -5px;">
                                             <p class="small">{{ comment.description }}</p>
                                         </div>
                                         <div v-if="comment.editMode" class="d-flex flex-row">
@@ -88,110 +98,30 @@
                                                 class="form-control small w-50 me-3"
                                                 style="height:40px; resize: none;"></textarea>
 
-                                            <input @change="handleFileChange($event)" id="fileInput2" type="file" multiple
-                                                accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
+                                            <input @change="handleFileChange($event)" id="fileInput2" type="file"
+                                                multiple accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
                                                 class="form-control w-auto d-none">
                                             <label for="fileInput2"
                                                 class="text-xs rounded border border-1 border-dark font-weight-bold me-2"
                                                 title="Add files" style="padding:11px">Add Files</label>
                                         </div>
-                                        <div v-if="comment.editMode" class="d-flex flex-row">
+                                        <div v-if="comment.editMode" class="d-flex flex-row gap-4">
                                             <p @click="editComment(comment)"
-                                                class="small me-2 cursor-pointer font-weight-bold">save</p>
+                                                class="small me-2 cursor-pointer font-weight-bold icon">Save</p>
                                             <p @click="commentToggler(comment)"
-                                                class="small cursor-pointer font-weight-bold">cancel</p>
+                                                class="small cursor-pointer font-weight-bold icon">Cancel</p>
                                         </div>
                                     </div>
-                                    <div v-if="!comment.editMode" class="d-flex flex-row"
+                                    <div v-if="!comment.editMode" class="d-flex flex-row gap-4"
                                         style="margin-left:40px; margin-top: -10px;">
                                         <p @click="commentToggler(comment)"
-                                            class="text-sm me-2 font-weight-bold cursor-pointer">Edit</p>
+                                            class="text-sm me-2 font-weight-bold cursor-pointer icon">Edit</p>
                                         <p @click="deleteComment(comment.commentID)"
-                                            class="text-sm font-weight-bold cursor-pointer">Delete</p>
+                                            class="text-sm font-weight-bold cursor-pointer icon">Delete</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <div class="tab-pane fade" id="filteredCommentsDevelopers" role="tabpanel" aria-labelledby="list2-tab">
-                            Content for List 2
-                            <div v-if="filterKey" class="row mt-3">
-                                <div class="col-md-10 mb-3">
-                                    <input v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
-                                        style="height: 35px;" placeholder=" Add Comments..." type="text"
-                                        class="form-control" required>
-                                </div>
-                                <div v-if="isCommentFocused" class="col-md-2 mb-3">
-                                    <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
-                                        accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
-                                        class="form-control w-auto d-none">
-                                    <label for="fileInput1"
-                                        class="p-2 text-xs rounded border border-1 border-dark font-weight-bold cursor-pointer"
-                                        title="Attach">Attach</label>
-                                </div>
-                                <div v-if="!isCommentFocused" style="margin-top: -8px;">
-                                    <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press <span
-                                            class="font-weight-bold text-dark">C</span> to comment</p>
-                                </div>
-                            </div>
-                            <div v-if="isCommentFocused && filterKey" class="row" style="margin-top: -15px;">
-                                <div style="margin-right: -12px;" class="col-sm-1 col-lg-1 col-md-1">
-                                    <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold">save</p>
-                                </div>
-                                <div class="col-sm-1 col-lg-1 col-md-1">
-                                    <p @click="isCommentFocused = false, resetValues()"
-                                        class="cursor-pointer ms-1 text-sm font-weight-bold">
-                                        cancel</p>
-                                </div>
-                            </div>
-                            <div v-if="comments.length" class="mt-3 overflow-y-auto pt-2" style="max-height: 200px;">
-                                <div v-for="(comment, index) in comments" :key="index">
-                                    <div class="d-flex flex-row text text-dark">
-                                        <span
-                                            style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
-                                            class="small font-weight-bold me-2 pt-1">{{
-                                                comment.author.name.charAt(0).toUpperCase()
-                                            }}</span>
-                                        <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
-                                        <p class="small">Posted {{ comment.created_at }}</p>
-                                        <a v-if="comment.attachments.length"
-                                            @click="downloadCommentAttachments($event, comment.commentID)">
-                                            <i class="fas fa-download ms-3 cursor-pointer" title="download attachments"></i>
-                                        </a>
-                                    </div>
-                                    <div class="d-flex flex-column" style="margin-left: 40px;">
-                                        <div v-if="!comment.editMode" class="d-flex flex-column" style="margin-top: -5px;">
-                                            <p class="small">{{ comment.description }}</p>
-                                        </div>
-                                        <div v-if="comment.editMode" class="d-flex flex-row">
-                                            <input @keyup.enter="editComment(comment,)" type="text"
-                                                v-model="comment.description"
-                                                class="small w-50 me-2 rounded border border-dark"
-                                                style="height:33px; background-color: rgb(247, 249, 250);">
-                                            <input @change="handleFileChange($event)" id="fileInput2" type="file" multiple
-                                                accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
-                                                class="form-control w-auto me-2 d-none">
-                                            <label for="fileInput2"
-                                                class="p-2 text-xs rounded border border-1 border-dark font-weight-bold me-2"
-                                                title="Add files">Add Files</label>
-                                        </div>
-                                        <div v-if="comment.editMode" class="d-flex flex-row">
-                                            <p @click="editComment(comment)"
-                                                class="small me-2 cursor-pointer font-weight-bold">save</p>
-                                            <p @click="commentToggler(comment)"
-                                                class="small cursor-pointer font-weight-bold">cancel</p>
-                                        </div>
-                                    </div>
-                                    <div v-if="!comment.editMode" class="d-flex flex-row"
-                                        style="margin-left:40px; margin-top: -10px;">
-                                        <p @click="commentToggler(comment)"
-                                            class="text-sm me-2 font-weight-bold cursor-pointer">Edit</p>
-                                        <p @click="deleteComment(comment.commentID)"
-                                            class="text-sm font-weight-bold cursor-pointer">Delete</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
             </div>
@@ -280,7 +210,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -309,7 +239,6 @@ export default {
                     });
                     this.comments = response.data.comments
                 }
-                console.log('comments', this.comments)
                 if (!this.comments.length) {
                     new Noty({
                         type: 'warning',
@@ -322,7 +251,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -358,7 +287,7 @@ export default {
             catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -383,7 +312,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader');
@@ -408,7 +337,6 @@ export default {
                     responseType: 'arraybuffer',
                 });
                 if (response && response.status === 200 && response.data) {
-                    console.log(response, '-----------downlaod Response--------------')
                     const filename = this.extractFilename(response);
                     const blob = new Blob([response.data], { type: 'application/zip' });
 
@@ -427,7 +355,8 @@ export default {
                 }
             } catch (error) {
                 new Noty({
-                    text: 'An error occurred',
+                    type: "error",
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show();
             }
@@ -488,6 +417,10 @@ export default {
 ::v-deep .ql-editor img:hover {
     transform: scale(2.5);
     /* Adjust the scale factor as needed */
+}
+
+.icon:hover {
+    transform: scale(1.1);
 }
 
 .modalBody {

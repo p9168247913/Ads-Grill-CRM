@@ -1,12 +1,16 @@
-<template >
+<template>
     <div class="container">
         <div class="row" style="margin-top: 20px;">
             <div class="col-md-12 col-lg-12 block">
                 <h6 class="text-uppercase">Add Tag</h6>
                 <div class="col-md-5 mb-3">
                     <form @submit="addLeadInfo($event, 'tag')" style="display: flex; gap: 10px;">
-                        <input required type="text" class="form-control" v-model="newLeadInfoTag" placeholder="Enter Tag" />
-                        <button type="submit" class="btn btn-sm btn-dark px-3 py-2 h-100 d-flex" style="width: auto !important;">  <i class="fas fa-plus-circle text-success text-sm opacity-10"></i> &nbsp;&nbsp;<span>Add</span></button>
+                        <input required type="text" class="form-control" v-model="newLeadInfoTag"
+                            placeholder="Enter Tag" />
+                        <button type="submit" class="btn btn-sm btn-dark px-3 py-2 h-100 d-flex"
+                            style="width: auto !important;"> <i
+                                class="fas fa-plus-circle text-success text-sm opacity-10"></i>
+                            &nbsp;&nbsp;<span>Add</span></button>
                     </form>
                 </div>
                 <table class="table">
@@ -47,7 +51,9 @@
                     <form @submit="addLeadInfo($event, 'source')" style="display: flex; gap: 10px;">
                         <input required type="text" class="form-control" v-model="newLeadInfoSource"
                             placeholder="Enter Source" />
-                            <button type="submit" class="btn btn-dark d-flex" style="width: auto !important;">  <i class="fas fa-plus-circle text-success text-sm opacity-10"></i> &nbsp;&nbsp;<span>Add</span></button>
+                        <button type="submit" class="btn btn-dark d-flex" style="width: auto !important;"> <i
+                                class="fas fa-plus-circle text-success text-sm opacity-10"></i>
+                            &nbsp;&nbsp;<span>Add</span></button>
                     </form>
                 </div>
                 <table class="table">
@@ -88,7 +94,9 @@
                     <form @submit="addLeadInfo($event, 'status')" style="display: flex; gap: 10px;">
                         <input required type="text" class="form-control" v-model="newLeadInfoStatus"
                             placeholder="Enter Status" />
-                            <button type="submit" class="btn btn-dark d-flex" style="width: auto !important;">  <i class="fas fa-plus-circle text-success text-sm opacity-10"></i> &nbsp;&nbsp;<span>Add</span></button>
+                        <button type="submit" class="btn btn-dark d-flex" style="width: auto !important;"> <i
+                                class="fas fa-plus-circle text-success text-sm opacity-10"></i>
+                            &nbsp;&nbsp;<span>Add</span></button>
                     </form>
                 </div>
                 <table class="table">
@@ -124,7 +132,7 @@
         </div>
     </div>
 </template>
-  
+
 <script>
 import axios from 'axios';
 import Noty from 'noty';
@@ -147,7 +155,7 @@ export default {
     methods: {
         async getLeadsInfo() {
             try {
-                this.$store.commit('showLoader') 
+                this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/leadinfo/`)
                 this.tags = response.data.leadInfoData['leadTag']
                 this.sources = response.data.leadInfoData['leadSource']
@@ -156,7 +164,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
@@ -190,7 +198,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
@@ -210,11 +218,13 @@ export default {
                     try {
                         this.$store.commit('showLoader')
                         const response = await axios.delete(`${BASE_URL}api/leadinfo/?key=${infoName}&id=${newLeadInfoId}`)
-                        this.getLeadsInfo();
-                        Swal.fire('Deleted!', response.data.message, 'success');
+                        if (response.status === 204) {
+                            this.getLeadsInfo();
+                            Swal.fire('Deleted!', response.data.message, 'success');
+                        }
                         this.$store.commit('hideLoader')
                     } catch (error) {
-                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error', error.response.data.message ? error.response.data.message : error.response.data.detail, 'error');
                         this.$store.commit('hideLoader')
                     }
                 }
@@ -226,7 +236,7 @@ export default {
     }
 };
 </script>
-  
+
 <style scoped>
 .container {
     margin-top: 30px;
@@ -261,4 +271,3 @@ export default {
     color: white !important;
 }
 </style>
-  

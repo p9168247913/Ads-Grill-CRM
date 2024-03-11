@@ -84,7 +84,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads'">
+      <li class="nav-item" v-if="authUser.role !== 'leads' || localStorage.getItem('projectId')">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
 
@@ -274,13 +274,13 @@ export default {
   },
   methods: {
     isEmployeeActive() {
-        if(this.getRoute() === 'development' ||
+      if (this.getRoute() === 'development' ||
         this.getRoute() === 'sales' ||
-        this.getRoute() === 'hrms'){
-          console.log(true)
-        }else{
-          console.log(false)
-        }
+        this.getRoute() === 'hrms') {
+        console.log(true)
+      } else {
+        console.log(false)
+      }
     },
     colapseShowTogeller() {
       this.isCollapseShow = !this.isCollapseShow;
@@ -316,7 +316,7 @@ export default {
   },
   computed: {
     ...mapState(['authUser']),
-    
+
     mounted() {
       return document.addEventListener("click", this.closeEmploymentDropdown);
     },

@@ -159,7 +159,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.response.data.message,
+          text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
           timeout: 3000,
           layout: 'topCenter'
         }).show()

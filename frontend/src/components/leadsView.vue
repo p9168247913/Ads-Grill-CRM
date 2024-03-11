@@ -557,7 +557,6 @@ export default {
                         this.getLeads()
                     }
                 })).catch(e => {
-                    console.log('error', e)
                     new Noty({
                         type: 'error',
                         text: e,
