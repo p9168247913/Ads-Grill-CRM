@@ -578,7 +578,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message? error.response.data.message : error.response.data.detail,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail? error.response.data.detail : error.response.data.email,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')

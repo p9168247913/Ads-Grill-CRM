@@ -180,7 +180,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="status" class="form-label">Status</label>
                                             <select class="form-control" v-model="updatedSprintData.status" required>
-                                                <option value="">Select Status</option>
+                                                <option disabled value="">Select Status</option>
                                                 <option value="to_do">To Do</option>
                                                 <option v-if="updatedSprintData.is_started" value="in_progress">In
                                                     Progress</option>
@@ -214,7 +214,7 @@
                 <!--Table-->
                 <div v-if="filteredSprints?.length" class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
-                        <h6>SPRINTS</h6>
+                        <h6>{{this.projectName? `SPRINTS (${this.projectName})`:'SPRINTS'}}</h6>
                     </div>
                     <div class="card-body px-0 pt-0 pb-1">
                         <div class="table-responsive p-1">
@@ -452,6 +452,7 @@ export default {
             projectKey: localStorage.getItem("projectId"),
             startedSprintKey: null,
             projectManagers: [],
+            projectName:'',
         };
     },
     components: {
@@ -919,6 +920,7 @@ export default {
         this.getAllSprints();
         this.filteredSprints
         this.getProjectManagers();
+        this.projectName = localStorage.getItem('projectname')
     },
     watch: {
         'sprintData.start_date': function (newStartDate) {

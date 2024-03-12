@@ -50,7 +50,7 @@
                   aria-label="Close"></button>
               </div>
               <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
-                <form @submit="createProjects($event)">
+                <form @submit="createProjects($event), resetValues()">
                   <div class="row">
                     <div style="color: black;" class="col-md-6 mb-3">
                       <label for="client_name" class="form-label">Client Name</label>

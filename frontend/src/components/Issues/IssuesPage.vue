@@ -55,7 +55,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Key</label>
-                                            <input type="text" class="form-control" v-model="issueData.key"
+                                            <input title="Fill the Title first!!" type="text" class="form-control" v-model="issueData.key"
                                                 readonly="readonly" required>
                                         </div>
                                     </div>
@@ -63,7 +63,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="sprint" class="form-label">Sprint</label>
                                             <select required class="form-select" v-model="issueData.sprint_id">
-                                                <option value="">Select sprint</option>
+                                                <option value="">{{ this.allSprints.length? 'Select sprint': 'No sprints found!!'}}</option>
                                                 <option v-for="(sprint, index) in allSprints" :key="index"
                                                     :value="sprint.id">{{
                                     sprint.name }}</option>
@@ -287,7 +287,8 @@
                                                 toolbar="full" />
                                         </div>
                                     </div>
-                                    <div id="child" style="margin-top: 20px;" class="row" v-if="this.parent_issues.length > 0">
+                                    <div id="child" style="margin-top: 20px;" class="row"
+                                        v-if="this.parent_issues.length > 0">
                                         <label for="description" class="form-label">Parent issue</label>
                                         <div class="col-md-12 mb-3" style="overflow: auto;">
                                             <table class="table align-items-center mb-0">
@@ -509,7 +510,7 @@
                 <!--Table-->
                 <div v-if="filteredIssues?.length" class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
-                        <h6>{{ this.projectName ? `ISSUES of ${this.projectName}` : "ISSUES" }}</h6>
+                        <h6>{{ this.projectName ? `ISSUES (${this.projectName})` : "ISSUES" }}</h6>
                     </div>
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive p-0">
@@ -528,7 +529,7 @@
                                     <tr>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ index + 1 }}</h6>
+                                                <h6 class="mb-0 text-sm">{{  startingSerialNumber + index  }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding: 25px;">
@@ -638,6 +639,8 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import PaginationComponent from '../Paginator/PaginatorComponent.vue';
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
+import router from "@/router";
+
 export default {
     name: "IssuePage",
     data() {
@@ -737,6 +740,9 @@ export default {
             const startIndex = (this.currentPage - 1) * this.itemsPerPage;
             return this.filteredIssues.slice(startIndex, startIndex + this.itemsPerPage);
         },
+        startingSerialNumber() {
+            return (this.currentPage - 1) * this.itemsPerPage + 1;
+        },
         filteredIssues() {
             const searchLowerCase = this.searchTerm.toLowerCase() || ''
             return this.allIssues.filter(issue => {
@@ -756,7 +762,29 @@ export default {
             return this.editIssueData.sprint_id === "" || this.editIssueData.type === "" || this.editIssueData.type === 'epic';
         },
     },
+    created() {
+        this.projectKey = localStorage.getItem("projectId");
+
+        if (!this.projectKey) {
+            this.showSweetAlert();
+        } else {
+            this.getIssue();
+        }
+    },
     methods: {
+        createSprint(){
+            router.push("/backlogs")
+        },
+        showSweetAlert() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Select Project',
+                text: 'Please select a project.',
+                confirmButtonText: 'OK',
+            }).then(() => {
+                this.$router.push('/projects');
+            });
+        },
         formatDuration(duration) {
             const regex = /P(\d+D)?T(\d+H)?(\d+M)?(\d+S)?/;
             const matches = duration?.match(regex);
@@ -973,8 +1001,8 @@ export default {
                     type: 'error',
                     text: "Invalid duration format. Please use the format like '7d 5h 20m 30s'.",
                     timeout: 5000,
-                    layout: 'topRight', 
-                    closeWith: ['click'], 
+                    layout: 'topRight',
+                    closeWith: ['click'],
                 }).show();
                 this.issueData.exp_duration = '';
                 return;
@@ -1008,17 +1036,12 @@ export default {
             this.editIssueData.exp_duration = formattedDuration2;
 
             if (days > 366 || hours > 23 || minutes > 59 || seconds > 59 || days2 > 366 || hours2 > 23 || minutes2 > 59 || seconds2 > 59) {
-                // alert();
                 new Noty({
                     type: 'error',
                     text: "Invalid time values. Days should be between 0 and 365, hours should be between 0 and 23, and minutes/seconds should be between 0 and 59.",
                     timeout: 5000,
-                    closeWith: ['click', 'button'],
-                    buttons: [
-                        Noty.button('Close', 'btn btn-light', function (n) {
-                            n.close();
-                        })
-                    ],
+                    layout: 'topRight',
+                    closeWith: ['click'],
                 }).show()
                 this.issueData.exp_duration = '';
                 return;
