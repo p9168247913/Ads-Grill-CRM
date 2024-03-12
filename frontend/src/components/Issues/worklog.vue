@@ -68,8 +68,8 @@
         worklog.author.charAt(0).toUpperCase()
     }}</span>
                                                 <p class="pe-2 small font-weight-bold">{{ worklog.author }}</p>
-                                                <p class="small"> logged {{ formatDuration(worklog.logged_time) }} {{
-        worklog.created_at
+                                                <p class="small"> logged - {{ formatDuration2(worklog.logged_time)+' on' }} {{
+        formatDateTime(worklog.created_at)
     }}
                                                 </p>
                                                 <a v-if="worklog.attachments.length"
@@ -202,6 +202,22 @@ export default {
         ...mapState(['authToken', 'authUser'])
     },
     methods: {
+        formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Kolkata'
+            };
+
+            return new Intl.DateTimeFormat('en-US', options).format(date);
+        },
         formatDuration(duration) {
             const regex = /P(\d+D)?T(\d+H)?(\d+M)?(\d+S)?/;
             const matches = duration?.match(regex);
@@ -217,6 +233,34 @@ export default {
             if (days) {
                 formattedParts.push(`${parseInt(days, 10)}d`);
             }
+
+            if (hours) {
+                formattedParts.push(`${parseInt(hours, 10)}h`);
+            }
+
+            if (minutes) {
+                formattedParts.push(`${parseInt(minutes, 10)}m`);
+            }
+
+            if (seconds) {
+                formattedParts.push(`${parseInt(seconds, 10)}s`);
+            }
+
+            return formattedParts.join(' ');
+        },
+        formatDuration2(duration) {
+            const regex = /P?T(\d+H)?(\d+M)?(\d+S)?/;
+            const matches = duration?.match(regex);
+
+            if (!matches) {
+                return '';
+            }
+
+            const [, hours, minutes, seconds] = matches;
+
+            const formattedParts = [];
+
+
 
             if (hours) {
                 formattedParts.push(`${parseInt(hours, 10)}h`);
@@ -291,7 +335,13 @@ export default {
                 const match = this.logTime.match(durationRegex);
 
                 if (!match) {
-                    alert("Invalid duration format. Please use the format like '7h 20m 30s'.");
+                    new Noty({
+                        type: 'error',
+                        text: "Invalid duration format. Please use the format like '5h 20m 30s'.",
+                        timeout: 5000,
+                        layout: 'topRight',
+                        closeWith: ['click'],
+                    }).show();
                     this.logTime = '';
                     return;
                 }
@@ -305,7 +355,13 @@ export default {
                 this.logTime = formattedDuration;
 
                 if (hours > 23 || minutes > 59 || seconds > 59) {
-                    alert("Invalid time values. Hours should be between 0 and 23, and minutes/seconds should be between 0 and 59.");
+                    new Noty({
+                        type: 'error',
+                        text: "Invalid time values. Days should be between 0 and 365, hours should be between 0 and 23, and minutes/seconds should be between 0 and 59.",
+                        timeout: 5000,
+                        layout: 'topRight',
+                        closeWith: ['click'],
+                    }).show()
                     this.logTime = '';
                     return;
                 }
@@ -396,7 +452,7 @@ export default {
         },
         editedLog(worklog) {
             this.updatedLog = worklog
-            this.logTime = this.formatDuration(this.updatedLog.logged_time)
+            this.logTime = this.formatDuration2(this.updatedLog.logged_time)
             const quillHtml = this.$refs.logEditor
             if (quillHtml) {
                 quillHtml.setHTML(this.updatedLog.description)

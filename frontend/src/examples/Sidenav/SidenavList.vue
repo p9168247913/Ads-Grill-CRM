@@ -61,7 +61,7 @@
         </ul>
       </li>
 
-      <li v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
+      <!-- <li v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
         class="nav-item">
         <sidenav-item url="/requestaccess" class="requestaccess"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'RequestAccess'">
@@ -70,7 +70,7 @@
             <i class="fas fa-key text-warning text-sm opacity-10"></i>
           </template>
         </sidenav-item>
-      </li>
+      </li> -->
 
       <li v-if="authUser.role !== 'leads'" class="nav-item">
         <sidenav-item url="/projects" :class="getRoute() === 'projects' ? 'active' : ''"
