@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
     <!-- Modal for Create Comments -->
-    <div class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
+    <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
         aria-hidden="true" role="dialog" data-backdrop="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
