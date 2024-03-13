@@ -56,20 +56,22 @@
                 <div data-bs-backdrop="static" class="modal fade" id="createRoleModal" tabindex="-1"
                     aria-labelledby="createRoleModalLabel" aria-hidden="true" @hidden="createRole">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
+                            <div class="modal-body modalBody"
+                                style="padding-bottom: 0; height:52vh; border: 1px solid red;">
                                 <form @submit="createRole($event)">
                                     <div class="mb-3">
                                         <label for="roleName" class="form-label">Role Name</label>
                                         <input type="text" class="form-control" id="roleName"
                                             placeholder="Enter role name..." v-model="roleName">
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="roleName = ''">Close</button>
                                         <button type="button" class="btn btn-primary">Add</button>
@@ -84,13 +86,14 @@
                 <div data-bs-backdrop="static" class="modal fade" id="createAdmin" tabindex="-1"
                     aria-labelledby="createadminLabel" aria-hidden="true" @hidden="createUser">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create Admin</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
+                            <div class="modal-body modalBody"
+                                style="padding-bottom: 0; height:52vh; border: 1px solid red;">
                                 <form @submit="createUser($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -130,7 +133,8 @@
                                             <input type="text" class="form-control" v-model="contact_no" required>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
                                         <button type="submit" class="btn btn-primary">Send</button>
@@ -219,13 +223,13 @@
                 <div data-bs-backdrop="static" class="modal fade" id="edituser" tabindex="-1" aria-labelledby="edituser"
                     aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content" style="padding: 30px;">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="editdetails">Edit Details</h5>
                                 <button ref="modalCloseBtn" class="btn-close bg-dark text-xs" type="button"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:44vh">
                                 <form @submit="editUser($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -263,14 +267,14 @@
                                                 id="designation" name="designation" disabled>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 25px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal">Close</button>
                                         <button type="submit" class="btn btn-primary">Save</button>
                                     </div>
                                 </form>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -702,12 +706,12 @@ export default {
 </script>
 
 <style>
-
 .modalBody {
-  max-height: calc(100vh - 200px);
-  overflow: auto;
-  height: auto
+    max-height: calc(100vh - 200px);
+    overflow: auto;
+    height: auto
 }
+
 .icon:hover {
     transform: scale(1.1);
 }
