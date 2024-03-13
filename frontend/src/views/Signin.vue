@@ -139,7 +139,10 @@ export default {
           }).show()
           this.storeAuthToken(response.headers['token'], response.data.user)
           setTimeout(() => {
-            router.push('/dashboard')
+          if (this.authUser.role=="development"){
+            router.push('/projects')
+          }
+          else{router.push('/dashboard')}
           }, 1000);
           this.$store.commit('hideLoader')
         }
@@ -156,7 +159,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.response.data.message,
+          text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
           timeout: 3000,
           layout: 'topCenter'
         }).show()

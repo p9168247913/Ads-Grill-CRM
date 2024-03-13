@@ -13,14 +13,22 @@ from os.path import basename
 import os
 import openpyxl
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class LeadView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         parser_classes = (MultiPartParser, FormParser)
@@ -56,7 +64,6 @@ class LeadView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Lead Created Successfully'},status=status.HTTP_201_CREATED)
         
         if val =='bulkUpload':
-            print('post')
             parser_class = (FileUploadParser,)
             up_file = request.FILES.get('file')
             upload_folder = 'uploads/leads'
@@ -71,7 +78,6 @@ class LeadView(CsrfExemptMixin, APIView):
             df = df.dropna(how='all')
             rowList = df.values.tolist()
             rowList = rowList[:-1]
-            print(rowList) 
             empty_cols = []
             try:
                 for (ind, col) in enumerate(rowList):
@@ -129,8 +135,6 @@ class LeadView(CsrfExemptMixin, APIView):
                 return JsonResponse({'message':f"No Sale's Manager Found At Row: {ind+2}"})
 
             except Exception as exc:
-            # import traceback
-            # traceback.print_exc()
                 return JsonResponse({'message': str(exc)}, status=400, safe=False)
             return JsonResponse({'message':f'{up_file.name} Uploaded Successfully',}, status=status.HTTP_201_CREATED)
     
@@ -201,7 +205,7 @@ class LeadView(CsrfExemptMixin, APIView):
         
         
 class LeadInfo(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         val = request.GET.get('key')

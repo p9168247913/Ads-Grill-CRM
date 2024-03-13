@@ -65,6 +65,7 @@ class ClientLogin(APIView):
             if client is not None and checkPassword:
                 login(request,client)
                 res = JsonResponse({'login':'True', 'status':'Success', 'message':'Authenticated successfully', 'user':{
+                    "id": client.pk,
                     'email': client.email,
                     'name': client.name,
                 }})

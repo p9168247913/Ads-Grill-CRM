@@ -17,26 +17,32 @@
                                 <span class="input-group-text text-body">
                                     <i class="fas fa-search" aria-hidden="true"></i>
                                 </span>
-                                <input type="text" v-model="searchTerm" @change="filterUsers" class="form-control"
+                                <input type="text" v-model="searchTerm" class="form-control"
                                     placeholder="Search by name, role, designation or number..." />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                                <button v-if="authUser.role == 'super-admin'" type="button" style="width: auto; height: 40px !important;"
+                                <button v-if="authUser.role == 'super-admin'" type="button"
+                                    style="width: auto; height: 40px !important;"
                                     class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createRoleModal" >
-                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Role
+                                    data-bs-target="#createRoleModal">
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
+                                    Role
                                 </button>
-                                <button v-if="authUser.role == 'super-admin'" type="button" style="width: auto; height: 40px !important;"
+                                <button v-if="authUser.role == 'super-admin'" type="button"
+                                    style="width: auto; height: 40px !important;"
                                     class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createAdmin" >
-                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Admin
+                                    data-bs-target="#createAdmin">
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
+                                    Admin
                                 </button>
-                                <button v-if="authUser.role == 'admin'" type="button" style="width: auto; height: 40px !important;"
+                                <button v-if="authUser.role == 'admin'" type="button"
+                                    style="width: auto; height: 40px !important;"
                                     class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createUser" @click="getUserRole" >
-                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create User
+                                    data-bs-target="#createUser" @click="getUserRole">
+                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create
+                                    User
                                 </button>
                             </div>
                         </div>
@@ -147,32 +153,30 @@
                                             <input type="text" class="form-control" v-model="name" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="desgination" class="form-label">Designation</label>
-                                            <input type="text" class="form-control" v-model="designation" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Email</label>
                                             <input type="text" class="form-control" v-model="email" required>
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="password" class="form-label">Password</label>
-                                            <input type="password" class="form-control" v-model="password" required>
-                                        </div>
+
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="Pincode" class="form-label">Pincode</label>
-                                            <input type="text" class="form-control" v-model="pincode" required>
+                                            <label for="Role" class="form-label">Role</label>
+                                            <select @change="handleDesignation" class="form-select" id="role" name="role"
+                                                v-model="selectedRole" required>
+                                                <option value="" disabled selected>Select Role</option>
+                                                <option v-for="(item, index) in userRole" :key="index"
+                                                    :value="`${item.id},${item.name}`"> {{
+                                                        item.name }}</option>
+                                            </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="Role" class="form-label">Role</label>
-                                            <select class="form-select" id="role" name="role" v-model="selectedRole"
-                                                required>
-                                                <option value="" disabled selected>Select Role</option>
-                                                <option v-for="(item, index) in userRole" :key="index" :value="item.id"> {{
-                                                    item.name }}</option>
+                                            <label for="Designation" class="form-label">Designation</label>
+                                            <select class="form-select" id="Designation" name="Designation"
+                                                v-model="selectedDesgination" required>
+                                                <option value="" disabled selected>Select Designation</option>
+                                                <option v-for="(item, index) in filteredDesignations" :key="index"
+                                                    :value="item"> {{
+                                                        item}}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -180,6 +184,17 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="contactno" class="form-label">Contact No</label>
                                             <input type="text" class="form-control" v-model="contact_no" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="Pincode" class="form-label">Pincode</label>
+                                            <input type="text" class="form-control" v-model="pincode" required>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input type="password" class="form-control" v-model="password" required>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -216,8 +231,8 @@
                                     </div>
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="Role" class="form-label">Role</label>
-                                            <select class="form-select" id="role" name="role">
+                                            <label for="editRole" class="form-label">Role</label>
+                                            <select class="form-select" id="editRole" name="editRole">
                                                 <option value="select">Select...</option>
                                                 <option value="option1">Option 1</option>
                                             </select>
@@ -259,15 +274,16 @@
                                     <tr>
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
-                                            v-for="(head) in headers" :key="head">{{ head }}</th>
+                                            v-for="(header) in headers" :key="header">{{ header }}</th>
                                     </tr>
                                 </thead>
                                 <tbody v-for="(user, index) in paginatedUsers" :key="index">
                                     <tr>
                                         <td style="padding-left: 25px;">
-                                            <div class="d-flex px-2 py-1">
+                                            <div class="d-flex">
                                                 <div>
-                                                    <img src="" class="avatar avatar-sm me-3" alt="user1" />
+                                                    <img :src="'data:image/jpeg;base64,' + user.profile_pic"
+                                                        class="avatar avatar-sm me-3 rounded-circle" />
                                                 </div>
                                             </div>
                                         </td>
@@ -351,15 +367,22 @@ export default {
             createadminRole: 'admin',
             userRole: [],
             selectedRole: '',
+            selectedRoleName: '',
+            selectedDesgination: '',
             currentPage: 1,
             itemsPerPage: 10,
+            designations: {
+                "development": ['FE_Developer', 'BE_Developer', 'Full_Stack_Developer', 'Team_Lead', 'Project_Manager', 'Tester', 'Dev_Ops_Engineer', 'Product_Manager', 'QA_Engineer', 'UI/UX', 'Software_Architecture', 'Client'],
+                "sales": ["Project_Manager", "Sales_Executive_Officer"],
+                "client": ["Client"]
+            }
         }
     },
     computed: {
-        ...mapState(['authUser']),
+        ...mapState(['authToken', 'authUser']),
         filteredUsers() {
+            const searchLowerCase = this.searchTerm.toLowerCase() || ''
             return this.users.filter(user => {
-                const searchLowerCase = this.searchTerm.toLowerCase() || ''
                 return (
                     user.name.toLowerCase().includes(searchLowerCase) ||
                     user.role.toLowerCase().includes(searchLowerCase) ||
@@ -371,6 +394,10 @@ export default {
         paginatedUsers() {
             const startIndex = (this.currentPage - 1) * this.itemsPerPage;
             return this.filteredUsers.slice(startIndex, startIndex + this.itemsPerPage);
+        },
+        filteredDesignations() {
+            const designationsForRole = this.designations[this.selectedRoleName] || [];
+            return designationsForRole.map(item => this.removeUnderScores(item));
         }
     },
     methods: {
@@ -390,7 +417,6 @@ export default {
             const endIndex = startIndex + this.itemsPerPage;
             this.displayedUsers = this.filteredUsers.slice(startIndex, endIndex);
         },
-        filterUsers() { },
         resetValues() {
             this.closeModal
             this.email = ''
@@ -406,16 +432,47 @@ export default {
             try {
                 this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/roles/`);
-                this.userRole = response.data.roles
+                if(response.status === 200){
+                    this.userRole = response.data.roles
+                }
                 this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
             }
+        },
+        handleDesignation() {
+            this.selectedRoleName = this.selectedRole.split(',')[1]
+        },
+        removeUnderScores(value) {
+            // return value.replace(/_/g, ' ')
+            let result = ''
+            for(let i=0; i<value.length; i++){
+                if(value[i]=='_'){
+                    result+=' '
+                }
+                else{
+                    result+=value[i]
+                }
+            }
+            return result
+        },
+        formatDesignationToLowerCaseAndUnderScores(){
+            let designation= this.selectedDesgination.toLowerCase()
+            let result = ''
+            for (let i=0; i<designation.length; i++){
+                if (designation[i] == ' '){
+                    result+='_'
+                }
+                else{
+                    result+=designation[i]
+                }
+            }
+            return result
         },
         async createRole(e) {
             e.preventDefault()
@@ -440,7 +497,7 @@ export default {
                 } catch (error) {
                     new Noty({
                         type: 'error',
-                        text: error.response.data.message,
+                        text: error.response.data.message? error.response.data.message : error.response.data.detail,
                         timeout: 500,
                     }).show()
                     this.$store.commit('hideLoader')
@@ -465,12 +522,12 @@ export default {
                                 userID: id
                             }
                         });
-                        if (response.status === 201) {
+                        if (response.status === 204) {
                             Swal.fire('Deleted!', 'The user has been deleted.', 'success');
                         }
                         this.$store.commit('hideLoader')
                     } catch (error) {
-                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error!', error.response.data.message? error.response.data.message : error.response.data.detail, 'error');
                         this.$store.commit('hideLoader')
                     }
                 }
@@ -487,16 +544,21 @@ export default {
                 name: this.name,
                 role: '',
                 contact_no: this.contact_no,
-                designation: this.designation,
+                designation: '',
                 pincode: this.pincode,
                 password: this.password
             }
+            requestData.designation = this.formatDesignationToLowerCaseAndUnderScores()
             if (this.authUser.role == 'admin') {
-                requestData.role = this.selectedRole
+                requestData.role = this.selectedRole.split(',')[0]
             }
             else if (this.authUser.role == 'super-admin') {
-                requestData.role = '8'
+                let admin = this.userRole.find((item) => {
+                    return item.name == 'admin'
+                })
+                requestData.role = admin.id
             }
+
             try {
                 this.$store.commit('showLoader')
                 const response = await axios.post(`${BASE_URL}api/create/user/`, requestData, {
@@ -506,7 +568,7 @@ export default {
                 })
                 if (response.status == 201) {
                     Swal.fire({
-                        title: 'Created successfully!',
+                        title: 'User created successfully!',
                         icon: 'success',
                     })
                     this.getUsers(this.$route.params.val);
@@ -516,7 +578,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail? error.response.data.detail : error.response.data.email,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
@@ -530,14 +592,18 @@ export default {
             try {
                 this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/users/`, {
-                    params: { role: role }
-                })
-                this.users = response.data.users
+                    params: { role: role },
+                    headers: { token: this.authToken },
+                },
+                )
+                if (response.status == 200) {
+                    this.users = response.data.users
+                }
                 this.$store.commit('hideLoader')
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message : error.response.data.detail,
                     timeout: 500,
                 }).show()
                 this.$store.commit('hideLoader')
@@ -555,6 +621,11 @@ export default {
 </script>
 
 <style>
+.avatar:hover {
+    transform: scale(2.15);
+    transition: transform 0.3s ease;
+}
+
 .table-responsive {
     overflow-x: auto;
     max-height: 60vh;
@@ -586,5 +657,4 @@ export default {
 .edit-icon:hover {
     background-color: dodgerblue;
     color: rgb(251, 251, 251) !important;
-}
-</style>
+}</style>

@@ -1,4 +1,4 @@
-from app.models import Project, Users, Client, Sprint
+from app.models import Project, Users, Client, Sprint, Issue
 from rest_framework.views import APIView
 from django.utils import timezone
 import os
@@ -7,9 +7,10 @@ from django.http import JsonResponse
 import json
 from django.db import transaction
 from django.db.utils import IntegrityError
-from django.db.models import ObjectDoesNotExist
+from django.db.models import ObjectDoesNotExist, Count, Sum, Case, When, F, Value, IntegerField
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from django.core.files.storage import default_storage
 from braces.views import CsrfExemptMixin
 from io import BytesIO
@@ -22,8 +23,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class ProjectView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
@@ -36,7 +44,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             type = requestData.get('type')
             pro_status = requestData.get('status', 'to_do') 
             attachments = request.FILES.getlist('attachments', [])
-            team_members = requestData.get('team_members')
+            # team_members = requestData.get('team_members')
             host_address = requestData.get('host_address')
             tech_stacks = requestData.get('tech_stacks')
 
@@ -45,7 +53,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             
             with transaction.atomic():
                 team_lead_instance = Users.objects.get(pk=team_lead_id) if team_lead_id else None
-                client_instance = Client.objects.get(pk=client_id)
+                client_instance = Users.objects.get(pk=client_id)
                 reporter_instance=Users.objects.get(pk=reporter_id)
                     
                 project_instance = Project.objects.create(
@@ -56,7 +64,7 @@ class ProjectView(CsrfExemptMixin, APIView):
                     key=key,
                     type=type,
                     status=pro_status,
-                    team_members=team_members,
+                    # team_members=team_members,
                     host_address=host_address,
                     tech_stacks=tech_stacks,
                 )
@@ -89,40 +97,77 @@ class ProjectView(CsrfExemptMixin, APIView):
             return JsonResponse({'messge':str(i)})
         
         except Exception as e:
-            # import traceback
-            # traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Created Successfully'}, status=status.HTTP_201_CREATED)
     
     def get(self, request):
         try:
-            all_projects = Project.objects.all().order_by('-created_at')
-            res_data = [{
-                "id": project.pk,
-                "reporter": {
-                    'id': project.reporter.pk if project.reporter else None,
-                    'name': project.reporter.name if project.reporter else None
-                },
-                "team_lead": {
-                    'id': project.team_lead.pk if project.team_lead else None,
-                    'name': project.team_lead.name if project.team_lead else None
-                },
-                "client": {
-                    'id': project.client.pk if project.client else None,
-                    'name': project.client.name if project.client else None
-                },
-                "name": project.name,
-                "key": project.key,
-                "type": project.type,
-                "status": project.status,
-                "attachments": project.attachments,
-                "progress": project.progress,
-                "team_members": project.team_members,
-                "host_address": project.host_address,
-                "tech_stacks": project.tech_stacks,
-                "created_at": project.created_at,
-            }for project in all_projects]
+            val = request.GET.get('key')
+            res_data = []
+            if val == 'development':
+                all_projects = Project.objects.annotate(total_issues=Count('issue'), done_issues = Sum(Case(When(issue__status='done', then=1), default=Value(0), output_field=IntegerField()))).order_by('-created_at')
+                for project in all_projects:
+                    project_data = {
+                        "id": project.pk,
+                        "reporter": {
+                            'id': project.reporter.pk if project.reporter else None,
+                            'name': project.reporter.name if project.reporter else None
+                        },
+                        "team_lead": {
+                            'id': project.team_lead.pk if project.team_lead else None,
+                            'name': project.team_lead.name if project.team_lead else None
+                        },
+                        "client": {
+                            'id': project.client.pk if project.client else None,
+                            'name': project.client.name if project.client else None
+                        },
+                        "name": project.name,
+                        "key": project.key,
+                        "type": project.type,
+                        "status": project.status,
+                        "attachments": project.attachments,
+                        "progress": int((project.done_issues*100) / project.total_issues) if project.total_issues > 0 else int(0),
+                        "team_members": ", ".join(project.issue_set.values_list('assignee__name', flat=True).distinct()),
+                        "host_address": project.host_address,
+                        "tech_stacks": project.tech_stacks,
+                        "created_at": project.created_at,
+                    }
+                    res_data.append(project_data)
+            if val == 'client':
+                clientID = request.GET.get('clientID')
+                if not clientID:
+                    return JsonResponse({'messgae':'Request parameter missing(clientID)'}, status=status.HTTP_400_BAD_REQUEST)
+                client_all_projects = Project.objects.annotate(total_sprints=Count('sprint'), done_sprints=Sum(Case(When(sprint__status='done', then=1),default=Value(0), output_field=IntegerField()))).filter(client_id=clientID).order_by('-created_at')
+                for project in client_all_projects:
+                    sprints = Sprint.objects.filter(project_id = project.pk).order_by('-created_at')
+                    project_data = {
+                        "id": project.pk,
+                        "reporter": {
+                            'id': project.reporter.pk if project.reporter else None,
+                            'name': project.reporter.name if project.reporter else None
+                        },
+                        "name": project.name,
+                        "type": project.type,
+                        "status": project.status,
+                        "attachments": project.attachments,
+                        "progress":int((project.done_sprints*100) / project.total_sprints) if project.total_sprints > 0 else int(0),
+                        "host_address": project.host_address,
+                        "tech_stacks": project.tech_stacks,
+                        "created_at": project.created_at,
+                        "sprints":[{
+                            'id':sprint.pk,
+                            'name':sprint.name,
+                            'key':sprint.key,
+                            'status':sprint.status,
+                            'is_started':sprint.is_started,
+                            'start_date':sprint.start_date
+                            }for sprint in sprints]
+                    }
+                    res_data.append(project_data)
+
+        except Project.DoesNotExist:
+            return JsonResponse({'message':"No projects found"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return JsonResponse({'message':str(e)})
         return JsonResponse({'projects':res_data}, status=status.HTTP_200_OK)
@@ -133,7 +178,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             attachments = request.FILES.getlist('attachments', [])
             reporter_instance = Users.objects.get(pk=req_data.get('reporter_id'))
             team_lead_instance = Users.objects.get(pk=req_data.get('team_lead_id')) if req_data.get('team_lead_id') else None
-            client_instance = Client.objects.get(pk=req_data.get('client_id'))
+            client_instance = Users.objects.get(pk=req_data.get('client_id'))
             upd_project = Project.objects.get(pk=req_data.get('id'))
             with transaction.atomic():
                 upd_project.reporter = reporter_instance
@@ -143,7 +188,6 @@ class ProjectView(CsrfExemptMixin, APIView):
                 upd_project.key = req_data.get('key')
                 upd_project.type = req_data.get('type')
                 upd_project.status = req_data.get('status', 'to_do')  
-                upd_project.team_members = req_data.get('team_members')
                 upd_project.host_address = req_data.get('host_address')
                 upd_project.tech_stacks = req_data.get('tech_stacks')
                 attachment_file_names = []
@@ -199,62 +243,95 @@ class ProjectView(CsrfExemptMixin, APIView):
         except ObjectDoesNotExist:
             return JsonResponse({'message':'Requested Project Does Not Exists'}, status=status.HTTP_204_NO_CONTENT)        
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
     
 class DownloadProjectAttchments(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
             id=request.GET.get("id")
             project_instance=Project.objects.get(pk=id)
             files=project_instance.attachments
-            
-            zip_buffer=BytesIO()
-            with zipfile.ZipFile(zip_buffer,'w') as pro_zip:
-                for file in files:
-                    file_name = file.split("\\")[-1]
-                    pro_zip.write(file, file_name)
-            response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
-            response['Content-Disposition'] = f'attachment; filename={project_instance.name}_attachments.zip'
-            
-            return response
-            
+            if files:
+                zip_buffer=BytesIO()
+                with zipfile.ZipFile(zip_buffer,'w') as pro_zip:
+                    for file in files:
+                        file_name = file.split("\\")[-1]
+                        pro_zip.write(file, file_name)
+                response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename={project_instance.name}_attachments.zip'
+            else:
+                response = JsonResponse({"message":"No files found for the specified criteria."}, status=status.HTTP_204_NO_CONTENT)
+           
+        except IntegrityError as i:
+            response =  JsonResponse({"message":str(i)})
+
         except Exception as e:
-            return JsonResponse({"message":str(e)})
+            response =  JsonResponse({"message":str(e)})
+        return response
     
 
 class GetProjectManagers(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
-            all_lead_man = Users.objects.filter(role__name='Development', designation='Product Manager', is_deleted=False).order_by("-created_at")
+            all_lead_man = Users.objects.filter(role__name='development', designation='project_manager', is_deleted=False).order_by("-created_at")
             res_data = [{
                 "id":lead_man.pk,
                 "name":lead_man.name
             }for lead_man in all_lead_man]
         except Exception as e:
             return JsonResponse({'message':str(e)})
-        return JsonResponse({'lead_man':res_data}, status=status.HTTP_200_OK)
+        return JsonResponse({'project_managers':res_data}, status=status.HTTP_200_OK)
     
 class GetAllAssignees(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
-            all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='Development')
+            all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='development')
             res_data = [{
                 'id':assignee.pk,
                 'name': assignee.name
             } for assignee in all_assignees]
         except Exception as e:
             return JsonResponse({'message':str(e)})
-        return JsonResponse({'Assignees':res_data}, status=status.HTTP_200_OK)
+        return JsonResponse({'assignees':res_data}, status=status.HTTP_200_OK)
+    
+class GetAllTeamLeaders(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        try:
+            all_team_leaders = Users.objects.filter(Q(designation__icontains='team_lead'), role__name='development')
+            res_data = [{
+                'id':team_leader.pk,
+                'name': team_leader.name
+            } for team_leader in all_team_leaders]
+        except Exception as e:
+            return JsonResponse({'message':str(e)})
+        return JsonResponse({'team_leaders':res_data}, status=status.HTTP_200_OK)
+
+class GetAllClients(APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            all_clients = Users.objects.filter(role__name='client',is_deleted=False).order_by("-created_at")
+            res_data = [{
+                "id":client.pk,
+                "name":client.name
+            }for client in all_clients]
+        except Exception as e:
+            return JsonResponse({'message':str(e)})
+        return JsonResponse({'clients':res_data}, status=status.HTTP_200_OK)
+        
 
 
 

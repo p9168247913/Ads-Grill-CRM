@@ -327,7 +327,6 @@ export default {
             this.isFixedNavbar = window.scrollY > 1
         },
         doLogout() {
-            // console.log('working..')
             axios.get('http://127.0.0.1:8000/api/logout/').
                 then((r) => {
                     if (r.status == 200) {

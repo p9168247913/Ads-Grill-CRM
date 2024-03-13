@@ -17,7 +17,6 @@ class RolesView(APIView):
     def post(self, request):
         if request.method == 'POST':
             roleName = request.GET.get('role')
-            print(roleName)
             if not roleName or roleName == None:
                 return Response({'message':'Invalid Credentials'}, status = 400 ) 
             try:

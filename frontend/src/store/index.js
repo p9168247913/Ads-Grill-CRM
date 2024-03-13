@@ -10,12 +10,14 @@ export default createStore({
     },
     authToken: localStorage.getItem('token') || '',
     authUser:{
+      id:localStorage.getItem('id') || "",
       email: localStorage.getItem('email') || "",
       role:localStorage.getItem('role') || "",
       name: localStorage.getItem('name') || "",
       contact_no: localStorage.getItem('contact_no') || "",
       pincode: localStorage.getItem('pincode') || "",
-      designation: localStorage.getItem('designation') || ""
+      designation: localStorage.getItem('designation') || "",
+      profile_pic:localStorage.getItem('profile_pic') || ""
     },
     hideConfigButton: false,
     isPinned: true,
@@ -66,12 +68,14 @@ export default createStore({
     },
     setAuthUser(state, user) {
       state.authUser = user
+      localStorage.setItem('id', user.id)
       localStorage.setItem('email', user.email)
       localStorage.setItem('role', user.role)
       localStorage.setItem('name', user.name)
       localStorage.setItem('contact_no', user.contact_no)
       localStorage.setItem('pincode', user.pincode)
       localStorage.setItem('designation', user.designation)
+      localStorage.setItem('profile_pic', user.profile_pic)
     },
     setAuthClient(state, user) {
       state.authClient = user
@@ -88,6 +92,8 @@ export default createStore({
       localStorage.removeItem('email')
       localStorage.removeItem('role')
       localStorage.removeItem('name')
+      localStorage.removeItem('projectId')
+      localStorage.removeItem('id')
     },
     clearAuthUser(state){
       state.authUser = {
@@ -100,6 +106,9 @@ export default createStore({
       localStorage.removeItem('contact_no')
       localStorage.removeItem('pincode')
       localStorage.removeItem('designation')
+      localStorage.removeItem('profile_pic')
+      localStorage.removeItem('projectId')
+      localStorage.removeItem('id')
     },
     clearAuthToken(){
       localStorage.removeItem("token")
