@@ -88,7 +88,7 @@ class WorklogView(CsrfExemptMixin, APIView):
             else:
                 saved_logged_time = timedelta(0)
             checkDays = issue_instance.exp_duration - (saved_logged_time)
-            if checkDays.days or checkDays > convert_to_duration('7h 30m 0s'):
+            if checkDays.days:
                 upd_logged_time = convert_to_duration(logged_time)+convert_to_duration('16h 30m 0s')
             else:
                 upd_logged_time = convert_to_duration(logged_time)

@@ -47,6 +47,7 @@ class UsersView(CsrfExemptMixin, APIView):
                     User = {
                     'id':user.pk,
                     'name': user.name,
+                    'email': user.email,
                     'designation': user.designation,
                     'role': user.role.name,
                     'contact_no': user.contact_no,
