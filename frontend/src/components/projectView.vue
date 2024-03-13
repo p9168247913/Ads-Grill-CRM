@@ -25,12 +25,14 @@
             </div>
             <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
               <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                <button v-if="this.authUser.designation==='project_manager'" type="button" style="width: auto; height: 40px !important;"
+                <button v-if="this.authUser.designation === 'project_manager'" type="button"
+                  style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createProject">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Project
                 </button>
-                <button v-if="this.authUser.designation==='project_manager'" @click="getClientRole" type="button" style="width: auto; height: 40px !important;"
+                <button v-if="this.authUser.designation === 'project_manager'" @click="getClientRole" type="button"
+                  style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createClient">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Client
@@ -223,13 +225,13 @@
         <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
           <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Client</h5>
                 <button ref="createClient" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                   aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
                 <form @submit="createClient($event), resetValues()">
                   <div class="row">
                     <div class="col-md-6 mb-3">
@@ -251,8 +253,8 @@
                       <input type="text" class="form-control" v-model="clientData.pincode" required>
                     </div>
                   </div>
-
-                  <div class="modal-footer">
+                  <div class="modal-footer"
+                    style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
                     <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
@@ -295,7 +297,7 @@
             limitedTeamMembers(project.name) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.name && project.name.length > 15" data-bs-toggle="modal"
-                          data-bs-target="#showTeam" @click="openModal(project.name)">
+                          data-bs-target="#showTeam" @click.stop="openModal(project.name)">
                           ...more
                         </p>
                       </div>
@@ -326,7 +328,8 @@
           limitedTeamMembers(project.team_members) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.team_members && project.team_members.length > 15"
-                          data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.team_members)">
+                          data-bs-toggle="modal" data-bs-target="#showTeam"
+                          @click.stop="openModal(project.team_members)">
                           ...more
                         </p>
                       </div>
@@ -336,7 +339,8 @@
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ limitedTeamMembers(project.tech_stacks) }}
                         </h6>
                         <p class="show-more" v-if="project.tech_stacks && project.tech_stacks.length > 15"
-                          data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.tech_stacks)">
+                          data-bs-toggle="modal" data-bs-target="#showTeam"
+                          @click.stop="openModal(project.tech_stacks)">
                           ...more
                         </p>
                       </div>
@@ -355,7 +359,7 @@
                     </td>
                     <td style="padding-left: 30px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)">
+                        <a v-if="project.attachments.length" @click.stop="getAttachmentUrl($event, project.id)">
                           <i class="fas fa-download"></i>
                         </a>
                         <span v-else>No Files</span>
@@ -374,10 +378,10 @@
                                             @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
                                         <i v-else class="fas fa-trash text-danger m-3 fa-xs"
                                             style="cursor: not-allowed;"></i> -->
-                      <i data-bs-toggle="modal" data-bs-target="#editProject" @click="editModal(project)"
+                      <i data-bs-toggle="modal" data-bs-target="#editProject" @click.stop="editModal(project)"
                         class="fas fa-pencil-alt text-primary mx-3 icon"
                         style="margin-left: 20px; cursor: pointer;"></i>
-                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 mx-3 icon"
+                      <i @click.stop="deleteProject(project.id)" class="fas fa-trash text-danger m-3 mx-3 icon"
                         style="cursor: pointer;"></i>
                     </td>
                   </tr>
@@ -650,14 +654,17 @@ export default {
     },
     async getProjects() {
       try {
-        this.$store.commit('showLoader');
+
         const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
           headers: {
             'Content-Type': "multipart/form-data",
             token: this.authToken,
           }
         })
-        this.allProjects = response.data.projects;
+        this.$store.commit('showLoader');
+        if (response.status === 200) {
+          this.allProjects = response.data.projects;
+        }
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
