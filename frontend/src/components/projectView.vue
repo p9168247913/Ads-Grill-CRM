@@ -257,7 +257,7 @@
                     style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                   </div>
                 </form>
               </div>
@@ -427,6 +427,7 @@ export default {
   name: "projects",
   data() {
     return {
+      clientRoleID:null,
       currentPage: 1,
       itemsPerPage: 10,
       uploadProgress: 0,
@@ -500,7 +501,7 @@ export default {
       return this.filteredProjects.slice(startIndex, startIndex + this.itemsPerPage);
     }
   },
-  methods: {
+  methods: { 
     nextPage() {
       if (this.currentPage * this.itemsPerPage < this.filteredProjects.length) {
         this.currentPage++;
@@ -527,9 +528,11 @@ export default {
       try {
         this.$store.commit('showLoader')
         let response = await axios.get(`${BASE_URL}api/roles/`);
+        console.log('resp',response);
         let clientRole = response.data.roles.find((role) => {
           return role.name == 'client'
         })
+        console.log('clientRole',clientRole)
         if (clientRole) {
           this.$store.commit('hideLoader')
           this.clientRoleID = clientRole.id
@@ -830,6 +833,8 @@ export default {
     },
     async createClient(e) {
       e.preventDefault();
+      this.clientData.role = this.clientRoleID
+      console.log(this.clientData);
       try {
         this.$store.commit('showLoader');
         this.clientData.role = this.clientRoleID
