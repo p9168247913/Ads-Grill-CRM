@@ -41,8 +41,8 @@
                                     </div>
                                     <div class="row align-items-center "
                                         style="margin-left: 2px;width: 95%; margin-top: -20px;">
-                                        <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
-                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                        <img style="width: 45px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://static.vecteezy.com/ti/vecteur-libre/p3/421699-icone-de-documentss-gratuit-vectoriel.jpg"
                                             aria-describedby="5673val-tooltip">
                                         <p class="story-name col-10 ps-0"
                                             style="margin-top: 15px; font-size: 12px; font-weight: bold;">{{
@@ -86,8 +86,8 @@
                                     </div>
                                     <div class="row align-items-center "
                                         style="margin-left: 2px;width: 95%; margin-top: -20px;">
-                                        <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
-                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                        <img style="width: 45px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://static.vecteezy.com/ti/vecteur-libre/p3/421699-icone-de-documentss-gratuit-vectoriel.jpg"
                                             aria-describedby="5673val-tooltip">
                                         <p class="story-name col-10 ps-0"
                                             style="margin-top: 15px; font-size: 12px; font-weight: bold;">{{
@@ -131,7 +131,7 @@
                                     <div class="row align-items-center "
                                         style="margin-left: 2px;width: 95%; margin-top: -20px;">
                                         <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
-                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                            src="https://static.vecteezy.com/ti/vecteur-libre/p3/421699-icone-de-documentss-gratuit-vectoriel.jpg"
                                             aria-describedby="5673val-tooltip">
                                         <p class="story-name col-10 ps-0"
                                             style="margin-top: 15px; font-size: 12px; font-weight: bold;">{{
@@ -299,7 +299,7 @@ export default {
             projectName: localStorage.getItem("projectname"),
             editorInstance: null,
             sprintData: {},
-            updateSprintData :{}
+            updateSprintData: {}
         };
     },
     components: {
@@ -344,10 +344,10 @@ export default {
                 }
             } else {
                 new Noty({
-                        type: 'error',
-                        text: 'Quill editor reference not found',
-                        timeout: 1000,
-                    }).show();
+                    type: 'error',
+                    text: 'Quill editor reference not found',
+                    timeout: 1000,
+                }).show();
             }
         },
         async deleteIssue(id) {

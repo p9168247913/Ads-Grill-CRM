@@ -231,7 +231,7 @@
                 <button ref="createClient" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                   aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:34vh">
                 <form @submit="createClient($event), resetValues()">
                   <div class="row">
                     <div class="col-md-6 mb-3">
