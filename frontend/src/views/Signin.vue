@@ -1,4 +1,5 @@
 <template>
+
   <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
@@ -16,7 +17,7 @@
           <div class="row">
             <div class="mx-auto col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0">
               <div style="margin: auto;">
-                <img src="../assets/img/logos/Adsgrill.png" style=" width: 150px !important;" alt="">
+                <img src="../assets/img/logos/ag_logo.png" style=" width: 150px !important;" alt="">
               </div>
               <div class="card card-plain"
                 style="margin-top: 20px; box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px !important;">
@@ -139,10 +140,14 @@ export default {
           }).show()
           this.storeAuthToken(response.headers['token'], response.data.user)
           setTimeout(() => {
-          if (this.authUser.role=="development"){
-            router.push('/projects')
-          }
-          else{router.push('/dashboard')}
+            if (this.authUser.role == "development") {
+              router.push('/projects')
+              this.$store.commit('hideLoader')
+            }
+            else { 
+              router.push('/dashboard') 
+              this.$store.commit('hideLoader')
+            }
           }, 1000);
           this.$store.commit('hideLoader')
         }
@@ -159,7 +164,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
+          text: error.response.data.message ? error.response.data.message :error.response.data.detail,
           timeout: 3000,
           layout: 'topCenter'
         }).show()

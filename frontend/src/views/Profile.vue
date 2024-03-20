@@ -62,7 +62,8 @@
               <p class="text-uppercase text-sm">User Information</p>
               <div class="mb-3 col-md-6">
                 <label for="profileImage" class="form-label">Profile Picture</label>
-                <input type="file" class="form-control" id="profileImage" @change="onImageChange($event)" />
+                <input accept=".jpeg, .png, .jpg" type="file" class="form-control" id="profileImage"
+                  @change="onImageChange($event)" />
               </div>
               <div class="row">
                 <div class="col-md-6">
@@ -248,7 +249,38 @@ export default {
       }
     },
     onImageChange(e) {
-      this.selectedFiles = e.target.files
+      let fileInput = e.target;
+      let file = fileInput.files[0];
+
+      if (!file) {
+        new Noty({
+          type: 'error',
+          text: 'No file selected.',
+          timeout: 2000,
+        }).show();
+        fileInput.value = '';
+        return;
+      }
+
+      if (!file.type.match('image.*')) {
+        new Noty({
+          type: 'error',
+          text: 'Please select an image file.',
+          timeout: 2000,
+        }).show();
+        fileInput.value = '';
+        return;
+      }
+
+      if (file.size > 409600) {
+        new Noty({
+          type: 'error',
+          text: 'Please select an image file less than 400KB.',
+          timeout: 2000,
+        }).show();
+        fileInput.value = '';
+      }
+      this.selectedFiles = file;
     },
     setUserDataFromLocalStorage() {
       this.userData.id = this.authUser.id

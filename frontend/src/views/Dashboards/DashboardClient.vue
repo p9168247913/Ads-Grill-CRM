@@ -9,21 +9,21 @@
     </head>
     <div class="wrapper" style="margin-bottom: 80px; ">
         <div class="content-page">
-            <div class="container-fluid">
+            <div class="container-fluid p-0">
                 <!--Table-->
-                <div class="card" style="margin-top: 2rem;">
+                <div class="card" style="margin-top: 2rem; padding: 3px; padding-bottom: 8px; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;">
                     <div class="card-header pb-0">
-                        <h6></h6>
+                        <h6>PROJECTS</h6>
                     </div>
-                    <div class="card-body px-0 pt-0 pb-1">
-                        <div class="table-responsive p-1">
+
+                    <div class="card-body px-0 pt-0 pb-1" style="border-top: 1px solid gray;">
+                        <div class="table-responsive p-1" >
                             <div class="align-items-center p-1 project-card" v-for="(project, index) in allProjects"
                                 :key="index">
-                                <div class="align-items-center mb-0"
-                                    style="display:flex; justify-content: space-between;">
-                                    <div style="display: flex; gap: 50px; align-items: center;">
+                                <div class="align-items-center mb-0 sprintRow" @click="toggleDropdown(index)">
+                                    <div style="display: flex; gap: 50px; align-items: center; ">
                                         <div class="d-flex flex-row justify-content-center">
-                                            <span class="mb-0 text-sm"><i @click="toggleDropdown(index)"
+                                            <span class="mb-0 text-sm"><i
                                                     class="fa fa-chevron-down drop-icon"></i></span>
                                         </div>
                                         <div class="d-flex flex-row justify-content-center">
@@ -55,10 +55,10 @@
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">{{
                                 project.host_address }}</p>
                                         </div>
-                                        <div class="d-flex flex-column justify-content-left" 
-                                        style="padding: 0px 10px;">
-                                            <h6 class="mb-0 text-sm" >
-                                                <argon-progress :percentage="project.progress" color="success" style="width: 100px;" />
+                                        <div class="d-flex flex-column justify-content-left" style="padding: 0px 10px;">
+                                            <h6 class="mb-0 text-sm">
+                                                <argon-progress :percentage="project.progress" color="success"
+                                                    style="width: 100px;" />
                                             </h6>
                                         </div>
                                     </div>
@@ -73,7 +73,8 @@
                                             </thead>
 
                                             <tbody>
-                                                <tr title="click me to see comments" @click="getComments(sprint.id)"
+                                                <tr title="click me to see comments" class="issueRow"
+                                                    @click="getComments(sprint.id)"
                                                     v-for="(sprint, sprintIndex) in project.sprints" :key="sprintIndex">
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
@@ -95,9 +96,11 @@
                                                     </td>
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
-                                                            <h6 class="mb-0 text-sm">{{sprint.status === 'done' ? "Done" :
-                                                             sprint.status ==='in_progress' ? 'In Progress' : 
-                                                             sprint.status === 'to_do' ? "To Do" : '' }}</h6>
+                                                            <h6 class="mb-0 text-sm">{{ sprint.status === 'done' ?
+                                "Done"
+                                :
+                                sprint.status === 'in_progress' ? 'In Progress' :
+                                    sprint.status === 'to_do' ? "To Do" : '' }}</h6>
                                                         </div>
                                                     </td>
                                                     <td style="padding-left: 25px;">
@@ -128,7 +131,7 @@
         </div>
 
         <!--COMMENT SECTION-->
-        <div class="d-flex flex-column justify-content-center mt-8">
+        <div class="d-flex flex-column justify-content-center mt-4">
             <h5 class="mb-2">Comments</h5>
 
             <div v-if="sprintId != null" class="d-flex flex-column mb-4">
@@ -511,6 +514,27 @@ export default {
     max-height: 500px;
     overflow-y: auto;
     z-index: 99;
+}
+
+.sprintRow {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 5px;
+    padding: 8px;
+}
+
+.sprintRow:hover {
+    background-color: rgb(244, 243, 243);
+    cursor: pointer;
+}
+
+/* .issueRow{
+    
+} */
+
+.issueRow:hover {
+    background-color: rgb(244, 243, 243);
+    cursor: pointer;
 }
 
 .priority-icon {
