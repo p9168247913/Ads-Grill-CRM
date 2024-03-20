@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-(2l!o^)n)khr1ie=v-+5=&cd0r8ub+9tn5@m%$wmn-gqw26rfl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['162.0.236.82']
+ALLOWED_HOSTS = ['162.0.236.82', '162.0.235.74', 'www.crm.adsgrill.com', 'crm.adsgrill.com']
 if DEBUG:
     ALLOWED_HOSTS.append("*")
 
@@ -123,8 +123,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'adsgrill_crm',
-        'USER': 'adsgrill_crm',
-        'PASSWORD': 'adsgrill@1234',
+        'USER': 'adsgrill_admin',
+        'PASSWORD': 'adsgrill@123',
         'HOST': '162.0.236.82',
         'PORT': '5432', 
     }
@@ -212,7 +212,7 @@ EMAIL_HOST_PASSWORD = 'nl,Mke-F,PZu'
 DEFAULT_FROM_EMAIL = 'developer_team@adsgrill.com'
 
 # Dajngo session settings
-# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 3600 * 24
 SESSION_SAVE_EVERY_REQUEST = False
