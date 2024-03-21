@@ -79,6 +79,7 @@ class Lead(models.Model):
     country = models.CharField(null=True, blank=False, max_length=30)
     state = models.CharField(null=True, blank=False, max_length=30)
     city = models.CharField(null=True, blank=False, max_length=30)
+    requirement=models.CharField(null=True,blank=True)
     file = models.FileField(upload_to='uploads/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
