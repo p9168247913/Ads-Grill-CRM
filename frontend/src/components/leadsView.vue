@@ -1,5 +1,6 @@
 <!-- Home.vue -->
 <template>
+
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -24,8 +25,8 @@
                         <div class="col-md-6 col-lg-6 col-sm-10 d-flex justify-content-lg-end justify-content-md-end">
                             <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
                                 <button type="button" style="width: auto; height: 40px !important;"
-                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
-                                    data-bs-target="#createLead">
+                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active"
+                                    data-bs-toggle="modal" data-bs-target="#createLead">
                                     <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>
                                     <span class="d-none d-md-inline">&nbsp; &nbsp;Create Lead</span>
                                 </button>
@@ -48,20 +49,22 @@
                     </div>
                 </div>
                 <!-- Modal for Create Lead -->
-                <div class="modal fade" ref="createLeadModal" id="createLead" tabindex="-1"
+                <div data-bs-backdrop="static" class="modal fade" ref="createLeadModal" id="createLead" tabindex="-1"
                     aria-labelledby="createadminLabel" aria-hidden="true" @hidden="createLeads">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create Lead</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:62vh">
                                 <form @submit="createLeads($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="client_name" class="form-label">Client Name</label>
-                                            <input type="text" class="form-control" v-model="leadData.client_name" required>
+                                            <input type="text" class="form-control" v-model="leadData.client_name"
+                                                required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Email</label>
@@ -71,7 +74,8 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="contact_no" class="form-label">Mobile No.</label>
-                                            <input type="text" class="form-control" v-model="leadData.contact_no" required>
+                                            <input type="text" class="form-control" v-model="leadData.contact_no"
+                                                required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="country" class="form-label">Country</label>
@@ -94,7 +98,7 @@
                                             <select class="form-select" v-model="leadData.tag" required>
                                                 <option value="">Select Tag</option>
                                                 <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                                    tag.name }}</option>
+                                    tag.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -125,7 +129,8 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="resetValues">Close</button>
                                         <button type="submit" class="btn btn-primary">Create</button>
@@ -137,13 +142,14 @@
                     </div>
                 </div>
                 <!-- Modal for Edit Lead -->
-                <div class="modal fade" ref="editLeadModal" id="edituser" tabindex="-1" @hidden="updateLead"
-                    aria-labelledby="edituser" aria-hidden="true">
+                <div data-bs-backdrop="static" class="modal fade" ref="editLeadModal" id="edituser" tabindex="-1"
+                    @hidden="updateLead" aria-labelledby="edituser" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content" style="padding: 30px;">
+                        <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="editdetails">Edit Details</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <form @submit="updateLead($event, updateLeadData.id), resetValues()">
@@ -175,7 +181,8 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="state" class="form-label">State</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.state" required>
+                                            <input type="text" class="form-control" v-model="updateLeadData.state"
+                                                required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="city" class="form-label">City</label>
@@ -188,7 +195,7 @@
                                             <select class="form-select" v-model="updateLeadData.tag" required>
                                                 <option value="">Select Tag</option>
                                                 <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                                    tag.name }}</option>
+                                    tag.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -253,7 +260,8 @@
                                     <tr>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1
+                                                    }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
@@ -311,10 +319,11 @@
                                                 class="fas fa-pencil-alt text-primary fa-xs pr-4 "
                                                 style=" cursor: not-allowed;"></i>
                                             <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
-                                                data-bs-toggle="modal" data-bs-target="#edituser" @click="editModal(lead)"
-                                                style=" cursor: pointer;"></i>
+                                                data-bs-toggle="modal" data-bs-target="#edituser"
+                                                @click="editModal(lead)" style=" cursor: pointer;"></i>
                                             <i v-if="authUser.role === 'super-admin'"
-                                                class="fas fa-trash text-danger m-3 fa-xs" style="cursor: not-allowed"></i>
+                                                class="fas fa-trash text-danger m-3 fa-xs"
+                                                style="cursor: not-allowed"></i>
                                             <i v-else class="fas fa-trash text-danger m-3 fa-xs delete-icon"
                                                 @click="deleteLead(lead.id)" style="cursor: pointer"></i>
                                         </td>
@@ -323,14 +332,14 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="leads.length>10" :currentPage="currentPage" :itemsPerPage="itemsPerPage"
+                    <PaginationComponent v-if="leads.length > 10" :currentPage="currentPage" :itemsPerPage="itemsPerPage"
                         :filteredUsers="filteredLeads" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
             </div>
         </div>
     </div>
 </template>
-    
+
 <script>
 import axios from 'axios';
 import Noty from 'noty'
@@ -593,7 +602,7 @@ export default {
     },
 };
 </script>
-    
+
 <style scoped>
 .modalBody {
     max-height: calc(100vh - 150px);
