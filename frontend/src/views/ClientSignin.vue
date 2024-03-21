@@ -105,59 +105,6 @@ export default {
     },
     methods: {
         ...mapMutations(['setAuthToken', 'setAuthUser']),
-        // doLogin(e) {
-        //     e.preventDefault();
-        //     if (!this.username) {
-        //         new Noty({
-        //             type: 'warning',
-        //             text: 'Please enter email',
-        //             timeout: 3000,
-        //             layout: 'topCenter'
-        //         }).show();
-        //     }
-        //     else if (!this.password) {
-        //         new Noty({
-        //             type: 'warning',
-        //             text: 'Please enter password',
-        //             timeout: 3000,
-        //             layout: 'topCenter'
-        //         }).show();
-        //     }
-        //     else {
-        //         axios.post(`${BASE_URL}api/client/login/`, {
-        //             "username": this.username,
-        //             "password": this.password
-        //         }).then((response) => {
-        //             if (response.data.status == 'Success') {
-        //                 new Noty({
-        //                     type: 'success',
-        //                     text: response.data.message,
-        //                     timeout: 500,
-        //                     layout: 'topCenter'
-        //                 }).show()
-        //                 this.storeAuthToken(response.headers['token'], response.data.user)
-        //                 setTimeout(() => {
-        //                     router.push('/projects')
-        //                 }, 1000);
-        //             }
-        //             else if (response.data.status == 'Failed') {
-        //                 new Noty({
-        //                     type: 'error',
-        //                     text: response.data.message,
-        //                     timeout: 3000,
-        //                     layout: 'topCenter'
-        //                 }).show()
-        //             }
-        //         }).catch((error) => {
-        //             new Noty({
-        //                 type: 'error',
-        //                 text: error.message,
-        //                 timeout: 3000,
-        //                 layout: 'topCenter'
-        //             }).show()
-        //         })
-        //     }
-        // },
         async doLogin(e) {
             e.preventDefault();
             if (!this.username) {
@@ -210,7 +157,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
                     timeout: 3000,
                     layout: 'topCenter'
                 }).show()
@@ -221,8 +168,7 @@ export default {
             if (token !== 'undefined' && user) {
                 this.setAuthToken(token)
                 this.setAuthUser(user)
-                // Update role to 'client'
-                this.authUser.role = 'client'; // Update the role in the store or the data object
+                this.authUser.role = 'client';
             }
             localStorage.setItem('role', 'client')
         },

@@ -1,7 +1,7 @@
 <template>
   <div v-show="this.$store.state.layout === 'default'" class="min-height-400 position-absolute w-100"
     :class="`${this.$store.state.darkMode ? 'bg-transparent' : 'bg-custom1'}`"></div>
-  <aside class="my-3 overflow-auto border-0 sidenav navbar navbar-vertical navbar-expand-xs border-radius-xl" :class="`${this.$store.state.isRTL
+  <aside style="z-index: 3 !important;"  class="my-3 overflow-auto border-0 sidenav navbar navbar-vertical navbar-expand-xs border-radius-xl" :class="`${this.$store.state.isRTL
     ? 'me-3 rotate-caret fixed-end'
     : 'fixed-start ms-3'
     } 

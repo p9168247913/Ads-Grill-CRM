@@ -10,6 +10,7 @@ from django.db.utils import IntegrityError
 from django.db.models import ObjectDoesNotExist, Count, Sum, Case, When, F, Value, IntegerField
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from django.core.files.storage import default_storage
 from braces.views import CsrfExemptMixin
 from io import BytesIO
@@ -22,8 +23,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class ProjectView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         try:
@@ -36,7 +44,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             type = requestData.get('type')
             pro_status = requestData.get('status', 'to_do') 
             attachments = request.FILES.getlist('attachments', [])
-            team_members = requestData.get('team_members')
+            # team_members = requestData.get('team_members')
             host_address = requestData.get('host_address')
             tech_stacks = requestData.get('tech_stacks')
 
@@ -45,7 +53,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             
             with transaction.atomic():
                 team_lead_instance = Users.objects.get(pk=team_lead_id) if team_lead_id else None
-                client_instance = Client.objects.get(pk=client_id)
+                client_instance = Users.objects.get(pk=client_id)
                 reporter_instance=Users.objects.get(pk=reporter_id)
                     
                 project_instance = Project.objects.create(
@@ -56,7 +64,7 @@ class ProjectView(CsrfExemptMixin, APIView):
                     key=key,
                     type=type,
                     status=pro_status,
-                    team_members=team_members,
+                    # team_members=team_members,
                     host_address=host_address,
                     tech_stacks=tech_stacks,
                 )
@@ -89,8 +97,6 @@ class ProjectView(CsrfExemptMixin, APIView):
             return JsonResponse({'messge':str(i)})
         
         except Exception as e:
-            # import traceback
-            # traceback.print_exc()
             return JsonResponse({'message':str(e)})
         
         return JsonResponse({'message':'Project Created Successfully'}, status=status.HTTP_201_CREATED)
@@ -127,7 +133,6 @@ class ProjectView(CsrfExemptMixin, APIView):
                         "tech_stacks": project.tech_stacks,
                         "created_at": project.created_at,
                     }
-                    print('issues of projects', project.issue_set.values_list('assignee', flat=True))
                     res_data.append(project_data)
             if val == 'client':
                 clientID = request.GET.get('clientID')
@@ -173,7 +178,7 @@ class ProjectView(CsrfExemptMixin, APIView):
             attachments = request.FILES.getlist('attachments', [])
             reporter_instance = Users.objects.get(pk=req_data.get('reporter_id'))
             team_lead_instance = Users.objects.get(pk=req_data.get('team_lead_id')) if req_data.get('team_lead_id') else None
-            client_instance = Client.objects.get(pk=req_data.get('client_id'))
+            client_instance = Users.objects.get(pk=req_data.get('client_id'))
             upd_project = Project.objects.get(pk=req_data.get('id'))
             with transaction.atomic():
                 upd_project.reporter = reporter_instance
@@ -243,7 +248,7 @@ class ProjectView(CsrfExemptMixin, APIView):
         return JsonResponse({'message':'Project Deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
     
 class DownloadProjectAttchments(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
@@ -270,7 +275,7 @@ class DownloadProjectAttchments(CsrfExemptMixin, APIView):
     
 
 class GetProjectManagers(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
@@ -284,7 +289,7 @@ class GetProjectManagers(CsrfExemptMixin, APIView):
         return JsonResponse({'project_managers':res_data}, status=status.HTTP_200_OK)
     
 class GetAllAssignees(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
@@ -298,7 +303,7 @@ class GetAllAssignees(CsrfExemptMixin, APIView):
         return JsonResponse({'assignees':res_data}, status=status.HTTP_200_OK)
     
 class GetAllTeamLeaders(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -311,6 +316,21 @@ class GetAllTeamLeaders(CsrfExemptMixin, APIView):
         except Exception as e:
             return JsonResponse({'message':str(e)})
         return JsonResponse({'team_leaders':res_data}, status=status.HTTP_200_OK)
+
+class GetAllClients(APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            all_clients = Users.objects.filter(role__name='client',is_deleted=False).order_by("-created_at")
+            res_data = [{
+                "id":client.pk,
+                "name":client.name
+            }for client in all_clients]
+        except Exception as e:
+            return JsonResponse({'message':str(e)})
+        return JsonResponse({'clients':res_data}, status=status.HTTP_200_OK)
         
 
 

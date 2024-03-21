@@ -8,6 +8,7 @@ import json
 from django.db import transaction
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from braces.views import CsrfExemptMixin
 from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
@@ -18,8 +19,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class UsersView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self, request):
         if request.method == 'GET':
@@ -27,7 +35,7 @@ class UsersView(CsrfExemptMixin, APIView):
                 user_data = []
                 imageData = None
                 role = request.GET.get('role')
-                requestedUsers = Users.objects.filter(is_deleted=False).order_by('-created_at')
+                requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
                 for user in requestedUsers:
                     if user.profile_pic:
                         imagePath = user.profile_pic.path
@@ -39,6 +47,7 @@ class UsersView(CsrfExemptMixin, APIView):
                     User = {
                     'id':user.pk,
                     'name': user.name,
+                    'email': user.email,
                     'designation': user.designation,
                     'role': user.role.name,
                     'contact_no': user.contact_no,

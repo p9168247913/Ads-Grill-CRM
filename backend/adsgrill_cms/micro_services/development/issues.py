@@ -15,6 +15,7 @@ from datetime import timedelta
 import re
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from braces.views import CsrfExemptMixin
 from django.conf import settings
 from django.core.mail import send_mail
@@ -26,6 +27,13 @@ import threading
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
+    
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
 
 def convert_to_duration(duration_str):
     if 'd' not in duration_str:
@@ -48,10 +56,10 @@ def convert_to_duration(duration_str):
     return duration
 
 class IssueView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def send_issue_details(self,title, issue_type,priority,created_at,reporter,link,email,event):
+    def send_issue_details(self,title, issue_type,priority,created_at,reporter,link,email):
         local_time=created_at.astimezone(timezone.get_current_timezone())
         time=local_time.strftime('%d-%m-%y  %H:%M:%S')
         subject = f'{title}'
@@ -82,7 +90,7 @@ class IssueView(CsrfExemptMixin, APIView):
             sprint_instance = Sprint.objects.get(pk=sprint_id)
             sprint_exp_duration=sprint_instance.exp_duration
 
-            if Issue.objects.filter(title=title, project=project_id).exists():
+            if Issue.objects.filter(title=title, project=project_id, sprint = sprint_id).exists():
                 return JsonResponse({"message": "Issue with this title already exists"})
                 
             issue_exp_duration = convert_to_duration(exp_duration)
@@ -160,7 +168,7 @@ class IssueView(CsrfExemptMixin, APIView):
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
                                        
                 url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
-                send_email = threading.Thread(target=self.send_issue_details, args=((issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email,event)))
+                send_email = threading.Thread(target=self.send_issue_details, args=((issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)))
                 send_email.start()
         
         except Project.DoesNotExist:
@@ -245,7 +253,7 @@ class IssueView(CsrfExemptMixin, APIView):
                 return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
             
             
-            if(request.user.designation=="Product Manager" and request.user.role.name=="development"):
+            if(request.user.designation=="project_manager" and request.user.role.name=="development"):
                 if requestData.get("status")=="done":
                     worklogs=WorkLog.objects.filter(issue=upd_issue).order_by('-created_at')
                     if worklogs:
@@ -366,7 +374,7 @@ class LinkedIssueView(CsrfExemptMixin, APIView):
         return JsonResponse({"message":"Issues linked successfully "})
     
 class DownloadIssuesAttchments(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
@@ -389,7 +397,7 @@ class DownloadIssuesAttchments(CsrfExemptMixin, APIView):
             return JsonResponse({"message":str(e)})
         
 class IssueMetaData(APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:

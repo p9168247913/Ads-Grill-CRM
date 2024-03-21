@@ -2,10 +2,12 @@ from app.models import Users, Project, Sprint, Issue, LinkedIssue, WorkLog
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from braces.views import CsrfExemptMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import ObjectDoesNotExist
 from django.db import transaction
+from django.db.utils import IntegrityError
 import os
 from django.utils import timezone
 from rest_framework import status
@@ -13,6 +15,10 @@ import uuid
 from datetime import timedelta, time,datetime
 import re
 from django.db.models import Sum
+from io import BytesIO
+import zipfile
+
+
 def convert_to_duration(duration_str):
     if 'h' not in duration_str:
         duration_str += ' 0h'
@@ -42,8 +48,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
     
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+    
 class WorklogView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -57,14 +70,14 @@ class WorklogView(CsrfExemptMixin, APIView):
                 if lastWorklogRemainingTime <= timedelta(0):
                     return JsonResponse({"message":"You can't add more logs because of issue expected duration ends"}, status=status.HTTP_400_BAD_REQUEST)
             if 'sprint_id' not in requestData and 'logged_time' not in requestData and 'issue_id' not in requestData:
-                return JsonResponse({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
             sprint_instance = Sprint.objects.get(pk=requestData.get('sprint_id'))
             
             assignee_instance = request.user
             logged_time = requestData.get('logged_time')
             attachments = request.FILES.getlist('attachments', [])
-            if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance:
-                return JsonResponse({'message': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
+            if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance and issue_instance.assignee.designation !='project_manager':
+                return JsonResponse({"message": "You don't have access to log time on other's issue (Invalid user)"}, status=status.HTTP_400_BAD_REQUEST)
             if convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
                 extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
                 logged_time = '7h 30m 0s'
@@ -75,7 +88,7 @@ class WorklogView(CsrfExemptMixin, APIView):
             else:
                 saved_logged_time = timedelta(0)
             checkDays = issue_instance.exp_duration - (saved_logged_time)
-            if checkDays.days or checkDays > convert_to_duration('7h 30m 0s'):
+            if checkDays.days:
                 upd_logged_time = convert_to_duration(logged_time)+convert_to_duration('16h 30m 0s')
             else:
                 upd_logged_time = convert_to_duration(logged_time)
@@ -113,34 +126,35 @@ class WorklogView(CsrfExemptMixin, APIView):
             return JsonResponse({'message': "Requested Issue not exist"})
         except Exception as e:
             return JsonResponse({'error': str(e)})
-        return JsonResponse({'message': 'Worklog created successfully'},status=status.HTTP_200_OK)
+        return JsonResponse({'message': 'Worklog created successfully'},status=status.HTTP_201_CREATED)
 
     def get(self, request):
         try:
-            issue_id = request.data.get('issue_id')
+            issue_id = request.GET.get('issue_id')
             issue_instance = Issue.objects.get(pk=issue_id)
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
             if worklogs:
                 saved_logged_time = worklogs.aggregate(Sum('logged_time'))['logged_time__sum']
+                extra_efforts = worklogs.aggregate(Sum('extra_efforts'))['extra_efforts__sum']
                 remaining_time = issue_instance.exp_duration - saved_logged_time
                 if remaining_time < timedelta(0):
                     remaining_time = timedelta(0)
                 worklogs = [{
+                    'id':worklog.pk,
                     "author": worklog.author.name,
-                    "sprint": worklog.sprint.pk,
                     "issue": worklog.issue.pk,
                     "description": worklog.description,
                     "logged_time": worklog.logged_time,
                     "extra_efforts":worklog.extra_efforts,
                     "status":worklog.issue.status,
                     "created_at": worklog.created_at,
-                    "remaining_time":issue_instance.exp_duration-worklog.logged_time,
+                    "remaining_time":worklog.remaining_time,
                     "attachments": worklog.attachment
                 } for worklog in worklogs]
-                time_tracking = {'total_logged_time':saved_logged_time, 'actual_remaining_time':remaining_time}
+                time_tracking = {'total_logged_time':saved_logged_time, 'actual_remaining_time':remaining_time, 'extra_efforts':extra_efforts}
                 response = JsonResponse({"worklogs": worklogs, 'time_tracking':time_tracking}, status=status.HTTP_200_OK)
             else:
-                response = JsonResponse({"message":"No worklogs found for this issue"}, status=status.HTTP_204_NO_CONTENT)
+                response = JsonResponse({"message":"No worklogs found for this issue", "worklogs":[]})
         except Issue.DoesNotExist:
             return JsonResponse({"message": "Issue instance not exists"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -155,7 +169,7 @@ class WorklogView(CsrfExemptMixin, APIView):
             attachments = request.FILES.getlist('attachments', [])
             description = requestData.get('description') if requestData.get('description') else None
             upd_logged_time = None
-            extra_effort = None
+            extra_effort = timedelta(0)
             
             issue_instance = upd_worklog.issue
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
@@ -163,13 +177,13 @@ class WorklogView(CsrfExemptMixin, APIView):
             if worklogs.filter(remaining_time__lte =timedelta(0)):
                 return JsonResponse({"message":"can not update time as remaining time is zero"})
             if upd_worklog.created_at.date() != datetime.now().date() and logged_time:
-                return JsonResponse({"message": "You can update logged time at the same day only, rest of the fields could be update"})
+                return JsonResponse({"message": "You can update the logged time only on the same day as the post day"}, status=status.HTTP_400_BAD_REQUEST)
             if logged_time and convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
                 extra_effort = convert_to_duration(logged_time) - convert_to_duration('7h 30m 0s')
                 logged_time = '7h 30m 0s'
             elif logged_time:
                 extra_effort = timedelta(0)
-                    
+
             if worklogs and logged_time:
                 saved_logged_time=worklogs.exclude(pk=upd_worklog.pk).aggregate(Sum('logged_time'))['logged_time__sum']
                 if saved_logged_time is None:
@@ -182,11 +196,10 @@ class WorklogView(CsrfExemptMixin, APIView):
             elif logged_time:
                 upd_logged_time = convert_to_duration(logged_time)
             remaining_time = issue_instance.exp_duration-(saved_logged_time+upd_logged_time)
-            
             if remaining_time <= timedelta(0):
                 remaining_time = timedelta(0)
             with transaction.atomic():
-                if upd_logged_time and extra_effort:
+                if upd_logged_time or upd_logged_time and extra_effort:
                     upd_worklog.logged_time = upd_logged_time
                     upd_worklog.extra_efforts = extra_effort
                     upd_worklog.remaining_time = remaining_time
@@ -214,14 +227,12 @@ class WorklogView(CsrfExemptMixin, APIView):
         except Sprint.DoesNotExist:
             return JsonResponse({'message':'Requested sprint not exists'})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({'error': str(e)})
         return JsonResponse({"message": "Worklog updated successfully"})
     
     def delete(self, request):
         try:
-            del_worklog = WorkLog.objects.get(pk=request.data.get('id'))
+            del_worklog = WorkLog.objects.get(pk=request.GET.get('id'))
             file_paths = del_worklog.attachment
             if file_paths:
                 for file_path in file_paths:
@@ -237,3 +248,30 @@ class WorklogView(CsrfExemptMixin, APIView):
         except Exception as e:
             return JsonResponse({'error': str(e)})
         return JsonResponse({"message": "Worklog deleted successfully"})
+
+class DownloadWorklogAttachments(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            workLogInstance = WorkLog.objects.get(pk=request.GET.get('id'))
+            files = workLogInstance.attachment
+
+            if files:
+                zip_buffer = BytesIO()
+                with zipfile.ZipFile(zip_buffer,'w') as commentZip:
+                    for file in files:
+                        filename = file.split("\\")[-1]
+                        commentZip.write(file, filename)
+                response = HttpResponse(zip_buffer.getvalue(), content_type = 'application/zip')
+                response['Content-Disposition'] = f'attachment; filename={workLogInstance.issue.key}_attachments.zip'
+            else:
+                response = JsonResponse({"message":"No files found for the specified criteria"}, status=status.HTTP_204_NO_CONTENT)
+
+        except IntegrityError as i:
+            response = JsonResponse({"message":str(i)})
+
+        except Exception as e:
+            response = JsonResponse({"message":str(e)})
+        return response

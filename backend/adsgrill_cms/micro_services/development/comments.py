@@ -7,6 +7,7 @@ from django.db.utils import IntegrityError
 from django.db import transaction
 from django.db.models import Q
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from braces.views import CsrfExemptMixin
 from io import BytesIO
@@ -17,8 +18,15 @@ class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
     
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+    
 class CommentsView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -27,7 +35,6 @@ class CommentsView(CsrfExemptMixin, APIView):
             requestData = request.data
             sprintID=None
             issueID=None
-            print(dict(requestData))
             value = requestData.get('key')
             if value == 'client':
                 sprintID = requestData.get('sprintID')
@@ -85,8 +92,6 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IndentationError as i:
             return JsonResponse({"error":str(i)})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
 
         return JsonResponse({"message":"Comment added succussfully"}, status=status.HTTP_201_CREATED)
@@ -144,8 +149,6 @@ class CommentsView(CsrfExemptMixin, APIView):
             }for comment in allComments]
 
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         return JsonResponse({"comments":responseData}, status=status.HTTP_200_OK)
 
@@ -196,8 +199,6 @@ class CommentsView(CsrfExemptMixin, APIView):
         except IntegrityError as i:
             return JsonResponse({"message":str(i)})
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({"message":str(e)})
         
         return JsonResponse({"message":"Comment updated successfully"}, status=status.HTTP_200_OK)  
@@ -237,7 +238,7 @@ class CommentsView(CsrfExemptMixin, APIView):
         return JsonResponse({"message":"Comment deleted successfully"})
     
 class DownloadCommentsAttachments(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

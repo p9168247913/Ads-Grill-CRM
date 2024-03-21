@@ -1,7 +1,7 @@
 <template>
-  <div class="progress-container" ref="progressContainer">
+  <div class="progress-container" ref="progressContainer" style="height: 40px; padding-top: 3px; " >
     <div class="progress-bar mt-3" :class="[getClasses(color, variant)]"
-      :style="{ width: progressBarWidth, height: '4px', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+      :style="{width: progressBarWidth, marginTop: '10px', height: '4px', color: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
     </div>
     <p style="font-size: 10px; margin-top: 4px; text-align: center;">{{ `${displayedPercentage}%` }}</p>
   </div>
@@ -68,6 +68,6 @@ export default {
 .progress-container {
   margin: 0;
   padding: 0;
-  text-align: center; /* Center the text within the container */
+  text-align: center; 
 }
 </style>

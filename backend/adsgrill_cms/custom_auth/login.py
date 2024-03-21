@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from app.models import Users
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.sessions.models import Session
 from django.http import JsonResponse
 import json
 import base64
@@ -47,6 +48,7 @@ class authLogin(APIView):
             
 class LogoutView(APIView):
     def get(self, request):
+        request.session.flush()
         logout(request)
         return JsonResponse({'user':{
             'email': '',

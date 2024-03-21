@@ -92,6 +92,8 @@ export default createStore({
       localStorage.removeItem('email')
       localStorage.removeItem('role')
       localStorage.removeItem('name')
+      localStorage.removeItem('projectId')
+      localStorage.removeItem('id')
     },
     clearAuthUser(state){
       state.authUser = {
@@ -105,6 +107,8 @@ export default createStore({
       localStorage.removeItem('pincode')
       localStorage.removeItem('designation')
       localStorage.removeItem('profile_pic')
+      localStorage.removeItem('projectId')
+      localStorage.removeItem('id')
     },
     clearAuthToken(){
       localStorage.removeItem("token")

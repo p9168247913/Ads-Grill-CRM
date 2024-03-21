@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(2l!o^)n)khr1ie=v-+5=&cd0r8ub+9tn5@m%$wmn-gqw26rfl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['162.0.236.82', '162.0.235.74', 'www.crm.adsgrill.com', 'crm.adsgrill.com']
 if DEBUG:
     ALLOWED_HOSTS.append("*")
 
@@ -88,6 +88,8 @@ CORS_EXPOSE_HEADERS = ['token', 'content-disposition']
 
 ROOT_URLCONF = 'adsgrill_cms.urls'
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2 * 5242880
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -120,10 +122,10 @@ WSGI_APPLICATION = 'adsgrill_cms.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adsgrill_cms',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
+        'NAME': 'adsgrill_crm',
+        'USER': 'adsgrill_admin',
+        'PASSWORD': 'adsgrill@123',
+        'HOST': '162.0.236.82',
         'PORT': '5432', 
     }
 }
@@ -183,20 +185,34 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+# # SMTP server settings
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True  # Use TLS (True/False)
+
+# # SMTP server authentication (if required)
+# EMAIL_HOST_USER = 'shantanu.adsgrill@gmail.com'
+# EMAIL_HOST_PASSWORD = 'hhsk opst mwtc pspa'
+
+# # Default "from" address for emails
+# DEFAULT_FROM_EMAIL = 'shantanu.adsgrill@gmail.com'
+
+
 # SMTP server settings
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True  # Use TLS (True/False)
+EMAIL_HOST = 'business83-1.web-hosting.com'
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False  # Use TLS (True/False)
+EMAIL_USE_SSL = True
 
 # SMTP server authentication (if required)
-EMAIL_HOST_USER = 'shantanu.adsgrill@gmail.com'
-EMAIL_HOST_PASSWORD = 'hhsk opst mwtc pspa'
+EMAIL_HOST_USER = 'developer_team@adsgrill.com'
+EMAIL_HOST_PASSWORD = 'nl,Mke-F,PZu'
 
 # Default "from" address for emails
-DEFAULT_FROM_EMAIL = 'shantanu.adsgrill@gmail.com'
+DEFAULT_FROM_EMAIL = 'developer_team@adsgrill.com'
 
 # Dajngo session settings
-# SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 3600 * 24
 SESSION_SAVE_EVERY_REQUEST = False
