@@ -25,7 +25,7 @@
         <ul v-if="isEmploymentDropdownOpen" @click.stop
           class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled"
           :class="{ 'show': isCollapseShow }" data-parent="#iq-sidebar-toggle">
-          <li class="nav-item">
+          <li class="nav-item" v-if="authUser.role !== 'leads'">
             <sidenav-item class="emp-li" :url="getRoutePath('development')"
               :class="{ 'active': getRoute() === 'development' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
@@ -49,6 +49,17 @@
             </sidenav-item>
           </li>
           <li class=" " v-if="authUser.role !== 'development'">
+            <sidenav-item class="emp-li" :url="getRoutePath('leads')" :class="{ 'active': getRoute() === 'leads' }"
+              :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Leads'" data-toggle="collapse"
+              aria-expanded="false">
+
+              <template v-slot:icon>
+                <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
+              </template>
+              <router-link :to="getRoutePath('leads')"></router-link>
+            </sidenav-item>
+          </li>
+          <li class=" " v-if="authUser.role !== 'development' && authUser.role !== 'leads'">
             <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="{ 'active': getRoute() === 'hrms' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
 
@@ -84,7 +95,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads' || localStorage.getItem('projectId')">
+      <li class="nav-item" v-if="authUser.role !== 'leads' || projectId? projectId: null">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
 
@@ -156,7 +167,7 @@
         </sidenav-item>
       </li>
 
-      <li class="nav-item"
+      <!-- <li class="nav-item"
         v-if="authUser.role !== 'admin' && authUser.role !== 'development' && authUser.role !== 'client'">
         <sidenav-item url="/leadinfo" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads Info'
       ">
@@ -165,7 +176,7 @@
             <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
           </template>
         </sidenav-item>
-      </li>
+      </li> -->
 
       <!-- Profit-->
       <li class="nav-item"
@@ -269,7 +280,8 @@ export default {
       controls: "dashboardsExamples",
       isActive: "active",
       isEmploymentDropdownOpen: false,
-      isProjectDropdownOpen: false
+      isProjectDropdownOpen: false,
+      projectId: localStorage.getItem('projectId')
     }
   },
   methods: {
