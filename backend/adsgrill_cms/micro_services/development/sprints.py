@@ -197,12 +197,8 @@ class SprintView(CsrfExemptMixin, APIView):
                 is_started = True
             if is_started == 'false':
                 is_started = False
-
-            if request.data.get('name') == upd_sprint.name:
-                if Sprint.objects.filter(project__pk=requestData.get('project_id')).exists():
-                    return JsonResponse({'message':'Sprint with this name already exists'})
-            elif request.data.get('name') != upd_sprint.name:
-                if Sprint.objects.filter(project__pk=requestData.get('project_id'), name=request.data.get('name')).exists():
+            if upd_sprint.name != requestData.get('name'):
+                if Sprint.objects.get(project__pk=requestData.get('project_id'), name=requestData.get('name')).exists():
                     return JsonResponse({'message':'Sprint with this name already exists'})
     
             if start_date_str:
