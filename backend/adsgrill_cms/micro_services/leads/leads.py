@@ -146,24 +146,23 @@ class LeadView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
+            user_instance = Users.objects.get(email=request.user)            
+            if user_instance.designation != "sales_manager":
+                return JsonResponse({"message":"Sorry! You Can Not edit the lead"})
+            
+            if lead_data.get('contact_no')==None:
+                return JsonResponse({'message':"Please Enter Contact No."})
+            
             with transaction.atomic():
                 updateLead = Lead.objects.get(pk=lead_data.get('id'))
-                user_instance = Users.objects.get(pk=lead_data.get('userID'))
                 source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
-                tag_instance, _ = Tag.objects.get_or_create(name=lead_data.get('tag'))
-                status_instance, _ = LeadStatus.objects.get_or_create(name=lead_data.get('status'))
+                
                 updateLead.user = user_instance
                 updateLead.source =  source_instance
-                updateLead.tag =  tag_instance
-                updateLead.status =  status_instance
-
                 updateLead.client_name =  lead_data.get('client_name')
                 updateLead.email =  lead_data.get('email')
-                updateLead.contact_no = lead_data.get('contact_no')
-                updateLead.country =  lead_data.get('country')
-                updateLead.state =  lead_data.get('state')
-                updateLead.city =  lead_data.get('city')
-                updateLead.file = lead_data.get('file') if lead_data.get('file') else None
+                updateLead.contact_no=lead_data.get('contact_no')
+                updateLead.requirement=lead_data.get('requirement')
                 updateLead.save()
                 return JsonResponse({'message':'Lead Updated Successfully'}, status=status.HTTP_200_OK)
         except IntegrityError as i:
