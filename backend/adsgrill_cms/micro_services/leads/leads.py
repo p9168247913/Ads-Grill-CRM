@@ -126,7 +126,7 @@ class LeadView(CsrfExemptMixin, APIView):
             pageNo = request.GET.get("page_no")
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
-            noOfRecords = 15
+            noOfRecords = 5
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
                 if client_name is not None:
