@@ -152,10 +152,6 @@ class LeadView(CsrfExemptMixin, APIView):
         if not lead_data:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         
-        lead_instance = Lead.objects.filter(Q(contact_no=lead_data.get('contact_no')) | Q(email=lead_data.get('email')))
-        if lead_instance.exists():
-            return JsonResponse({'message':'Lead with this contact or email already exists'})
-        
         try:
             user_instance = Users.objects.get(email=request.user)            
             if user_instance.role.name != "sales" or user_instance.role.name != "leads":
