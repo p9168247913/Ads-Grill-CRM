@@ -43,7 +43,7 @@ class LeadView(CsrfExemptMixin, APIView):
         
         lead_instance = Lead.objects.filter(Q(contact_no=lead_data.get('contact_no')) | Q(email=lead_data.get('email')))
         if lead_instance.exists():
-            return JsonResponse({'message':'Lead with this contact or email already exists'})
+            return JsonResponse({'message':'Lead with this contact or email already exists'},status=status.HTTP_400_BAD_REQUEST)
         
         if val =='post':
             try:
@@ -52,7 +52,7 @@ class LeadView(CsrfExemptMixin, APIView):
                     source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
                     
                     if lead_data.get('contact_no')==None:
-                        return JsonResponse({'message':"Please Enter Contact Details"})
+                        return JsonResponse({'message':"Please Enter Contact Details"},status=status.HTTP_400_BAD_REQUEST)
 
                     # Create Lead instance with related models
                     create_lead = Lead.objects.create(
