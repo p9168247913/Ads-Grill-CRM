@@ -130,13 +130,13 @@ class LeadView(CsrfExemptMixin, APIView):
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
                 if client_name is not None:
-                    allLeads = allLeads.filter(client_name__icontains=client_name)
+                    allLeads = allLeads.filter(client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
 
                 if contact_no is not None:
-                    allLeads = allLeads.filter(contact_no__icontains=contact_no)      
+                    allLeads = allLeads.filter(contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at')    
                     
                 if client_name is not None and contact_no is not None:
-                    allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no))
+                    allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
 
                 p = Paginator(allLeads, noOfRecords)
                 page_obj = p.get_page(pageNo)
