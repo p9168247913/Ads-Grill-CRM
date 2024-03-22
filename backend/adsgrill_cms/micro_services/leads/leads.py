@@ -17,6 +17,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from datetime import datetime,timedelta
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -126,14 +127,25 @@ class LeadView(CsrfExemptMixin, APIView):
             pageNo = request.GET.get("page_no")
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
-            noOfRecords = 5
+            date_range=request.data.get('date_range') if request.data.get('date_range') else None
+            noOfRecords = 15
+            
+            if date_range is not None:
+                startDate_str = date_range.start_date
+                endDate_str = date_range.end_date
+                start_datetime = datetime.strptime(startDate_str, "%Y/%m/%d").date()
+                end_datetime = datetime.strptime(endDate_str, "%Y/%m/%d").date()
+                            
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
                 if client_name is not None:
                     allLeads = allLeads.filter(client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
 
                 if contact_no is not None:
-                    allLeads = allLeads.filter(contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at')    
+                    allLeads = allLeads.filter(contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at') 
+                   
+                if date_range is not None: 
+                    allLeads = allLeads.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False).order_by('-created_at') 
                     
                 if client_name is not None and contact_no is not None:
                     allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
