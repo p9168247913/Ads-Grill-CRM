@@ -16,6 +16,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -122,29 +123,56 @@ class LeadView(CsrfExemptMixin, APIView):
     
     def get(self, request):
         try:
+            pageNo = request.GET.get("page_no")
+            client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
+            contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
+            noOfRecords = 15
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
-                lead_count=allLeads.count()
-                assignedLeads=Sale.objects.all().count()
-                unassignedLeads=lead_count-assignedLeads
+                if client_name is not None:
+                    allLeads = allLeads.filter(client_name__icontains=client_name)
+
+                if contact_no is not None:
+                    allLeads = allLeads.filter(contact_no__icontains=contact_no)      
+                    
+                if client_name is not None and contact_no is not None:
+                    allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no))
+
+                p = Paginator(allLeads, noOfRecords)
+                page_obj = p.get_page(pageNo)
+                
+                try:
+                    page_obj = p.page(pageNo)
+                except PageNotAnInteger:
+                    page_obj = p.page(1)
+                except EmptyPage:
+                    page_obj = p.page(p.num_pages)
+                
+                lead_count = allLeads.count()
+                assignedLeads = Sale.objects.all().count()
+                unassignedLeads = lead_count - assignedLeads
+                
                 leads_data = [{
-                    'id':lead.pk,
+                    'id': lead.pk,
                     'source': lead.source.name,
                     'client_name': lead.client_name,
                     'email': lead.email,
                     'contact_no': lead.contact_no,
-                    'requirement':lead.requirement
-                } for lead in allLeads]
+                    'requirement': lead.requirement,
+                    'date': lead.created_at
+                } for lead in page_obj]
                 
                 data = {
-                'leads': leads_data,
-                'total_leads': lead_count,
-                'assigned_leads':assignedLeads,
-                'unassigned_leads':unassignedLeads
-            }
-                return JsonResponse({'lead_data':data}, status=status.HTTP_200_OK)
+                    'leads': leads_data,
+                    'total_leads': lead_count,
+                    'assigned_leads': assignedLeads,
+                    'unassigned_leads': unassignedLeads,
+                    'total_pages': p.num_pages
+                }
+                
+                return JsonResponse({'lead_data': data}, status=status.HTTP_200_OK)
         except IntegrityError as i:
-            return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
         
     def put(self, request):
         parser_classes = (MultiPartParser, FormParser)
