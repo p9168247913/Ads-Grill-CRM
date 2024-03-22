@@ -154,7 +154,7 @@ class LeadView(CsrfExemptMixin, APIView):
         
         try:
             user_instance = Users.objects.get(email=request.user)            
-            if user_instance.role.name != "sales" or user_instance.role.name != "leads":
+            if user_instance.role.name != "sales" and user_instance.role.name != "leads":
                 return JsonResponse({"message":"Sorry! You Can Not edit the lead"})
             
             if lead_data.get('contact_no')==None:
