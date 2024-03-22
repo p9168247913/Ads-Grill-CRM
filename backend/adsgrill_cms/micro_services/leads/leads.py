@@ -15,6 +15,8 @@ import openpyxl
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -36,6 +38,11 @@ class LeadView(CsrfExemptMixin, APIView):
         val = lead_data.get('key')
         if not lead_data or not val:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        lead_instance = Lead.objects.filter(Q(contact_no=lead_data.get('contact_no')) | Q(email=lead_data.get('email')))
+        if lead_instance.exists():
+            return JsonResponse({'message':'Lead with this contact or email already exists'})
+        
         if val =='post':
             try:
                 with transaction.atomic():            
@@ -145,9 +152,13 @@ class LeadView(CsrfExemptMixin, APIView):
         if not lead_data:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         
+        lead_instance = Lead.objects.filter(Q(contact_no=lead_data.get('contact_no')) | Q(email=lead_data.get('email')))
+        if lead_instance.exists():
+            return JsonResponse({'message':'Lead with this contact or email already exists'})
+        
         try:
             user_instance = Users.objects.get(email=request.user)            
-            if user_instance.designation != "sales_manager":
+            if user_instance.role.name != "sales" or user_instance.role.name != "leads":
                 return JsonResponse({"message":"Sorry! You Can Not edit the lead"})
             
             if lead_data.get('contact_no')==None:
