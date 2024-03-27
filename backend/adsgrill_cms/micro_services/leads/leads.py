@@ -127,12 +127,13 @@ class LeadView(CsrfExemptMixin, APIView):
             pageNo = request.GET.get("page_no")
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
-            date_range=request.data.get('date_range') if request.data.get('date_range') else None
+            date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
+            date_range = json.loads(date_range)
             noOfRecords = 15
             
             if date_range is not None:
-                startDate_str = date_range.start_date
-                endDate_str = date_range.end_date
+                startDate_str = date_range['start_date']
+                endDate_str = date_range['end_date']
                 start_datetime = datetime.strptime(startDate_str, "%Y/%m/%d").date()
                 end_datetime = datetime.strptime(endDate_str, "%Y/%m/%d").date()
                             
