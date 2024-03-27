@@ -6,13 +6,30 @@ from django.http import JsonResponse
 from django.core.mail import send_mail
 from .serializers import UserCreateSerializer
 from django.contrib.auth.hashers import make_password
+from rest_framework.authentication import SessionAuthentication
+from braces.views import CsrfExemptMixin
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth import logout
 from rest_framework.parsers import MultiPartParser
 from django.views import View
 from django.db import transaction
 import threading
 
-class UserCreateView(generics.CreateAPIView):
+class CsrfExemptSessionAuthentication(SessionAuthentication):
+    def enforce_csrf(self, request):
+        return
+
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
+class UserCreateView(CsrfExemptMixin, generics.CreateAPIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = UserCreateSerializer
     parser_classes = (MultiPartParser,)
 

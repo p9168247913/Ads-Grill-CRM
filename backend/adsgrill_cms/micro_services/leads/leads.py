@@ -128,14 +128,14 @@ class LeadView(CsrfExemptMixin, APIView):
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
             date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
-            date_range = json.loads(date_range)
             noOfRecords = 15
             
             if date_range is not None:
+                date_range = json.loads(date_range)
                 startDate_str = date_range['start_date']
                 endDate_str = date_range['end_date']
-                start_datetime = datetime.strptime(startDate_str, "%Y/%m/%d").date()
-                end_datetime = datetime.strptime(endDate_str, "%Y/%m/%d").date()
+                start_datetime = datetime.strptime(startDate_str, "%Y-%m-%d").date()
+                end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
                             
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')

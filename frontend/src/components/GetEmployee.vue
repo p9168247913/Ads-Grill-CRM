@@ -647,6 +647,7 @@ export default {
                 this.$store.commit('showLoader')
                 const response = await axios.post(`${BASE_URL}api/create/user/`, requestData, {
                     headers: {
+                        token: this.authToken,
                         'Content-Type': "multipart/form-data",
                     }
                 })
