@@ -13,13 +13,22 @@
             <div class="container-fluid">
                 <div style="margin-top: 20px;">
                     <div class="row">
-                        <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
+                        <div class="col-md-6 col-lg-3 col-sm-6 mb-3">
                             <div class="input-group">
                                 <span class="input-group-text text-body">
                                     <i class="fas fa-search" aria-hidden="true"></i>
                                 </span>
-                                <input type="text" v-model="searchTerm" @change="filterLeads" class="form-control"
-                                    placeholder="Search by name, role, designation or number..." />
+                                <input type="text" v-model="clientNameFilter" class="form-control"
+                                    placeholder="Search by contact name..." />
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3 col-sm-6 mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text text-body">
+                                    <i class="fas fa-search" aria-hidden="true"></i>
+                                </span>
+                                <input type="text" v-model="contactNoFilter" class="form-control"
+                                    placeholder="Search by contact number..." />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6 col-sm-10 d-flex justify-content-lg-end justify-content-md-end">
@@ -55,14 +64,14 @@
                         <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create Lead</h5>
-                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                                <button ref="createLeadBtn" type="button" class="btn-close bg-dark text-xs"
+                                    data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:62vh">
-                                <form @submit="createLeads($event), resetValues()">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:45vh">
+                                <form @submit="createLeads($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="client_name" class="form-label">Client Name</label>
+                                            <label for="client_name" class="form-label">Name</label>
                                             <input type="text" class="form-control" v-model="leadData.client_name"
                                                 required>
                                         </div>
@@ -78,30 +87,6 @@
                                                 required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="country" class="form-label">Country</label>
-                                            <input type="text" class="form-control" v-model="leadData.country" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="state" class="form-label">State</label>
-                                            <input type="text" class="form-control" v-model="leadData.state" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="city" class="form-label">City</label>
-                                            <input type="text" class="form-control" v-model="leadData.city">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="tag" class="form-label">Tag</label>
-                                            <select class="form-select" v-model="leadData.tag" required>
-                                                <option value="">Select Tag</option>
-                                                <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                    tag.name }}</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
                                             <label for="source" class="form-label">Source</label>
                                             <select class="form-select" v-model="leadData.source">
                                                 <option value="">Select Source</option>
@@ -110,23 +95,13 @@
                                                     {{ source.name }}</option>
                                             </select>
                                         </div>
+
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="status" class="form-label">Status</label>
-                                            <select class="form-select" v-model="leadData.status" required>
-                                                <option value="">Select Status</option>
-                                                <option v-for="(status, index) in statuses" :key="index"
-                                                    :value="status.name">{{ status.name }}</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="assignee" class="form-label">Assignee</label>
-                                            <select class="form-select" v-model="leadData.userID" required>
-                                                <option value="">Select Assignee</option>
-                                                <option value="9">9</option>
-                                                <option value="10">10</option>
-                                            </select>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="email" class="form-label">Requirement</label>
+                                            <textarea class="form-control" v-model="leadData.requirement"
+                                                required></textarea>
                                         </div>
                                     </div>
                                     <div class="modal-footer"
@@ -137,7 +112,6 @@
                                     </div>
                                 </form>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -145,13 +119,13 @@
                 <div data-bs-backdrop="static" class="modal fade" ref="editLeadModal" id="edituser" tabindex="-1"
                     @hidden="updateLead" aria-labelledby="edituser" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="editdetails">Edit Details</h5>
-                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                                <button ref="editModalBtn" type="button" class="btn-close bg-dark text-xs"
+                                    data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:45vh">
                                 <form @submit="updateLead($event, updateLeadData.id), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -171,33 +145,6 @@
                                             <input type="text" class="form-control" v-model="updateLeadData.contact_no"
                                                 required>
                                         </div>
-
-                                        <div class="col-md-6 mb-3">
-                                            <label for="country" class="form-label">Country</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.country"
-                                                required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="state" class="form-label">State</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.state"
-                                                required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="city" class="form-label">City</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.city">
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="tag" class="form-label">Tag</label>
-                                            <select class="form-select" v-model="updateLeadData.tag" required>
-                                                <option value="">Select Tag</option>
-                                                <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                                    tag.name }}</option>
-                                            </select>
-                                        </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="source" class="form-label">Source</label>
                                             <select class="form-select" v-model="updateLeadData.source">
@@ -209,28 +156,14 @@
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="status" class="form-label">Status</label>
-                                            <select class="form-select" v-model="updateLeadData.status" required>
-                                                <option value="">Select Status</option>
-                                                <option v-for="(status, index) in statuses" :key="index"
-                                                    :value="status.name">{{ status.name }}</option>
-                                            </select>
-                                        </div>
-                                        <!-- <div class="col-md-6 mb-3">
-                                            <label for="assignee" class="form-label">Assignee</label>
-                                            <input type="text" class="form-control" v-model="leadData.userID" required>
-                                        </div> -->
-                                        <div class="col-md-6 mb-3">
-                                            <label for="assignee" class="form-label">Assignee</label>
-                                            <select class="form-select" v-model="updateLeadData.userID" required>
-                                                <option value="">Select Assignee</option>
-                                                <option value="9">9</option>
-                                                <option value="10">10</option>
-                                            </select>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="email" class="form-label">Requirement</label>
+                                            <textarea class="form-control" v-model="updateLeadData.requirement"
+                                                required></textarea>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
+                                    <div class="modal-footer"
+                                        style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="resetValues()">Close</button>
                                         <button type="submit" class="btn btn-primary">Save
@@ -243,24 +176,45 @@
                 </div>
                 <!--Leads Table-->
                 <div class="card" style="margin-top: 2rem; margin-bottom:4rem">
-                    <div class="card-header pb-0">
+                    <div class="card-header pb-0 heads" style="overflow: auto; gap:20px">
                         <h6>LEADS</h6>
+                        <div class="col-md-3 col-lg-3 col-sm-6 mb-3 d-flex">
+                            <select class="form-select">
+                                <option value="">Sales Manager</option>
+                                <option value="Abhishek">Abhishek</option>
+                                <option value="Abhishek">Pawan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 col-lg-5 col-sm-6 mb-3 d-flex">
+                            <input class="form-control" v-model="start_date" type="date" placeholder="Start date" />
+                            <span class="mt-2">&nbsp;to&nbsp;</span>
+                            <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
+                                type="date" placeholder="End date" />
+                        </div>
                     </div>
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
-                                <thead>
+                                <thead style="background-color: white; position: sticky; top: 0;">
                                     <tr>
+                                        <th style="color: #344767 !important;">
+                                            <input style="width: 15px; height: 15px;" type="checkbox"
+                                                v-model="selectAll" @change="selectAllRows">
+                                        </th>
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                                             v-for="(head) in headers" :key="head">{{ head }}</th>
                                     </tr>
                                 </thead>
-                                <tbody v-for="(lead, index) in paginatedLeads" :key="index">
+                                <tbody v-for="(lead, index) in leads" :key="index">
                                     <tr>
+                                        <td style="padding-left: 24px;">
+                                            <input style="width: 15px; height: 15px;" type="checkbox"
+                                                v-model="selectedData" :value="lead" @change="updateSelectedData">
+                                        </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1
+                                                <h6 class="mb-0 text-sm">{{ index + 1
                                                     }}</h6>
                                             </div>
                                         </td>
@@ -281,50 +235,25 @@
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.country }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding-left: 25px;">
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.state }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding-left: 25px;">
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.city }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding-left: 25px;">
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.tag }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding-left: 25px;">
-                                            <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ lead.source }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.status }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding-left: 25px;">
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.user }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ formatDate(lead.date) }}</h6>
                                             </div>
                                         </td>
                                         <td class="align-middle" style="margin-left: 15px !important;">
                                             <i v-if="authUser.role === 'super-admin'"
                                                 class="fas fa-pencil-alt text-primary fa-xs pr-4 "
                                                 style=" cursor: not-allowed;"></i>
-                                            <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
+                                            <i v-else class="fas fa-pencil-alt text-primary mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#edituser"
                                                 @click="editModal(lead)" style=" cursor: pointer;"></i>
                                             <i v-if="authUser.role === 'super-admin'"
                                                 class="fas fa-trash text-danger m-3 fa-xs"
                                                 style="cursor: not-allowed"></i>
-                                            <i v-else class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                                            <i v-else class="fas fa-trash text-danger mx-3 icon"
                                                 @click="deleteLead(lead.id)" style="cursor: pointer"></i>
                                         </td>
                                     </tr>
@@ -332,8 +261,9 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="leads.length > 10" :currentPage="currentPage" :itemsPerPage="itemsPerPage"
-                        :filteredUsers="filteredLeads" :prevPage="prevPage" :nextPage="nextPage" :goToPage="goToPage" />
+                    <PaginationComponent :currentPage="currentPage" :totalPages="totalPages"
+                        :itemsPerPage="itemsPerPage" :prevPage="prevPage" :getLeads="getLeads" :nextPage="nextPage"
+                        :goToPage="goToPage" />
                 </div>
             </div>
         </div>
@@ -342,8 +272,8 @@
 
 <script>
 import axios from 'axios';
-import Noty from 'noty'
-import { mapState } from 'vuex'
+import Noty from 'noty';
+import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import { BASE_URL } from '../config/apiConfig';
@@ -354,68 +284,60 @@ export default {
     },
     data() {
         return {
-            searchTerm: '',
+            start_date: '',
+            end_date: '',
+            clientNameFilter: '',
+            contactNoFilter: '',
             leads: [],
             leadData: {
                 key: "post",
                 client_name: '',
                 email: '',
                 contact_no: '',
-                country: '',
-                state: '',
-                city: '',
-                tag: '',
                 source: '',
-                status: '',
-                userID: ''
             },
             updateLeadData: {
                 id: '',
                 client_name: '',
                 email: '',
                 contact_no: '',
-                country: '',
-                state: '',
-                city: '',
-                tag: '',
                 source: '',
-                status: '',
-                userID: ''
             },
-            headers: ['S.No', 'Client Name ', 'Email', 'Mobile No.', 'Country', 'State', 'City', 'Tag', 'Source', 'Status', 'Assignee', 'Actions'],
+            headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'Actions'],
             modalOpen: false,
             currentPage: 1,
-            itemsPerPage: 10,
+            itemsPerPage: 5,
             tags: [],
             sources: [],
             statuses: [],
+            totalPages: null,
+            totalLeads: null,
+            selectedData: [],
+            selectAll: false,
         };
     },
     computed: {
-        ...mapState(['authUser']),
-        filteredLeads() {
-            return this.leads.filter(lead => {
-                const searchLowerCase = this.searchTerm.toLowerCase() || ''
-                return (
-                    lead.client_name.toLowerCase().includes(searchLowerCase) ||
-                    lead.email.toLowerCase().includes(searchLowerCase) ||
-                    lead.contact_no.toLowerCase().includes(searchLowerCase) ||
-                    lead.country.toLowerCase().includes(searchLowerCase) ||
-                    lead.state.toLowerCase().includes(searchLowerCase) ||
-                    lead.city.toLowerCase().includes(searchLowerCase)
-                );
-            });
-        },
-        paginatedLeads() {
-            const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-            return this.filteredLeads.slice(startIndex, startIndex + this.itemsPerPage);
-        }
+        ...mapState(['authUser', 'authToken']),
     },
     methods: {
-        nextPage() {
-            if (this.currentPage * this.itemsPerPage < this.filteredLeads.length) {
-                this.currentPage++;
+        selectAllRows() {
+            if (this.selectAll) {
+                this.selectedData = this.leads.slice();
+            } else {
+                this.selectedData = [];
             }
+        },
+        updateSelectedData() {
+            console.log(this.selectedData);
+        },
+        formatDate(inputDate) {
+            const date = new Date(inputDate);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = date.toLocaleDateString('en-GB', options);
+            return formattedDate;
+        },
+        nextPage() {
+            this.currentPage++;
         },
         prevPage() {
             if (this.currentPage > 1) {
@@ -424,11 +346,7 @@ export default {
         },
         goToPage(page) {
             this.currentPage = page;
-            const startIndex = (page - 1) * this.itemsPerPage;
-            const endIndex = startIndex + this.itemsPerPage;
-            this.displayedLaads = this.filteredLeads.slice(startIndex, endIndex);
         },
-        filterUsers() { },
         resetValues() {
             this.leadData = {
                 client_name: '',
@@ -443,10 +361,42 @@ export default {
                 assignee: ''
             }
         },
+        getQueryString(params) {
+            return Object.keys(params)
+                .filter((key) => params[key] !== undefined && params[key] !== "")
+                .map((key) => `${key}=${encodeURIComponent(params[key])}`)
+                .join("&");
+        },
         async getLeads() {
+            let queryParams = {
+                page_no: this.currentPage ? this.currentPage : 1,
+            };
+
+            if (this.clientNameFilter) {
+                queryParams = { ...queryParams, client_name: this.clientNameFilter };
+            }
+            if (this.contactNoFilter) {
+                queryParams = { ...queryParams, contact_no: this.contactNoFilter };
+            }
+            let date_range = {};
+
+            if (this.start_date && this.end_date) {
+                date_range = {
+                    start_date: this.start_date,
+                    end_date: this.end_date,
+                }
+            }
             try {
-                const response = await axios.get(`${BASE_URL}api/leads/`)
-                this.leads = response.data.leads
+                const response = await axios.get(`${BASE_URL}api/leads/?page_no=${queryParams.page_no}&client_name=${queryParams.client_name ? queryParams.client_name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range}`, {
+                    headers: {
+                        token: this.authToken,
+                    }
+                })
+                if (response.status === 200) {
+                    this.totalLeads = response?.data?.lead_data?.total_leads
+                    this.totalPages = response?.data?.lead_data?.total_pages
+                    this.leads = response?.data?.lead_data?.leads
+                }
             } catch (error) {
                 new Noty({
                     type: 'error',
@@ -458,19 +408,17 @@ export default {
         async createLeads(e) {
             e.preventDefault();
             try {
-                const response = await axios.post(`${BASE_URL}api/leads/`, {
+                const response = await axios.post(`${BASE_URL}api/leads/`, this.leadData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
+                        token: this.authToken
                     },
                 }
                 )
                 if (response.status === 201) {
                     this.getLeads();
                     this.resetValues();
-                    this.$refs.createLeadModal.classList.remove('show');
-                    this.$refs.createLeadModal.setAttribute('aria-hidden', 'true');
-                    this.$refs.createLeadModal.style.display = 'none';
-                    this.removeModalBackdrop();
+                    this.$refs.createLeadBtn.click()
                     Swal.fire({
                         title: `${response.data.message}`,
                         icon: 'success',
@@ -502,16 +450,13 @@ export default {
                 const response = await axios.put(`${BASE_URL}api/leads/`, this.updateLeadData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
+                        token: this.authToken
                     },
                 })
                 this.resetValues()
                 if (response.status === 200) {
                     this.getLeads();
-                    this.resetValues();
-                    this.$refs.editLeadModal.classList.remove('show');
-                    this.$refs.editLeadModal.setAttribute('aria-hidden', 'true');
-                    this.$refs.editLeadModal.style.display = 'none';
-                    this.removeModalBackdrop();
+                    this.$refs.editModalBtn.click()
                     Swal.fire({
                         title: `${response.data.message}`,
                         icon: 'success',
@@ -528,10 +473,14 @@ export default {
         },
         async getLeadsInfo() {
             try {
-                const response = await axios.get(`${BASE_URL}api/leadinfo/`)
-                this.tags = response.data.leadInfoData['leadTag']
-                this.sources = response.data.leadInfoData['leadSource']
-                this.statuses = response.data.leadInfoData['leadStatus']
+                const response = await axios.get(`${BASE_URL}api/leadinfo/`, {
+                    headers: {
+                        token: this.authToken
+                    }
+                })
+                this.tags = response?.data?.leadInfoData['leadTag']
+                this.sources = response?.data?.leadInfoData['leadSource']
+                this.statuses = response?.data?.leadInfoData['leadStatus']
             } catch (error) {
                 new Noty({
                     type: 'error',
@@ -556,6 +505,7 @@ export default {
                 await axios.post(`${BASE_URL}api/leads/`, formData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
+                        token: this.authToken
                     },
                 }).then((r => {
                     if (r.status == 201) {
@@ -586,7 +536,11 @@ export default {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await axios.delete(`${BASE_URL}api/leads/?id=${id}`)
+                        const response = await axios.delete(`${BASE_URL}api/leads/?id=${id}`, {
+                            headers: {
+                                token: this.authToken
+                            }
+                        })
                         this.getLeads();
                         Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
@@ -596,6 +550,28 @@ export default {
             });
         },
     },
+    watch: {
+        clientNameFilter(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.getLeads();
+            }
+        },
+        contactNoFilter(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.getLeads();
+            }
+        },
+        start_date: {
+            handler() {
+                this.getLeads();
+            }
+        },
+        end_date: {
+            handler() {
+                this.getLeads();
+            }
+        }
+    },
     mounted() {
         this.getLeads()
         this.getLeadsInfo()
@@ -604,6 +580,18 @@ export default {
 </script>
 
 <style scoped>
+.heads {
+    display: flex;
+    justify-content: space-between
+}
+
+@media (max-width: 576px) {
+    .heads {
+        display: flex;
+        flex-direction: column
+    }
+}
+
 .modalBody {
     max-height: calc(100vh - 150px);
     overflow-y: auto;

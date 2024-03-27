@@ -48,17 +48,17 @@
               <router-link :to="getRoutePath('sales')"></router-link>
             </sidenav-item>
           </li>
-          <li class=" " v-if="authUser.role !== 'development'">
+          <li class="" v-if="authUser.role !== 'development'">
             <sidenav-item class="emp-li" :url="getRoutePath('leads')" :class="{ 'active': getRoute() === 'leads' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Leads'" data-toggle="collapse"
               aria-expanded="false">
-
               <template v-slot:icon>
-                <i class="fas fa-shopping-cart text-success text-sm opacity-10"></i>
+                <i class="fas fa-user-friends text-success text-sm opacity-10"></i>
               </template>
               <router-link :to="getRoutePath('leads')"></router-link>
             </sidenav-item>
           </li>
+
           <li class=" " v-if="authUser.role !== 'development' && authUser.role !== 'leads'">
             <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="{ 'active': getRoute() === 'hrms' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
@@ -95,7 +95,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads' || projectId? projectId: null">
+      <li class="nav-item" v-if="authUser.role !== 'leads' || projectId ? projectId : null">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
 
