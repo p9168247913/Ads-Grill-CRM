@@ -175,24 +175,29 @@
                     </div>
                 </div>
                 <!--Leads Table-->
-                <div class="card" style="margin-top: 2rem; margin-bottom:4rem">
-                    <div class="card-header pb-0 heads" style="overflow: auto; gap:20px">
+                <div class="card" style="margin-top: 2rem; margin-bottom:4rem;">
+                    <div class="card-header pb-0 heads" style="overflow: auto; gap:20px;">
                         <h6>LEADS</h6>
-                        <div class="col-md-3 col-lg-3 col-sm-6 mb-3 d-flex">
-                            <select class="form-select">
-                                <option value="">Sales Manager</option>
-                                <option value="Abhishek">Abhishek</option>
-                                <option value="Abhishek">Pawan</option>
-                            </select>
-                        </div>
                         <div class="col-md-4 col-lg-5 col-sm-6 mb-3 d-flex">
                             <input class="form-control" v-model="start_date" type="date" placeholder="Start date" />
                             <span class="mt-2">&nbsp;to&nbsp;</span>
                             <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
                                 type="date" placeholder="End date" />
                         </div>
+                        <div class="col-md-4 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
+                            <select class="form-select">
+                                <option value="">Sales Manager</option>
+                                <option value="Abhishek">Abhishek</option>
+                                <option value="Abhishek">Pawan</option>
+                            </select>
+                            <button type="button" style="width: auto; height: 40px !important;"
+                                class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
+                                <i class="bi bi-person-plus"></i>
+                                <span class="d-none d-md-inline">&nbsp; &nbsp;Assign</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="card-body px-0 pt-0 pb-2">
+                    <div class="card-body px-0 pt-0">
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
                                 <thead style="background-color: white; position: sticky; top: 0;">
@@ -382,12 +387,12 @@ export default {
 
             if (this.start_date && this.end_date) {
                 date_range = {
-                    start_date: this.start_date,
-                    end_date: this.end_date,
+                    start_date: (this.start_date).toString(),
+                    end_date: (this.end_date).toString(),
                 }
             }
             try {
-                const response = await axios.get(`${BASE_URL}api/leads/?page_no=${queryParams.page_no}&client_name=${queryParams.client_name ? queryParams.client_name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range}`, {
+                const response = await axios.get(`${BASE_URL}api/leads/?page_no=${queryParams.page_no}&client_name=${queryParams.client_name ? queryParams.client_name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}`, {
                     headers: {
                         token: this.authToken,
                     }
@@ -564,6 +569,7 @@ export default {
         start_date: {
             handler() {
                 this.getLeads();
+                this.end_date = '';
             }
         },
         end_date: {

@@ -1,5 +1,5 @@
 <template>
-  <nav aria-label="Page navigation">
+  <nav aria-label="Page navigation" style="margin-top: -20px; padding-top: 5px;">
     <ul class="pagination justify-content-center">
       <li class="page-item" :class="{ disabled: currentPage === 1 }">
         <a class="page-link" href="#" @click="prevPage(), getLeads()" :disabled="currentPage === 1">
