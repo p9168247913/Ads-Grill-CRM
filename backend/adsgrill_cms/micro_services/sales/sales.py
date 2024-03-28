@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from django.db.utils import IntegrityError
 from datetime import datetime,timedelta
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -26,11 +27,10 @@ class SalesView(APIView):
     
     def post(self,request):
         try:
-            lead_ids=request.data.get('lead_ids').split(',')
+            lead_ids=request.data.get('lead_ids')
             lead_ids = [int(lead_id) for lead_id in lead_ids]
             assignee_id=request.data.get('assignee_id')
             assignee_instance=Users.objects.get(pk=assignee_id)
-            
             leads=Lead.objects.filter(pk__in=lead_ids)
             
             with transaction.atomic():
@@ -38,6 +38,10 @@ class SalesView(APIView):
                     lead=lead_id,
                     assignee=assignee_instance
                 )for lead_id in leads]
+
+                for lead in leads:
+                    lead.is_assigned = True
+                    lead.save()
                 
                 Sale.objects.bulk_create(sales_instance)
                 
@@ -51,14 +55,34 @@ class SalesView(APIView):
     
     def get(self, request):
         try:
-            sales_Man = Users.objects.filter(role__name = 'sales', designation = 'sales_manager').order_by('-created_at')
+            pageNo = request.GET.get("page_no")
+            allSales = Sale.objects.all().order_by('-created_at')
+            noOfRecords = 15
+            p = Paginator(allSales, noOfRecords)
+            page_obj = p.get_page(pageNo)
+            
+            try:
+                page_obj = p.page(pageNo)
+            except PageNotAnInteger:
+                page_obj = p.page(1)
+            except EmptyPage:
+                page_obj = p.page(p.num_pages)
             data = [{
-                'id':man.pk,
-                'name':man.name
-            }for man in sales_Man]
+                'id':sale.lead.pk,
+                'name':sale.lead.client_name,
+                'email':sale.lead.email,
+                'conact_no':sale.lead.contact_no,
+                'source':{
+                    'id':sale.lead.source.pk,
+                    'name':sale.lead.source.name
+                },
+                'requirement':sale.lead.requirement,
+                'created_at':sale.created_at
 
-        except sales_Man.DoesNotExist:
-            return JsonResponse({'message':"Sales Manager Does Not Exist"}, status=status.HTTP_404_NOT_FOUND)
+            }for sale in page_obj]
+
+        except allSales.DoesNotExist:
+            return JsonResponse({'message':"No data found for sales"}, status=status.HTTP_404_NOT_FOUND)
         return JsonResponse({'res_data':data}, status=status.HTTP_200_OK)
     
     def put(self,request):
@@ -81,6 +105,18 @@ class SalesView(APIView):
             
         except Exception as e:
             return JsonResponse({"message":str(e)})
+        
+    def delete(self, request):
+        id = request.GET.get('id')
+        if not id:
+            return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            with transaction.atomic():
+                deleteSale = Sale.objects.get(pk=id)
+                deleteSale.delete()
+                return JsonResponse({'message':'Sale deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except IntegrityError as i:
+            return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
     
 class getAllSaleEmployees(APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
