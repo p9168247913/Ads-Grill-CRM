@@ -9,6 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from django.db.utils import IntegrityError
 from datetime import datetime,timedelta
+from django.db.models import Q
+import json
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -56,7 +58,29 @@ class SalesView(APIView):
     def get(self, request):
         try:
             pageNo = request.GET.get("page_no")
+            client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
+            contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
+            date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
+
+            if date_range is not None:
+                date_range = json.loads(date_range)
+                startDate_str = date_range['start_date']
+                endDate_str = date_range['end_date']
+                start_datetime = datetime.strptime(startDate_str, "%Y-%m-%d").date()
+                end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
+
             allSales = Sale.objects.all().order_by('-created_at')
+            if client_name is not None:
+                allSales = allSales.filter(lead__client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
+
+            if contact_no is not None:
+                allSales = allSales.filter(lead__contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at') 
+                
+            if date_range is not None: 
+                allSales = allSales.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False).order_by('-created_at') 
+                
+            if client_name is not None and contact_no is not None:
+                allSales = allSales.filter(Q(lead__client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
             noOfRecords = 15
             p = Paginator(allSales, noOfRecords)
             page_obj = p.get_page(pageNo)
