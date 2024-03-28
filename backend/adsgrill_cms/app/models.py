@@ -84,6 +84,7 @@ class Lead(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
+    is_assigned = models.BooleanField(null=False, blank=False, default=False)
     def __str__(self):
         return self.client_name
 class Sale(models.Model):
@@ -91,7 +92,7 @@ class Sale(models.Model):
     assignee = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False)
     status = models.ForeignKey(LeadStatus, on_delete=models.PROTECT, null=True, blank=False, related_name="LeadStatus")
     remark=models.CharField(null=True,blank=True)
-    sale_status=models.CharField(null=False,blank=False,max_length=15)
+    sale_status=models.CharField(null=True,blank=False,max_length=15)
     follow_date = models.DateTimeField(null=True, blank=False, db_index=True, default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)

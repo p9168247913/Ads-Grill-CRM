@@ -81,6 +81,14 @@ class LeadView(CsrfExemptMixin, APIView):
                     destination.write(chunk)
         
             df = pd.read_excel(destination_path, dtype=str)
+            original_len = len(df)
+            df = df.drop_duplicates(subset=['Contact No'])
+            new_len = len(df)
+            if new_len < original_len:
+                response_data = {"message":f"{original_len-new_len} Duplicates(contact no) were founded and deleted, {up_file.name} Uploaded Successfully"}
+            else:
+                response_data = {"message":f"{up_file.name} Uploaded Successfully", "status":status.HTTP_201_CREATED}
+
             df = df.dropna(how='all')
             empty_cols = []
         
@@ -119,7 +127,7 @@ class LeadView(CsrfExemptMixin, APIView):
             except Exception as exc:
                 return JsonResponse({'message': str(exc)}, status=400, safe=False)
         
-            return JsonResponse({'message': f'{up_file.name} Uploaded Successfully'}, status=status.HTTP_201_CREATED)
+            return JsonResponse(response_data)
 
     
     def get(self, request):
@@ -128,14 +136,14 @@ class LeadView(CsrfExemptMixin, APIView):
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
             date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
-            date_range = json.loads(date_range)
             noOfRecords = 15
             
             if date_range is not None:
+                date_range = json.loads(date_range)
                 startDate_str = date_range['start_date']
                 endDate_str = date_range['end_date']
-                start_datetime = datetime.strptime(startDate_str, "%Y/%m/%d").date()
-                end_datetime = datetime.strptime(endDate_str, "%Y/%m/%d").date()
+                start_datetime = datetime.strptime(startDate_str, "%Y-%m-%d").date()
+                end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
                             
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
@@ -172,6 +180,7 @@ class LeadView(CsrfExemptMixin, APIView):
                     'email': lead.email,
                     'contact_no': lead.contact_no,
                     'requirement': lead.requirement,
+                    'is_assigned':lead.is_assigned,
                     'date': lead.created_at
                 } for lead in page_obj]
                 
@@ -223,8 +232,7 @@ class LeadView(CsrfExemptMixin, APIView):
         try:
             with transaction.atomic():
                 deleteLead = Lead.objects.get(pk=id)
-                deleteLead.is_deleted = True
-                deleteLead.save()
+                deleteLead.delete()
                 return JsonResponse({'message':'Lead deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)

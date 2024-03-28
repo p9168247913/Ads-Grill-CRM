@@ -841,7 +841,8 @@ export default {
         this.clientData.designation = 'client'
         const response = await axios.post(`${BASE_URL}api/create/user/`, this.clientData, {
           headers: {
-            "Content-Type": "multipart/form-data",
+              token: this.authToken,
+              "Content-Type": "multipart/form-data",
           }
         })
         if (response.status == 201) {
