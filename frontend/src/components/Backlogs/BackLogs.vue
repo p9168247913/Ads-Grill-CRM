@@ -44,8 +44,9 @@
                             class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createProjectLabel">Create Sprint</h5>
-                                <button ref="createSprintBtn" type="button" class="btn-close bg-dark text-xs"
-                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button @click="resetValues" ref="createSprintBtn" type="button"
+                                    class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody" style="padding-top: 20px; padding-bottom: 0;">
                                 <form @submit="createSprints($event)">
@@ -65,7 +66,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="key" class="form-label">Start Date</label>
                                             <input type="datetime-local" class="form-control"
-                                                v-model="sprintData.start_date" :min="currentDateTime()" required>
+                                                v-model="sprintData.start_date" @change="changeDate" :min="currentDateTime()" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">End Date</label>
@@ -214,7 +215,7 @@
                 <!--Table-->
                 <div v-if="filteredSprints?.length" class="card" style="margin-top: 2rem;">
                     <div class="card-header pb-0">
-                        <h6>{{this.projectName? `SPRINTS (${this.projectName})`:'SPRINTS'}}</h6>
+                        <h6>{{ this.projectName ? `SPRINTS (${this.projectName})` : 'SPRINTS' }}</h6>
                     </div>
                     <div class="card-body px-0 pt-0 pb-1">
                         <div class="table-responsive p-1">
@@ -452,7 +453,7 @@ export default {
             projectKey: localStorage.getItem("projectId"),
             startedSprintKey: null,
             projectManagers: [],
-            projectName:'',
+            projectName: '',
         };
     },
     components: {
@@ -483,6 +484,9 @@ export default {
         }
     },
     methods: {
+        changeDate(){
+            this.sprintData.end_date = ''
+        },
         notAllowed() {
             new Noty({
                 type: 'error',
@@ -722,7 +726,7 @@ export default {
             }
         },
         formatDate(dateString) {
-            const options = { day: 'numeric', month: 'short', year:'numeric' };
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
             const date = new Date(dateString);
             return date.toLocaleDateString('en-US', options);
         },
@@ -785,20 +789,28 @@ export default {
             }
 
             const diffInMilliseconds = endDate - startDate;
+            const millisecondsInSecond = 1000;
+            const millisecondsInMinute = millisecondsInSecond * 60;
+            const millisecondsInHour = millisecondsInMinute * 60;
+            const millisecondsInDay = millisecondsInHour * 24;
 
-            const minutes = Math.floor(diffInMilliseconds / (1000 * 60) % 60);
-            const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60) % 24);
-            const days = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24) % 7);
-            const weeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7) % 4);
-            const months = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 30));
+            let duration = diffInMilliseconds;
+
+            const months = Math.floor(duration / (millisecondsInDay * 30));
+            duration -= months * (millisecondsInDay * 30);
+
+            const days = Math.floor(duration / millisecondsInDay);
+            duration -= days * millisecondsInDay;
+
+            const hours = Math.floor(duration / millisecondsInHour);
+            duration -= hours * millisecondsInHour;
+
+            const minutes = Math.floor(duration / millisecondsInMinute);
 
             let formattedDuration = '';
 
             if (months > 0) {
                 formattedDuration += `${months}m `;
-            }
-            if (weeks > 0) {
-                formattedDuration += `${weeks}w `;
             }
             if (days > 0) {
                 formattedDuration += `${days}d `;
@@ -823,20 +835,28 @@ export default {
             }
 
             const diffInMilliseconds = endDate - startDate;
+            const millisecondsInSecond = 1000;
+            const millisecondsInMinute = millisecondsInSecond * 60;
+            const millisecondsInHour = millisecondsInMinute * 60;
+            const millisecondsInDay = millisecondsInHour * 24;
 
-            const minutes = Math.floor(diffInMilliseconds / (1000 * 60) % 60);
-            const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60) % 24);
-            const days = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24) % 7);
-            const weeks = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 7) % 4);
-            const months = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 30));
+            let duration = diffInMilliseconds;
+
+            const months = Math.floor(duration / (millisecondsInDay * 30));
+            duration -= months * (millisecondsInDay * 30);
+
+            const days = Math.floor(duration / millisecondsInDay);
+            duration -= days * millisecondsInDay;
+
+            const hours = Math.floor(duration / millisecondsInHour);
+            duration -= hours * millisecondsInHour;
+
+            const minutes = Math.floor(duration / millisecondsInMinute);
 
             let formattedDuration = '';
 
             if (months > 0) {
                 formattedDuration += `${months}m `;
-            }
-            if (weeks > 0) {
-                formattedDuration += `${weeks}w `;
             }
             if (days > 0) {
                 formattedDuration += `${days}d `;

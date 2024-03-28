@@ -185,12 +185,14 @@
                                 type="date" placeholder="End date" />
                         </div>
                         <div class="col-md-4 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
-                            <select class="form-select">
-                                <option value="">Sales Manager</option>
-                                <option value="Abhishek">Abhishek</option>
-                                <option value="Abhishek">Pawan</option>
+                            <select v-model="selectedAssignee" class="form-select">
+                                <option value="">Sales Assignee</option>
+                                <option v-for="(item, index) in allAssignee" :key="index" :value="item.id"> {{
+                                    item.name }}</option>
                             </select>
-                            <button type="button" style="width: auto; height: 40px !important;"
+                            <button @click="assignLeads($event)"
+                                v-if="this.selectedData.length > 0 && this.selectedAssignee" type="button"
+                                style="width: auto; height: 40px !important;"
                                 class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
                                 <i class="bi bi-person-plus"></i>
                                 <span class="d-none d-md-inline">&nbsp; &nbsp;Assign</span>
@@ -215,7 +217,7 @@
                                     <tr>
                                         <td style="padding-left: 24px;">
                                             <input style="width: 15px; height: 15px;" type="checkbox"
-                                                v-model="selectedData" :value="lead" @change="updateSelectedData">
+                                                v-model="selectedData" :value="lead.id" @change="updateSelectedData">
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
@@ -319,6 +321,8 @@ export default {
             totalLeads: null,
             selectedData: [],
             selectAll: false,
+            allAssignee: [],
+            selectedAssignee: '',
         };
     },
     computed: {
@@ -327,13 +331,17 @@ export default {
     methods: {
         selectAllRows() {
             if (this.selectAll) {
-                this.selectedData = this.leads.slice();
+                this.selectedData = this.leads.map(lead => lead.id);
             } else {
                 this.selectedData = [];
             }
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.selectAll;
+            });
         },
         updateSelectedData() {
-            console.log(this.selectedData);
+            console.log([...this.selectedData]);
         },
         formatDate(inputDate) {
             const date = new Date(inputDate);
@@ -364,6 +372,55 @@ export default {
                 source: '',
                 status: '',
                 assignee: ''
+            }
+        },
+        async getSalesEmployee() {
+            try {
+                const response = await axios.get(`${BASE_URL}api/sales/getAllEmployees`, {
+                    headers: {
+                        token: this.authToken
+                    }
+                })
+                if (response.status === 200) {
+                    this.allAssignee = response.data.employee_data;
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.message,
+                    timeout: 1000,
+                }).show()
+            }
+        },
+        async assignLeads(e) {
+            e.preventDefault();
+            let data = {}
+            if (this.selectedData.length > 0 && this.selectedAssignee) {
+                data = {
+                    lead_ids: [...this.selectedData],
+                    assignee_id: this.selectedAssignee
+                }
+            }
+            try {
+                const response = await axios.post(`${BASE_URL}api/sales/`, data, {
+                    headers: {
+                        token: this.authToken
+                    }
+                })
+                if (response.status === 201) {
+                    this.selectedData = [];
+                    this.selectedAssignee = '';
+                    Swal.fire({
+                        title: `${response.data.message}`,
+                        icon: 'success',
+                    })
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.message,
+                    timeout: 500,
+                }).show()
             }
         },
         getQueryString(params) {
@@ -581,6 +638,7 @@ export default {
     mounted() {
         this.getLeads()
         this.getLeadsInfo()
+        this.getSalesEmployee()
     },
 };
 </script>
