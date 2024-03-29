@@ -268,7 +268,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent :currentPage="currentPage" :totalPages="totalPages"
+                    <PaginationComponent v-if="this.totalPages>1" :currentPage="currentPage" :totalPages="totalPages"
                         :itemsPerPage="itemsPerPage" :prevPage="prevPage" :getLeads="getLeads" :nextPage="nextPage"
                         :goToPage="goToPage" />
                 </div>

@@ -12,7 +12,7 @@
         <div class="content-page">
             <div class="container-fluid">
                 <div style="margin-top: 20px;">
-                    <!-- <div class="row">
+                    <div class="row">
                         <div class="col-md-6 col-lg-3 col-sm-6 mb-3">
                             <div class="input-group">
                                 <span class="input-group-text text-body">
@@ -31,90 +31,9 @@
                                     placeholder="Search by contact number..." />
                             </div>
                         </div>
-                        <div class="col-md-6 col-lg-6 col-sm-10 d-flex justify-content-lg-end justify-content-md-end">
-                            <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                                <button type="button" style="width: auto; height: 40px !important;"
-                                    class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active"
-                                    data-bs-toggle="modal" data-bs-target="#createLead">
-                                    <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>
-                                    <span class="d-none d-md-inline">&nbsp; &nbsp;Create Lead</span>
-                                </button>
-                                <a class="btn btn-sm btn-dark px-3 py-2 h-100" type="button"
-                                    style="width: auto; height: 40px !important; padding: none !important; "
-                                    href="http://127.0.0.1:8000/api/leadExcelFormat/" download>
-                                    <i class="fas fa-download text-success text-sm opacity-10"></i>
-                                    <span class="d-none d-md-inline">&nbsp;&nbsp;Lead Format</span>
-                                </a>
-                                <input @change="leadsBulkUpload" type="file" class="btn btn-sm btn-dark px-3 py-2 h-100"
-                                    style="width: auto; height: 40px !important; display: none; " id="fileInput"
-                                    accept=".xlsx, .xls">
-                                <label for="fileInput" class="btn btn-sm btn-dark px-3 py-2 h-100"
-                                    style="width: auto; height: 40px !important;">
-                                    <i class="fas fa-upload text-success text-sm opacity-10"></i>
-                                    <span class="d-none d-md-inline">&nbsp;&nbsp;Bulk Upload</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div> -->
-                </div>
-                <!-- Modal for Create Lead -->
-                <div data-bs-backdrop="static" class="modal fade" ref="createLeadModal" id="createLead" tabindex="-1"
-                    aria-labelledby="createadminLabel" aria-hidden="true" @hidden="createLeads">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createadminLabel">Create Lead</h5>
-                                <button ref="createLeadBtn" type="button" class="btn-close bg-dark text-xs"
-                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:45vh">
-                                <form @submit="createLeads($event)">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="client_name" class="form-label">Name</label>
-                                            <input type="text" class="form-control" v-model="leadData.client_name"
-                                                required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" v-model="leadData.email" required>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="contact_no" class="form-label">Mobile No.</label>
-                                            <input type="text" class="form-control" v-model="leadData.contact_no"
-                                                required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="source" class="form-label">Source</label>
-                                            <select class="form-select" v-model="leadData.source">
-                                                <option value="">Select Source</option>
-                                                <option v-for="(source, index) in sources" :key="index"
-                                                    :value="source.name">
-                                                    {{ source.name }}</option>
-                                            </select>
-                                        </div>
-
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label for="email" class="form-label">Requirement</label>
-                                            <textarea class="form-control" v-model="leadData.requirement"
-                                                required></textarea>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer"
-                                        style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                            @click="resetValues">Close</button>
-                                        <button type="submit" class="btn btn-primary">Create</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
                     </div>
                 </div>
+
                 <!-- Modal for Edit Lead -->
                 <div data-bs-backdrop="static" class="modal fade" ref="editLeadModal" id="edituser" tabindex="-1"
                     @hidden="updateLead" aria-labelledby="edituser" aria-hidden="true">
@@ -130,7 +49,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="client_name" class="form-label">Client Name</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.client_name"
+                                            <input type="text" class="form-control" v-model="updateLeadData.name"
                                                 required>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -142,12 +61,12 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="contact_no" class="form-label">Mobile No.</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.contact_no"
+                                            <input type="text" class="form-control" v-model="updateLeadData.conact_no"
                                                 required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="source" class="form-label">Source</label>
-                                            <select class="form-select" v-model="updateLeadData.source">
+                                            <select class="form-select" v-model="updateLeadData.source.name">
                                                 <option value="">Select Source</option>
                                                 <option v-for="(source, index) in sources" :key="index"
                                                     :value="source.name">
@@ -178,26 +97,12 @@
                 <div class="card" style="margin-top: 2rem; margin-bottom:4rem;">
                     <div class="card-header pb-0 heads" style="overflow: auto; gap:20px;">
                         <h6>SALES</h6>
-                        <!-- <div class="col-md-4 col-lg-5 col-sm-6 mb-3 d-flex">
+                        <div class="col-md-4 col-lg-5 col-sm-6 mb-3 d-flex">
                             <input class="form-control" v-model="start_date" type="date" placeholder="Start date" />
                             <span class="mt-2">&nbsp;to&nbsp;</span>
                             <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
                                 type="date" placeholder="End date" />
                         </div>
-                        <div class="col-md-4 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
-                            <select v-model="selectedAssignee" class="form-select">
-                                <option value="">Sales Assignee</option>
-                                <option v-for="(item, index) in allAssignee" :key="index" :value="item.id"> {{
-                                    item.name }}</option>
-                            </select>
-                            <button @click="assignLeads($event)"
-                                v-if="this.selectedData.length > 0 && this.selectedAssignee" type="button"
-                                style="width: auto; height: 40px !important;"
-                                class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
-                                <i class="bi bi-person-plus"></i>
-                                <span class="d-none d-md-inline">&nbsp; &nbsp;Assign</span>
-                            </button>
-                        </div> -->
                     </div>
                     <div class="card-body px-0 pt-0">
                         <div class="table-responsive p-0">
@@ -219,7 +124,7 @@
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.client_name }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ lead.name }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
@@ -229,17 +134,17 @@
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.contact_no }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ lead.conact_no }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ lead.source }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ lead.source.name }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ formatDate(lead.date) }}</h6>
+                                                <h6 class="mb-0 text-sm">{{ formatDate(lead.created_at) }}</h6>
                                             </div>
                                         </td>
                                         <td class="align-middle" style="margin-left: 15px !important;">
@@ -260,7 +165,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent :currentPage="currentPage" :totalPages="totalPages"
+                    <PaginationComponent v-if="this.totalPages>1" :currentPage="currentPage" :totalPages="totalPages"
                         :itemsPerPage="itemsPerPage" :prevPage="prevPage" :getLeads="getLeads" :nextPage="nextPage"
                         :goToPage="goToPage" />
                 </div>
@@ -288,18 +193,11 @@ export default {
             clientNameFilter: '',
             contactNoFilter: '',
             leads: [],
-            leadData: {
-                key: "post",
-                client_name: '',
-                email: '',
-                contact_no: '',
-                source: '',
-            },
             updateLeadData: {
                 id: '',
-                client_name: '',
+                name: '',
                 email: '',
-                contact_no: '',
+                conact_no: '',
                 source: '',
             },
             headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'Actions'],
@@ -313,7 +211,7 @@ export default {
             totalLeads: null,
             selectedData: [],
             selectAll: false,
-            allAssignee: [],
+           
             selectedAssignee: '',
         };
     },
@@ -366,24 +264,6 @@ export default {
                 assignee: ''
             }
         },
-        async getSalesEmployee() {
-            try {
-                const response = await axios.get(`${BASE_URL}api/sales/getAllEmployees`, {
-                    headers: {
-                        token: this.authToken
-                    }
-                })
-                if (response.status === 200) {
-                    this.allAssignee = response.data.employee_data;
-                }
-            } catch (error) {
-                new Noty({
-                    type: 'error',
-                    text: error.message,
-                    timeout: 1000,
-                }).show()
-            }
-        },
         async assignLeads(e) {
             e.preventDefault();
             let data = {}
@@ -425,9 +305,8 @@ export default {
             let queryParams = {
                 page_no: this.currentPage ? this.currentPage : 1,
             };
-
             if (this.clientNameFilter) {
-                queryParams = { ...queryParams, client_name: this.clientNameFilter };
+                queryParams = { ...queryParams, name: this.clientNameFilter };
             }
             if (this.contactNoFilter) {
                 queryParams = { ...queryParams, contact_no: this.contactNoFilter };
@@ -441,15 +320,15 @@ export default {
                 }
             }
             try {
-                const response = await axios.get(`${BASE_URL}api/leads/?page_no=${queryParams.page_no}&client_name=${queryParams.client_name ? queryParams.client_name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}`, {
+                const response = await axios.get(`${BASE_URL}api/sales/?page_no=${queryParams.page_no}&client_name=${queryParams.name ? queryParams.name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}`, {
                     headers: {
                         token: this.authToken,
                     }
                 })
                 if (response.status === 200) {
-                    this.totalLeads = response?.data?.lead_data?.total_leads
-                    this.totalPages = response?.data?.lead_data?.total_pages
-                    this.leads = response?.data?.lead_data?.leads
+                    this.totalLeads = response?.data?.data?.total_leads
+                    this.totalPages = response?.data?.data?.total_pages
+                    this.leads = response?.data?.res_data
                 }
             } catch (error) {
                 new Noty({
@@ -457,40 +336,6 @@ export default {
                     text: error,
                     timeout: 500,
                 }).show()
-            }
-        },
-        async createLeads(e) {
-            e.preventDefault();
-            try {
-                const response = await axios.post(`${BASE_URL}api/leads/`, this.leadData, {
-                    headers: {
-                        'Content-Type': "multipart/form-data",
-                        token: this.authToken
-                    },
-                }
-                )
-                if (response.status === 201) {
-                    this.getLeads();
-                    this.resetValues();
-                    this.$refs.createLeadBtn.click()
-                    Swal.fire({
-                        title: `${response.data.message}`,
-                        icon: 'success',
-                    })
-                }
-            } catch (error) {
-                new Noty({
-                    type: 'error',
-                    text: error.response.data.message,
-                    timeout: 500,
-                }).show()
-            }
-        },
-        removeModalBackdrop() {
-            const modalBackdrop = document.getElementsByClassName('modal-backdrop');
-            if (modalBackdrop.length > 0) {
-                document.body.classList.remove('modal-open');
-                document.body.removeChild(modalBackdrop[0]);
             }
         },
         editModal(lead) {
@@ -501,7 +346,7 @@ export default {
             e.preventDefault()
             this.updateLeadData.id = id
             try {
-                const response = await axios.put(`${BASE_URL}api/leads/`, this.updateLeadData, {
+                const response = await axios.put(`${BASE_URL}api/sales/`, this.updateLeadData, {
                     headers: {
                         'Content-Type': "multipart/form-data",
                         token: this.authToken
@@ -543,41 +388,6 @@ export default {
                 }).show()
             }
         },
-        async leadsBulkUpload(event) {
-            let file = event.target.files[0]
-            if (!file) {
-                new Noty({
-                    type: 'error',
-                    text: 'Please select a file',
-                    timeout: 500
-                }).show()
-            }
-            else {
-                const formData = new FormData();
-                formData.append('key', 'bulkUpload');
-                formData.append('file', file);
-                await axios.post(`${BASE_URL}api/leads/`, formData, {
-                    headers: {
-                        'Content-Type': "multipart/form-data",
-                        token: this.authToken
-                    },
-                }).then((r => {
-                    if (r.status == 201) {
-                        Swal.fire({
-                            title: `${r.data.message}`,
-                            icon: 'success',
-                        })
-                        this.getLeads()
-                    }
-                })).catch(e => {
-                    new Noty({
-                        type: 'error',
-                        text: e,
-                        timeout: 500
-                    }).show()
-                })
-            }
-        },
         async deleteLead(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -590,14 +400,16 @@ export default {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await axios.delete(`${BASE_URL}api/leads/?id=${id}`, {
+                        const response = await axios.delete(`${BASE_URL}api/sales/?id=${id}`, {
                             headers: {
                                 token: this.authToken
                             }
                         })
+                        console.log(response)
                         this.getLeads();
                         Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
+                        console.log(error)
                         Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
                     }
                 }
@@ -630,7 +442,6 @@ export default {
     mounted() {
         this.getLeads()
         this.getLeadsInfo()
-        this.getSalesEmployee()
     },
 };
 </script>
