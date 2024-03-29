@@ -40,44 +40,29 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="editdetails">Edit Details</h5>
+                                <h5 class="modal-title" id="editdetails">Edit</h5>
                                 <button ref="editModalBtn" type="button" class="btn-close bg-dark text-xs"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:45vh">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:40vh">
                                 <form @submit="updateLead($event, updateLeadData.id), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <label for="client_name" class="form-label">Client Name</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.name"
+                                            <label for="follow_date" class="form-label">Follow-up date</label>
+                                            <input type="datetime-local" class="form-control" v-model="updateLeadData.follow_date"
                                                 required>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="email" class="form-label">Email</label>
-                                            <input type="email" class="form-control" v-model="updateLeadData.email"
+                                            <label for="status" class="form-label">Status</label>
+                                            <input type="text" class="form-control" v-model="updateLeadData.status"
                                                 required>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="contact_no" class="form-label">Mobile No.</label>
-                                            <input type="text" class="form-control" v-model="updateLeadData.conact_no"
-                                                required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="source" class="form-label">Source</label>
-                                            <select class="form-select" v-model="updateLeadData.source.name">
-                                                <option value="">Select Source</option>
-                                                <option v-for="(source, index) in sources" :key="index"
-                                                    :value="source.name">
-                                                    {{ source.name }}</option>
-                                            </select>
-                                        </div>
-                                    </div>
+
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
-                                            <label for="email" class="form-label">Requirement</label>
-                                            <textarea class="form-control" v-model="updateLeadData.requirement"
+                                            <label for="remark" class="form-label">Remark</label>
+                                            <textarea class="form-control" v-model="updateLeadData.remark"
                                                 required></textarea>
                                         </div>
                                     </div>
@@ -165,7 +150,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="this.totalPages>1" :currentPage="currentPage" :totalPages="totalPages"
+                    <PaginationComponent v-if="this.totalPages > 1" :currentPage="currentPage" :totalPages="totalPages"
                         :itemsPerPage="itemsPerPage" :prevPage="prevPage" :getLeads="getLeads" :nextPage="nextPage"
                         :goToPage="goToPage" />
                 </div>
@@ -199,40 +184,22 @@ export default {
                 email: '',
                 conact_no: '',
                 source: '',
+                follow_date: '',
+                status: '',
+                remark: '',
             },
             headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'Actions'],
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,
-            tags: [],
-            sources: [],
-            statuses: [],
             totalPages: null,
             totalLeads: null,
-            selectedData: [],
-            selectAll: false,
-           
-            selectedAssignee: '',
         };
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
     },
     methods: {
-        selectAllRows() {
-            if (this.selectAll) {
-                this.selectedData = this.leads.map(lead => lead.id);
-            } else {
-                this.selectedData = [];
-            }
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = this.selectAll;
-            });
-        },
-        updateSelectedData() {
-            console.log([...this.selectedData]);
-        },
         formatDate(inputDate) {
             const date = new Date(inputDate);
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -263,43 +230,6 @@ export default {
                 status: '',
                 assignee: ''
             }
-        },
-        async assignLeads(e) {
-            e.preventDefault();
-            let data = {}
-            if (this.selectedData.length > 0 && this.selectedAssignee) {
-                data = {
-                    lead_ids: [...this.selectedData],
-                    assignee_id: this.selectedAssignee
-                }
-            }
-            try {
-                const response = await axios.post(`${BASE_URL}api/sales/`, data, {
-                    headers: {
-                        token: this.authToken
-                    }
-                })
-                if (response.status === 201) {
-                    this.selectedData = [];
-                    this.selectedAssignee = '';
-                    Swal.fire({
-                        title: `${response.data.message}`,
-                        icon: 'success',
-                    })
-                }
-            } catch (error) {
-                new Noty({
-                    type: 'error',
-                    text: error.message,
-                    timeout: 500,
-                }).show()
-            }
-        },
-        getQueryString(params) {
-            return Object.keys(params)
-                .filter((key) => params[key] !== undefined && params[key] !== "")
-                .map((key) => `${key}=${encodeURIComponent(params[key])}`)
-                .join("&");
         },
         async getLeads() {
             let queryParams = {
@@ -339,7 +269,7 @@ export default {
             }
         },
         editModal(lead) {
-            this.updateLeadData = { ...lead };
+            this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date?.toString() };
             this.isEditModalOpen = true;
         },
         async updateLead(e, id) {
@@ -366,25 +296,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message,
-                    timeout: 500,
-                }).show()
-            }
-        },
-        async getLeadsInfo() {
-            try {
-                const response = await axios.get(`${BASE_URL}api/leadinfo/`, {
-                    headers: {
-                        token: this.authToken
-                    }
-                })
-                this.tags = response?.data?.leadInfoData['leadTag']
-                this.sources = response?.data?.leadInfoData['leadSource']
-                this.statuses = response?.data?.leadInfoData['leadStatus']
-            } catch (error) {
-                new Noty({
-                    type: 'error',
-                    text: error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -440,8 +352,7 @@ export default {
         }
     },
     mounted() {
-        this.getLeads()
-        this.getLeadsInfo()
+        this.getLeads();
     },
 };
 </script>
