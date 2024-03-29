@@ -85,49 +85,56 @@ class LeadView(CsrfExemptMixin, APIView):
             df = df.drop_duplicates(subset=['Contact No'])
             new_len = len(df)
             if new_len < original_len:
-                response_data = {"message":f"{original_len-new_len} Duplicates(contact no) were founded and deleted, {up_file.name} Uploaded Successfully"}
+                excel_response = {"message":f"{original_len-new_len} Duplicates(contact no) were founded and deleted"}
             else:
-                response_data = {"message":f"{up_file.name} Uploaded Successfully", "status":status.HTTP_201_CREATED}
+                excel_response = {"message":"No duplicates found in the excel file"}
 
-            df = df.dropna(how='all')
-            empty_cols = []
-        
-            try:
-                with transaction.atomic():
-                    for ind, row in df.iterrows():
-                        xl_sale_man, xl_source, xl_cl_name, xl_email, xl_contact_no, xl_requirement = row
-                        xl_cl_name = str(xl_cl_name)
-        
-                        if pd.isna(xl_contact_no) or not str(xl_contact_no):
-                            empty_cols.append('contact_no')
-        
-                        if empty_cols:
-                            col_name = ', '.join(empty_cols)
-                            raise Exception(f'Empty fields in columns: {col_name}, Row {ind+2}')
-                        else:
-                            user_instance = Users.objects.get(email=xl_sale_man.lower())
-                            source_instance, _ = Source.objects.get_or_create(name=xl_source)
-        
-                            create_lead = Lead.objects.create(
-                                sales_man=user_instance,
-                                source=source_instance,
-                                client_name=xl_cl_name,
-                                contact_no=xl_contact_no,
-                                email=xl_email,
-                                requirement=xl_requirement
-                            )
-                            create_lead.save()
-        
-            except IntegrityError as i:
-                return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
+            existing_rows = Lead.objects.values_list('contact_no', flat=True)
+            df = df[~df['Contact No'].isin(existing_rows)]
+            if df.empty:
+                database_response = {"message":"No new records to save to the database"}
+            else:
+                df = df.dropna(how='all')
+                empty_cols = []
             
-            except ObjectDoesNotExist:
-                return JsonResponse({'message': f"No Sales Manager Found At Row: {ind+2}"})
+                try:
+                    pass
+                    with transaction.atomic():
+                        for ind, row in df.iterrows():
+                            xl_sale_man, xl_source, xl_cl_name, xl_email, xl_contact_no, xl_requirement = row
+                            xl_cl_name = str(xl_cl_name)
+            
+                            if pd.isna(xl_contact_no) or not str(xl_contact_no):
+                                empty_cols.append('contact_no')
+            
+                            if empty_cols:
+                                col_name = ', '.join(empty_cols)
+                                raise Exception(f'Empty fields in columns: {col_name}, Row {ind+2}')
+                            else:
+                                user_instance = Users.objects.get(email=xl_sale_man.lower())
+                                source_instance, _ = Source.objects.get_or_create(name=xl_source)
+            
+                                create_lead = Lead.objects.create(
+                                    sales_man=user_instance,
+                                    source=source_instance,
+                                    client_name=xl_cl_name,
+                                    contact_no=xl_contact_no,
+                                    email=xl_email,
+                                    requirement=xl_requirement
+                                )
+                                create_lead.save()
+                        database_response = {"message":f"{up_file.name} uploaded successfully", "status":status.HTTP_201_CREATED}
         
-            except Exception as exc:
-                return JsonResponse({'message': str(exc)}, status=400, safe=False)
-        
-            return JsonResponse(response_data)
+                except IntegrityError as i:
+                    return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
+                
+                except ObjectDoesNotExist:
+                    return JsonResponse({'message': f"No Sales Manager Found At Row: {ind+2}"})
+            
+                except Exception as exc:
+                    return JsonResponse({'message': str(exc)}, status=400, safe=False)
+            
+            return JsonResponse({"excel_res":excel_response, "database_res":database_response})
 
     
     def get(self, request):
