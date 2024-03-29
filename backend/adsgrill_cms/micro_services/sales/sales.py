@@ -151,6 +151,8 @@ class SalesView(CsrfExemptMixin, APIView):
         try:
             with transaction.atomic():
                 deleteSale = Sale.objects.get(pk=id)
+                deleteSale.lead.is_assigned=False
+                deleteSale.lead.save()
                 deleteSale.delete()
                 return JsonResponse({'message':'Sale deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
         except IntegrityError as i:
