@@ -49,8 +49,8 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="follow_date" class="form-label">Follow-up date</label>
-                                            <input type="datetime-local" class="form-control" v-model="updateLeadData.follow_date"
-                                                required>
+                                            <input type="datetime-local" class="form-control"
+                                                v-model="updateLeadData.follow_date" required>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="status" class="form-label">Status</label>
@@ -200,6 +200,11 @@ export default {
         ...mapState(['authUser', 'authToken']),
     },
     methods: {
+        parseDateTime(dateTimeString) {
+            if (dateTimeString) {
+                this.updateLeadData.follow_date = new Date(dateTimeString);
+            }
+        },
         formatDate(inputDate) {
             const date = new Date(inputDate);
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -255,6 +260,7 @@ export default {
                         token: this.authToken,
                     }
                 })
+                console.log(response);
                 if (response.status === 200) {
                     this.totalLeads = response?.data?.data?.total_leads
                     this.totalPages = response?.data?.data?.total_pages
@@ -263,18 +269,20 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
+                    text: error.message,
                     timeout: 500,
                 }).show()
             }
         },
         editModal(lead) {
-            this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date?.toString() };
+            this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date };
+            console.log(this.updateLeadData);
             this.isEditModalOpen = true;
         },
         async updateLead(e, id) {
             e.preventDefault()
             this.updateLeadData.id = id
+            this.updateLeadData.follow_date = this.updateLeadData.follow_date.toString()
             try {
                 const response = await axios.put(`${BASE_URL}api/sales/`, this.updateLeadData, {
                     headers: {
