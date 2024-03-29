@@ -103,7 +103,7 @@ class SalesView(CsrfExemptMixin, APIView):
                     'name':sale.lead.source.name
                 },
                 'requirement':sale.lead.requirement,
-                'follow_date':datetime.strftime(sale.follow_date,"%Y-%m-%dT%H:%M"),
+                'follow_date':datetime.strftime(sale.follow_date,"%Y-%m-%dT%H:%M") if sale.follow_date else "",
                 'status':sale.sale_status,
                 'remark':sale.remark,
                 'created_at':sale.created_at
