@@ -23,7 +23,7 @@ class CustomSessionAuthentication(SessionAuthentication):
         if user_auth_tuple is None:
             raise AuthenticationFailed('Your session has expired. Please log in again.')
         return user_auth_tuple
-class SalesView(APIView):
+class SalesView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     
@@ -91,8 +91,8 @@ class SalesView(APIView):
                 page_obj = p.page(1)
             except EmptyPage:
                 page_obj = p.page(p.num_pages)
-            data = [{
-                'id':sale.lead.pk,
+            sale_data = [{
+                'id':sale.pk,
                 'name':sale.lead.client_name,
                 'email':sale.lead.email,
                 'conact_no':sale.lead.contact_no,
@@ -105,13 +105,21 @@ class SalesView(APIView):
 
             }for sale in page_obj]
 
+            sales_count = Sale.objects.all().count()
+            data = {
+                "total_sales":sales_count,
+                "total_pages":p.num_pages
+            }
+
         except allSales.DoesNotExist:
             return JsonResponse({'message':"No data found for sales"}, status=status.HTTP_404_NOT_FOUND)
-        return JsonResponse({'res_data':data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return JsonResponse({"message":str(e)})
+        return JsonResponse({'res_data':sale_data, "data":data}, status=status.HTTP_200_OK)
     
     def put(self,request):
         try:
-            sale_id=request.data.get('sale_id')
+            sale_id=request.data.get('id')
             upd_sale=Sale.objects.get(pk=sale_id)
             follow_date_str = None
             follow_date = None
@@ -142,7 +150,7 @@ class SalesView(APIView):
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
     
-class getAllSaleEmployees(APIView):
+class getAllSaleEmployees(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def get(self,request):
