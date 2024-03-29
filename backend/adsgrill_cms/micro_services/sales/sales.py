@@ -47,13 +47,15 @@ class SalesView(CsrfExemptMixin, APIView):
                 
                 Sale.objects.bulk_create(sales_instance)
                 
-            return JsonResponse({'message':f"leads assigned successfully to {assignee_instance.name}"},status=status.HTTP_201_CREATED)
         
         except IntegrityError as i:
             return JsonResponse({"message":str(i)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         except Exception as e:
-            return JsonResponse({"message":str(e)})
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'message':f"leads assigned successfully to {assignee_instance.name}"},status=status.HTTP_201_CREATED)
+        
     
     def get(self, request):
         try:
@@ -101,6 +103,9 @@ class SalesView(CsrfExemptMixin, APIView):
                     'name':sale.lead.source.name
                 },
                 'requirement':sale.lead.requirement,
+                'follow_date':sale.follow_date,
+                'status':sale.sale_status,
+                'remark':sale.remark,
                 'created_at':sale.created_at
 
             }for sale in page_obj]
@@ -114,7 +119,7 @@ class SalesView(CsrfExemptMixin, APIView):
         except allSales.DoesNotExist:
             return JsonResponse({'message':"No data found for sales"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return JsonResponse({"message":str(e)})
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'res_data':sale_data, "data":data}, status=status.HTTP_200_OK)
     
     def put(self,request):
@@ -125,18 +130,19 @@ class SalesView(CsrfExemptMixin, APIView):
             follow_date = None
             if request.data.get('follow_date'):
                 follow_date_str= request.data.get('follow_date')
-                follow_date=datetime.strptime(follow_date_str,"%Y-%m-%dT%H:%M:%S")
+                follow_date=datetime.strptime(follow_date_str,"%Y-%m-%dT%H:%M")
             
             with transaction.atomic():
                 upd_sale.sale_status=request.data.get('status') if request.data.get('status') else None
                 upd_sale.remark=request.data.get('remark') if request.data.get('remark') else None
                 upd_sale.follow_date=follow_date
                 upd_sale.save()
-                
-            return JsonResponse({"message":"Lead Updated Successfully"},status=status.HTTP_200_OK)
-            
+                            
         except Exception as e:
-            return JsonResponse({"message":str(e)})
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({"message":"Lead Updated Successfully"},status=status.HTTP_200_OK)
+        
         
     def delete(self, request):
         id = request.GET.get('id')
@@ -146,7 +152,7 @@ class SalesView(CsrfExemptMixin, APIView):
             with transaction.atomic():
                 deleteSale = Sale.objects.get(pk=id)
                 deleteSale.delete()
-                return JsonResponse({'message':'Sale deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
+                return JsonResponse({'message':'Sale deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -163,6 +169,6 @@ class getAllSaleEmployees(CsrfExemptMixin, APIView):
                 } for user in user_instance ]
                 
         except Exception as e:
-            return JsonResponse({"message":str(e)})
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'employee_data':employee_data},status=status.HTTP_200_OK)
         

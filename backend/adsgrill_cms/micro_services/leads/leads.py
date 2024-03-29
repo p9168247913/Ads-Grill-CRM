@@ -41,14 +41,18 @@ class LeadView(CsrfExemptMixin, APIView):
         if not lead_data or not val:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         
+        user_instance=Users.objects.get(email=request.user.email)
+        if user_instance.role.name != "leads":
+            return JsonResponse({'message':"Sorry you can not add lead"},status=status.HTTP_401_UNAUTHORIZED)
+        
         lead_instance = Lead.objects.filter(Q(contact_no=lead_data.get('contact_no')) | Q(email=lead_data.get('email')))
+        
         if lead_instance.exists():
             return JsonResponse({'message':'Lead with this contact or email already exists'},status=status.HTTP_400_BAD_REQUEST)
         
         if val =='post':
             try:
                 with transaction.atomic():            
-                    user_instance=request.user
                     source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
                     
                     if lead_data.get('contact_no')==None:
@@ -69,6 +73,7 @@ class LeadView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Lead Created Successfully'},status=status.HTTP_201_CREATED)
         
         if val == 'bulkUpload':
+            
             parser_class = (FileUploadParser,)
             up_file = request.FILES.get('file')
             upload_folder = 'uploads/leads'
@@ -98,10 +103,9 @@ class LeadView(CsrfExemptMixin, APIView):
                 empty_cols = []
             
                 try:
-                    pass
                     with transaction.atomic():
                         for ind, row in df.iterrows():
-                            xl_sale_man, xl_source, xl_cl_name, xl_email, xl_contact_no, xl_requirement = row
+                            xl_source, xl_cl_name, xl_email, xl_contact_no, xl_requirement = row
                             xl_cl_name = str(xl_cl_name)
             
                             if pd.isna(xl_contact_no) or not str(xl_contact_no):
@@ -111,7 +115,6 @@ class LeadView(CsrfExemptMixin, APIView):
                                 col_name = ', '.join(empty_cols)
                                 raise Exception(f'Empty fields in columns: {col_name}, Row {ind+2}')
                             else:
-                                user_instance = Users.objects.get(email=xl_sale_man.lower())
                                 source_instance, _ = Source.objects.get_or_create(name=xl_source)
             
                                 create_lead = Lead.objects.create(
@@ -129,10 +132,10 @@ class LeadView(CsrfExemptMixin, APIView):
                     return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
                 
                 except ObjectDoesNotExist:
-                    return JsonResponse({'message': f"No Sales Manager Found At Row: {ind+2}"})
+                    return JsonResponse({'message': f"No Sales Manager Found At Row: {ind+2}"},status=status.HTTP_404_NOT_FOUND)
             
                 except Exception as exc:
-                    return JsonResponse({'message': str(exc)}, status=400, safe=False)
+                    return JsonResponse({'message': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
             
             return JsonResponse({"excel_res":excel_response, "database_res":database_response})
 
@@ -198,10 +201,13 @@ class LeadView(CsrfExemptMixin, APIView):
                     'unassigned_leads': unassignedLeads,
                     'total_pages': p.num_pages
                 }
-                
-                return JsonResponse({'lead_data': data}, status=status.HTTP_200_OK)
+                   
         except IntegrityError as i:
             return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return JsonResponse({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'lead_data': data}, status=status.HTTP_200_OK)
         
     def put(self, request):
         parser_classes = (MultiPartParser, FormParser)
@@ -212,10 +218,10 @@ class LeadView(CsrfExemptMixin, APIView):
         try:
             user_instance = Users.objects.get(email=request.user)            
             if user_instance.role.name != "sales" and user_instance.role.name != "leads":
-                return JsonResponse({"message":"Sorry! You Can Not edit the lead"})
+                return JsonResponse({"message":"Sorry! You Can Not edit the lead"},status=status.HTTP_401_UNAUTHORIZED)
             
             if lead_data.get('contact_no')==None:
-                return JsonResponse({'message':"Please Enter Contact No."})
+                return JsonResponse({'message':"Please Enter Contact No."},status=status.HTTP_400_BAD_REQUEST)
             
             with transaction.atomic():
                 updateLead = Lead.objects.get(pk=lead_data.get('id'))
@@ -228,9 +234,13 @@ class LeadView(CsrfExemptMixin, APIView):
                 updateLead.contact_no=lead_data.get('contact_no')
                 updateLead.requirement=lead_data.get('requirement')
                 updateLead.save()
-                return JsonResponse({'message':'Lead Updated Successfully'}, status=status.HTTP_200_OK)
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'message':'Lead Updated Successfully'}, status=status.HTTP_200_OK)
+        
         
     def delete(self,request):
         id = request.GET.get('id')
@@ -240,9 +250,13 @@ class LeadView(CsrfExemptMixin, APIView):
             with transaction.atomic():
                 deleteLead = Lead.objects.get(pk=id)
                 deleteLead.delete()
-                return JsonResponse({'message':'Lead deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'message':'Lead deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
+        
         
         
 class LeadInfo(CsrfExemptMixin, APIView):
@@ -352,12 +366,11 @@ class LeadExcelDownload(APIView):
     def get(self, request):
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws['A1'] = 'Sales Man'
-        ws['B1'] = 'Source'
-        ws['C1'] = 'Client Name'
-        ws['D1'] = 'Email'
-        ws['E1'] = 'Contact No'
-        ws['F1'] = 'Requirement'
+        ws['A1'] = 'Source'
+        ws['B1'] = 'Client Name'
+        ws['C1'] = 'Email'
+        ws['D1'] = 'Contact No'
+        ws['E1'] = 'Requirement'
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         wb.save(response)
         return response 
