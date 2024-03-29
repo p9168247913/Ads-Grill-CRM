@@ -227,7 +227,7 @@ class LeadView(CsrfExemptMixin, APIView):
                 updateLead = Lead.objects.get(pk=lead_data.get('id'))
                 source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
                 
-                updateLead.user = user_instance
+                updateLead.sales_man = user_instance
                 updateLead.source =  source_instance
                 updateLead.client_name =  lead_data.get('client_name')
                 updateLead.email =  lead_data.get('email')
