@@ -216,8 +216,9 @@
                                 <tbody v-for="(lead, index) in leads" :key="index">
                                     <tr>
                                         <td style="padding-left: 24px;">
-                                            <input style="width: 15px; height: 15px;" type="checkbox"
-                                                v-model="selectedData" :value="lead.id" @change="updateSelectedData">
+                                            <input :disabled="lead.is_assigned" style="width: 15px; height: 15px;"
+                                                type="checkbox" v-model="selectedData" :value="lead.id"
+                                                @change="updateSelectedData">
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
@@ -250,6 +251,12 @@
                                                 <h6 class="mb-0 text-sm">{{ formatDate(lead.date) }}</h6>
                                             </div>
                                         </td>
+                                        <td style="padding-left: 25px;">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ lead.is_assigned ? "Assigned" : "Not Assigned"
+                                                    }}</h6>
+                                            </div>
+                                        </td>
                                         <td class="align-middle" style="margin-left: 15px !important;">
                                             <i v-if="authUser.role === 'super-admin'"
                                                 class="fas fa-pencil-alt text-primary fa-xs pr-4 "
@@ -268,7 +275,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="this.totalPages>1" :currentPage="currentPage" :totalPages="totalPages"
+                    <PaginationComponent v-if="this.totalPages > 1" :currentPage="currentPage" :totalPages="totalPages"
                         :itemsPerPage="itemsPerPage" :prevPage="prevPage" :getLeads="getLeads" :nextPage="nextPage"
                         :goToPage="goToPage" />
                 </div>
@@ -310,7 +317,7 @@ export default {
                 contact_no: '',
                 source: '',
             },
-            headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'Actions'],
+            headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'Assigned', 'Actions'],
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,
@@ -331,7 +338,7 @@ export default {
     methods: {
         selectAllRows() {
             if (this.selectAll) {
-                this.selectedData = this.leads.map(lead => lead.id);
+                this.selectedData = this.leads.filter(lead => !lead.is_assigned).map(lead => lead.id);
             } else {
                 this.selectedData = [];
             }
@@ -339,6 +346,7 @@ export default {
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.selectAll;
             });
+            console.log([...this.selectedData]);
         },
         updateSelectedData() {
             console.log([...this.selectedData]);
@@ -410,6 +418,7 @@ export default {
                 if (response.status === 201) {
                     this.selectedData = [];
                     this.selectedAssignee = '';
+                    this.getLeads();
                     Swal.fire({
                         title: `${response.data.message}`,
                         icon: 'success',
@@ -459,6 +468,7 @@ export default {
                     this.totalPages = response?.data?.lead_data?.total_pages
                     this.leads = response?.data?.lead_data?.leads
                 }
+                // console.log(this.leads);
             } catch (error) {
                 new Noty({
                     type: 'error',
