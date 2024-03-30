@@ -135,7 +135,7 @@ export default {
           new Noty({
             type: 'success',
             text: response.data.message,
-            timeout: 500,
+            timeout: 1000,
             layout: 'topCenter'
           }).show()
           this.storeAuthToken(response.headers['token'], response.data.user)

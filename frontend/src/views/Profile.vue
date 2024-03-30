@@ -31,13 +31,14 @@
                 <p class="mb-0 font-weight-bold text-sm">{{ authUser.email }}</p>
               </div>
             </div>
-            <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0">
+            <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0" style=" z-index: 0;">
               <div class="nav-wrapper position-relative end-0">
                 <ul class="p-1 bg-transparent nav nav-pills" role="tablist">
                   <li class="nav-item col-lg-auto col-md-auto col-sm-auto w-100" style="width: 200px !important;"
                     @click="doLogout">
-                    <button style="width: 150px !important; height: 35px !important;"
-                      class="btn btn-sm btn-dark float-right mb-0 px-2 py-1 mb-0 nav-link active">
+                    <button style="width: 120px !important; height: 40px !important; z-index: 0 !important;"
+                      class="btn btn-sm btn-dark float-right nav-link active ">
+                      <i class="bi bi-box-arrow-right" style="color: white; height: 20px"></i> &nbsp;&nbsp;
                       <span class="ms-1" style="color: white;">Logout</span>
                     </button>
                   </li>
@@ -55,7 +56,8 @@
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
                 <p class="mb-0">Edit Profile</p>
-                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()">Save</argon-button>
+                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()"> <i
+                    class="bi bi-save-fill" style="color: white;"></i> &nbsp;&nbsp; Save</argon-button>
               </div>
             </div>
             <div class="card-body">
@@ -190,6 +192,8 @@ export default {
       try {
         this.$store.commit('showLoader');
         const formData = new FormData();
+        console.log("3", this.selectedFiles);
+
         if (this.userData.oldPassword && this.userData.newPassword !== this.userData.confirmPassword) {
           new Noty({
             type: 'error',
@@ -230,12 +234,14 @@ export default {
           this.userData.newPassword = ''
           this.userData.confirmPassword = ''
           setTimeout(() => {
+          // window.location.reload();
+           
             new Noty({
               type: 'info',
               text: 'Please re-login to see profile changes',
               timeout: 1000,
             }).show()
-          }, 1500)
+          }, 100)
         }
         this.$store.commit('hideLoader');
       }
@@ -251,7 +257,6 @@ export default {
     onImageChange(e) {
       let fileInput = e.target;
       let file = fileInput.files[0];
-
       if (!file) {
         new Noty({
           type: 'error',
@@ -280,7 +285,8 @@ export default {
         }).show();
         fileInput.value = '';
       }
-      this.selectedFiles = file;
+      this.selectedFiles = [file];
+      console.log(this.selectedFiles);
     },
     setUserDataFromLocalStorage() {
       this.userData.id = this.authUser.id
