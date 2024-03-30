@@ -31,13 +31,13 @@
                 <p class="mb-0 font-weight-bold text-sm">{{ authUser.email }}</p>
               </div>
             </div>
-            <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0">
+            <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0" style=" z-index: 0;">
               <div class="nav-wrapper position-relative end-0">
                 <ul class="p-1 bg-transparent nav nav-pills" role="tablist">
                   <li class="nav-item col-lg-auto col-md-auto col-sm-auto w-100" style="width: 200px !important;"
                     @click="doLogout">
-                    <button style="width: 120px !important; height: 40px !important;"
-                      class="btn btn-sm btn-dark float-right  nav-link active">
+                    <button style="width: 120px !important; height: 40px !important; z-index: 0 !important;"
+                      class="btn btn-sm btn-dark float-right nav-link active ">
                       <i class="bi bi-box-arrow-right" style="color: white; height: 20px"></i> &nbsp;&nbsp;
                       <span class="ms-1" style="color: white;">Logout</span>
                     </button>
