@@ -44,7 +44,7 @@
                                 <button ref="editModalBtn" type="button" class="btn-close bg-dark text-xs"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:40vh">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:38vh">
                                 <form @submit="updateLead($event, updateLeadData.id), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -78,6 +78,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!--Leads Table-->
                 <div class="card" style="margin-top: 2rem; margin-bottom:4rem;">
                     <div class="card-header pb-0 heads" style="overflow: auto; gap:20px;">
@@ -192,7 +193,7 @@ export default {
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,
-            totalPages: null,
+            totalPages: null,  
             totalLeads: null,
         };
     },

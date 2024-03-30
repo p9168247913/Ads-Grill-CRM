@@ -57,7 +57,7 @@
               <div class="d-flex align-items-center">
                 <p class="mb-0">Edit Profile</p>
                 <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()"> <i
-                    class="bi bi-save-fill" style="color: white;"></i>  &nbsp;&nbsp; Save</argon-button>
+                    class="bi bi-save-fill" style="color: white;"></i> &nbsp;&nbsp; Save</argon-button>
               </div>
             </div>
             <div class="card-body">
@@ -192,6 +192,8 @@ export default {
       try {
         this.$store.commit('showLoader');
         const formData = new FormData();
+        console.log("3", this.selectedFiles);
+
         if (this.userData.oldPassword && this.userData.newPassword !== this.userData.confirmPassword) {
           new Noty({
             type: 'error',
@@ -232,12 +234,14 @@ export default {
           this.userData.newPassword = ''
           this.userData.confirmPassword = ''
           setTimeout(() => {
+          // window.location.reload();
+           
             new Noty({
               type: 'info',
               text: 'Please re-login to see profile changes',
               timeout: 1000,
             }).show()
-          }, 1500)
+          }, 100)
         }
         this.$store.commit('hideLoader');
       }
@@ -253,7 +257,6 @@ export default {
     onImageChange(e) {
       let fileInput = e.target;
       let file = fileInput.files[0];
-
       if (!file) {
         new Noty({
           type: 'error',
@@ -282,7 +285,8 @@ export default {
         }).show();
         fileInput.value = '';
       }
-      this.selectedFiles = file;
+      this.selectedFiles = [file];
+      console.log(this.selectedFiles);
     },
     setUserDataFromLocalStorage() {
       this.userData.id = this.authUser.id
