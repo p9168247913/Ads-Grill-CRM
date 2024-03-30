@@ -401,10 +401,13 @@ export default {
             currentPage: 1,
             itemsPerPage: 10,
             designations: {
-                "development": ['FE_Developer', 'BE_Developer', 'Full_Stack_Developer', 'Team_Lead', 'Project_Manager', 'Tester', 'Dev_Ops_Engineer', 'Product_Manager', 'QA_Engineer', 'UI/UX', 'Software_Architecture', 'Client'],
-                "sales": ["Project_Manager", "Sales_Executive_Officer"],
+                "development": ['FE_Developer', 'BE_Developer', 'Full_Stack_Developer', 'Team_Lead', 'Project_Manager', 'Tester', 'Dev_Ops_Engineer', 'Product_Manager', 'QA_Engineer', 'UI_Designer','Junior_Web_Developer','Web_Developer','App_Developer', 'Software_Architecture'],
+                "sales": ["Sales_Manager", "Sales_Associate"],
+		"leads":["Leads_Manager", "Leads_Associate", "Marketing_Manager"],
                 "client": ["Client"],
                 'admin': ['Admin'],
+		"super_admin":["super_admin"],
+		"hr":["hr"]
 
             }
         }

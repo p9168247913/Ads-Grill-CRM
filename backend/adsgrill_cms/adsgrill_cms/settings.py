@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(2l!o^)n)khr1ie=v-+5=&cd0r8ub+9tn5@m%$wmn-gqw26rfl'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['162.0.236.82', '162.0.235.74', 'www.crm.adsgrill.com', 'crm.adsgrill.com']
 if DEBUG:
@@ -122,10 +122,10 @@ WSGI_APPLICATION = 'adsgrill_cms.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'adsgrill_cms',
-        'USER': 'postgres',
-        'PASSWORD': '123',
-        'HOST': 'localhost',
+        'NAME': 'adsgrill_crm',
+        'USER': 'adsgrill_admin',
+        'PASSWORD': 'adsgrill@123',
+        'HOST': '162.0.236.82',
         'PORT': '5432', 
     }
 }
