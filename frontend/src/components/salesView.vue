@@ -261,7 +261,6 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log(response);
                 if (response.status === 200) {
                     this.totalLeads = response?.data?.data?.total_leads
                     this.totalPages = response?.data?.data?.total_pages

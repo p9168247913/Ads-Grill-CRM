@@ -580,18 +580,32 @@ export default {
                         token: this.authToken
                     },
                 }).then((r => {
-                    if (r.status == 201) {
+                    if(r?.status ===200){
+                        new Noty({
+                        type: 'info',
+                        text: r?.data?.database_res.message,
+                        timeout: 3000
+                    }).show()
+                    }
+                    if (r?.data.database_res?.status == 201) {
                         Swal.fire({
-                            title: `${r.data.message}`,
+                            title: `${r.data.database_res.message}`,
                             icon: 'success',
                         })
                         this.getLeads()
+                    }
+                    if(r?.data?.excel_res){
+                        new Noty({
+                        type: 'info',
+                        text: r?.data?.excel_res.message,
+                        timeout: 3000
+                    }).show()
                     }
                 })).catch(e => {
                     new Noty({
                         type: 'error',
                         text: e,
-                        timeout: 500
+                        timeout: 1000
                     }).show()
                 })
             }

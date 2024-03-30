@@ -95,7 +95,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads'  || authUser.role !== 'sales' || projectId ? projectId : null">
+      <li class="nav-item" v-if="authUser.role !== 'leads'  && authUser.role !== 'sales' || projectId ? projectId : null">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
 
