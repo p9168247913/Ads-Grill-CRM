@@ -193,7 +193,7 @@ export default {
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,
-            totalPages: null,  
+            totalPages: null,
             totalLeads: null,
         };
     },
@@ -276,7 +276,6 @@ export default {
         },
         editModal(lead) {
             this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date };
-            console.log(this.updateLeadData);
             this.isEditModalOpen = true;
         },
         async updateLead(e, id) {

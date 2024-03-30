@@ -6,8 +6,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
     <!-- Modal for Create Comments -->
-    <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
-        aria-hidden="true" role="dialog" data-backdrop="false">
+    <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="comments" tabindex="-1"
+        aria-labelledby="createProjectLabel" aria-hidden="true" role="dialog" data-backdrop="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -39,12 +39,39 @@
                             aria-labelledby="list2-tab">
                             <!-- Content for List 1 -->
                             <div v-if="filterKey" class="row mt-3">
+                                <!-- <button>open</button> -->
                                 <div class="col-md-10 mb-3">
-                                    <textarea v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
+                                    <textarea v-model="commentDesc" ref="doComment" @input="checkForAtSymbol"
+                                        @focus="isCommentFocused = true"
                                         style="height: 40px; resize: none; max-height: auto;"
                                         placeholder=" Add Comments..." type="text" class="form-control"
                                         required></textarea>
                                 </div>
+
+                                <!-- <div >
+                                    <ul>
+                                        <li></li>
+                                    </ul>
+                                </div> -->
+                                
+                                <!-- <div class="modal fade" id="employeeModal" tabindex="-1"
+                                    aria-labelledby="employeeModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="employeeModalLabel">Employee List</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ul>
+                                                    <li v-for="employee in employees" :key="employee.id">{{
+                        employee.name }}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
                                 <div v-if="isCommentFocused" class="col-md-2 mb-3">
                                     <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
                                         accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
@@ -76,9 +103,9 @@
                                     <div class="d-flex flex-row text text-dark">
                                         <span
                                             style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
-                                            class="small font-weight-bold me-2 pt-1">{{
-                        comment.author.name.charAt(0).toUpperCase()
-                    }}</span>
+                                            class="small font-weight-bold me-2 pt-1">
+                                            {{ comment.author.name.charAt(0).toUpperCase() }}
+                                        </span>
                                         <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
                                         <p class="small">Posted {{ formatDateTime(comment.created_at) }}</p>
                                         <a v-if="comment.attachments.length"
@@ -146,7 +173,9 @@ export default {
             commentDesc: '',
             comments: [],
             filterKey: '',
-            selectedFiles: []
+            selectedFiles: [],
+            showModal: false,
+            employees: []
         }
     },
     computed: {
@@ -384,6 +413,14 @@ export default {
             this.isCommentFocused = false
             this.selectedFiles = []
             this.commentDesc = ''
+        },
+        checkForAtSymbol(event) {
+            const text = event.target.value;
+            if (text.includes('@')) {
+                console.log("OPEN");
+                this.showModal = true;
+
+            }
         }
     },
     mounted() {
