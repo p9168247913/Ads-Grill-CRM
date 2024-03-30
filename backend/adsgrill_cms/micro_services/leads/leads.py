@@ -217,7 +217,7 @@ class LeadView(CsrfExemptMixin, APIView):
         
         try:
             user_instance = Users.objects.get(email=request.user)            
-            if user_instance.role.name != "sales" and user_instance.role.name != "leads":
+            if user_instance.role.name != "admin" and user_instance.role.name != "leads":
                 return JsonResponse({"message":"Sorry! You Can Not edit the lead"},status=status.HTTP_401_UNAUTHORIZED)
             
             if lead_data.get('contact_no')==None:
@@ -227,7 +227,7 @@ class LeadView(CsrfExemptMixin, APIView):
                 updateLead = Lead.objects.get(pk=lead_data.get('id'))
                 source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
                 
-                updateLead.user = user_instance
+                updateLead.sales_man = user_instance
                 updateLead.source =  source_instance
                 updateLead.client_name =  lead_data.get('client_name')
                 updateLead.email =  lead_data.get('email')
@@ -244,15 +244,25 @@ class LeadView(CsrfExemptMixin, APIView):
         
     def delete(self,request):
         id = request.GET.get('id')
+        
+        user_instance=request.user
+        if user_instance.role.name != "admin" and user_instance.role.name != "leads":
+                return JsonResponse({"message":"Sorry! You Can Not delete the lead"},status=status.HTTP_401_UNAUTHORIZED)
+            
         if not id:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             with transaction.atomic():
                 deleteLead = Lead.objects.get(pk=id)
+                deleteSale=Sale.objects.filter(lead=deleteLead)
+                if deleteSale:
+                    deleteSale.delete()
                 deleteLead.delete()
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
         
         return JsonResponse({'message':'Lead deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)

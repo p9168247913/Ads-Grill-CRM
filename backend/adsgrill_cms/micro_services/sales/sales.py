@@ -111,8 +111,11 @@ class SalesView(CsrfExemptMixin, APIView):
             }for sale in page_obj]
 
             sales_count = Sale.objects.all().count()
+            follow_count=Sale.objects.filter(follow_date__isnull=False).count()
+            
             data = {
                 "total_sales":sales_count,
+                "follow_count":follow_count,
                 "total_pages":p.num_pages
             }
 
@@ -128,6 +131,11 @@ class SalesView(CsrfExemptMixin, APIView):
             upd_sale=Sale.objects.get(pk=sale_id)
             follow_date_str = None
             follow_date = None
+            
+            user_instance=request.user
+            if user_instance.role.name != "admin" and user_instance.role.name != "sales":
+                return JsonResponse({"message":"Sorry! You Can Not edit the sale"},status=status.HTTP_401_UNAUTHORIZED)
+            
             if request.data.get('follow_date'):
                 follow_date_str= request.data.get('follow_date')
                 follow_date=datetime.strptime(follow_date_str,"%Y-%m-%dT%H:%M")
@@ -146,11 +154,18 @@ class SalesView(CsrfExemptMixin, APIView):
         
     def delete(self, request):
         id = request.GET.get('id')
+        
+        user_instance=request.user
+        if user_instance.role.name != "admin" and user_instance.role.name != "sales":
+            return JsonResponse({"message":"Sorry! You Can Not delete the sale"},status=status.HTTP_401_UNAUTHORIZED)
         if not id:
+            
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             with transaction.atomic():
                 deleteSale = Sale.objects.get(pk=id)
+                deleteSale.lead.is_assigned=False
+                deleteSale.lead.save()
                 deleteSale.delete()
                 return JsonResponse({'message':'Sale deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
         except IntegrityError as i:
