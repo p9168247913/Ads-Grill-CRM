@@ -145,7 +145,7 @@
 
       <!-- Sales -->
       <li
-        v-if="authUser.role !== 'admin' && authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
+        v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
         class="nav-item">
         <sidenav-item url="/sales" :class="getRoute() === 'billing' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الفواتیر' : 'Sales'">
@@ -158,7 +158,7 @@
 
       <!--Leads-->
       <li class="nav-item"
-        v-if="authUser.role !== 'admin' && authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales'">
+        v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales'">
         <sidenav-item url="/leads" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads'
       ">
 
