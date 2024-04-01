@@ -405,7 +405,6 @@ export default {
                 "sales": ["Project_Manager", "Sales_Executive_Officer"],
                 "client": ["Client"],
                 'admin': ['Admin'],
-
             }
         }
     },
