@@ -44,6 +44,9 @@ class UsersView(CsrfExemptMixin, APIView):
                                 imageData = base64.b64encode(f.read()).decode('utf-8')
                         else:
                             imageData = None
+                    else:
+                        imageData=None
+                    
                     User = {
                     'id':user.pk,
                     'name': user.name,
@@ -93,7 +96,6 @@ class UsersView(CsrfExemptMixin, APIView):
                 newPassword = make_password(requestData.get('newPassword'))
             else:
                 return JsonResponse({"detail":"The old password you provided is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             with transaction.atomic():
                 user.name = name
