@@ -366,22 +366,16 @@
                       </div>
                     </td>
                     <td class="align-middle d-md-table-cell actions">
-                      <!-- <i v-if="authUser.role == 'admin'"
-                                            class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
-                                            data-bs-toggle="modal" data-bs-target="#edituser"
-                                            style="margin-left: 20px; cursor: pointer;" @click="handleEditClick"></i>
-                                        <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
-                                            style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i> -->
 
-                      <!-- <i v-if="authUser.role == 'admin'"
-                                            class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"
-                                            @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
-                                        <i v-else class="fas fa-trash text-danger m-3 fa-xs"
-                                            style="cursor: not-allowed;"></i> -->
-                      <i data-bs-toggle="modal" data-bs-target="#editProject" @click.stop="editModal(project)"
+                      <i v-if="this.authUser.designation === 'project_manager'" data-bs-toggle="modal"
+                        data-bs-target="#editProject" @click.stop="editModal(project)"
                         class="fas fa-pencil-alt text-primary mx-3 icon"
                         style="margin-left: 20px; cursor: pointer;"></i>
-                      <i @click.stop="deleteProject(project.id)" class="fas fa-trash text-danger m-3 mx-3 icon"
+                      <i v-else @click.stop="notAllowed" class="fas fa-pencil-alt text-primary mx-3 icon"
+                        style="margin-left: 20px; cursor: pointer;"></i>
+                      <i v-if="this.authUser.designation === 'project_manager'" @click.stop="deleteProject(project.id)"
+                        class="fas fa-trash text-danger m-3 mx-3 icon" style="cursor: pointer;"></i>
+                      <i v-else @click.stop="notAllowed" class="fas fa-trash text-danger m-3 mx-3 icon"
                         style="cursor: pointer;"></i>
                     </td>
                   </tr>
@@ -427,7 +421,7 @@ export default {
   name: "projects",
   data() {
     return {
-      clientRoleID:null,
+      clientRoleID: null,
       currentPage: 1,
       itemsPerPage: 10,
       uploadProgress: 0,
@@ -501,7 +495,14 @@ export default {
       return this.filteredProjects.slice(startIndex, startIndex + this.itemsPerPage);
     }
   },
-  methods: { 
+  methods: {
+    notAllowed() {
+      new Noty({
+        type: 'error',
+        text: "❌ Access denied!! ",
+        timeout: 500,
+      }).show()
+    },
     nextPage() {
       if (this.currentPage * this.itemsPerPage < this.filteredProjects.length) {
         this.currentPage++;
@@ -528,11 +529,11 @@ export default {
       try {
         this.$store.commit('showLoader')
         let response = await axios.get(`${BASE_URL}api/roles/`);
-        console.log('resp',response);
+        console.log('resp', response);
         let clientRole = response.data.roles.find((role) => {
           return role.name == 'client'
         })
-        console.log('clientRole',clientRole)
+        console.log('clientRole', clientRole)
         if (clientRole) {
           this.$store.commit('hideLoader')
           this.clientRoleID = clientRole.id
@@ -841,8 +842,8 @@ export default {
         this.clientData.designation = 'client'
         const response = await axios.post(`${BASE_URL}api/create/user/`, this.clientData, {
           headers: {
-              token: this.authToken,
-              "Content-Type": "multipart/form-data",
+            token: this.authToken,
+            "Content-Type": "multipart/form-data",
           }
         })
         if (response.status == 201) {
