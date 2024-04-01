@@ -6,8 +6,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
     <!-- Modal for Create Comments -->
-    <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="comments" tabindex="-1" aria-labelledby="createProjectLabel"
-        aria-hidden="true" role="dialog" data-backdrop="false">
+    <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="comments" tabindex="-1"
+        aria-labelledby="createProjectLabel" aria-hidden="true" role="dialog" data-backdrop="false">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -39,33 +39,60 @@
                             aria-labelledby="list2-tab">
                             <!-- Content for List 1 -->
                             <div v-if="filterKey" class="row mt-3">
+                                <!-- <button>open</button> -->
                                 <div class="col-md-10 mb-3">
-                                    <textarea v-model="commentDesc" ref="doComment" @focus="isCommentFocused = true"
+                                    <textarea v-model="commentDesc" ref="doComment" @input="checkForAtSymbol"
                                         style="height: 40px; resize: none; max-height: auto;"
                                         placeholder=" Add Comments..." type="text" class="form-control"
                                         required></textarea>
                                 </div>
-                                <div v-if="isCommentFocused" class="col-md-2 mb-3">
-                                    <input @change="handleFileChange($event)" id="fileInput1" type="file" multiple
+
+                                <!-- <div >
+                                    <ul>
+                                        <li></li>
+                                    </ul>
+                                </div> -->
+                                
+                                <!-- <div class="modal fade" id="employeeModal" tabindex="-1"
+                                    aria-labelledby="employeeModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="employeeModalLabel">Employee List</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ul>
+                                                    <li v-for="employee in employees" :key="employee.id">{{
+                        employee.name }}</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <div class="col-md-2 mb-1">
+                                    <input @change="handlePostFileChange($event)" id="fileInput1" type="file" multiple
                                         accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
                                         class="form-control w-auto d-none">
                                     <label for="fileInput1"
                                         class="text-xs rounded border border-1 border-dark font-weight-bold cursor-pointer"
                                         title="Attach" style="padding:11px;">Attach</label>
+                                    <p v-if="this.postselectedFiles.length>0" class="text-xs" style="margin-left: 5px;">{{ `${this.postselectedFiles.length} file selected` }}</p>
                                 </div>
-                                <div v-if="!isCommentFocused" style="margin-top: -8px;">
+                                <!-- <div v-if="!isCommentFocused" style="margin-top: -8px;">
                                     <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press
                                         <span class="font-weight-bold text-dark">C</span> to comment
                                     </p>
-                                </div>
+                                </div> -->
                             </div>
-                            <div v-if="isCommentFocused && filterKey" class="row" style="margin-top: -15px;">
+                            <div v-if="filterKey" class="row" style="margin-top: -15px;">
                                 <div style="margin-right: -12px;" class="col-sm-1 col-lg-1 col-md-1">
                                     <p @click="postComment()" class="cursor-pointer ms-1 text-sm font-weight-bold icon">
                                         Save
                                     </p>
                                 </div>
-                                <div class="col-sm-1 col-lg-1 col-md-1">
+                                <div class="col-sm-1 col-lg-1 col-md-1" style="margin-left: 10px;">
                                     <p @click="isCommentFocused = false, resetValues()"
                                         class="cursor-pointer ms-1 text-sm font-weight-bold icon">
                                         Cancel</p>
@@ -76,9 +103,9 @@
                                     <div class="d-flex flex-row text text-dark">
                                         <span
                                             style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
-                                            class="small font-weight-bold me-2 pt-1">{{
-                        comment.author.name.charAt(0).toUpperCase()
-                    }}</span>
+                                            class="small font-weight-bold me-2 pt-1">
+                                            {{ comment.author.name.charAt(0).toUpperCase() }}
+                                        </span>
                                         <p class="pe-2 small font-weight-bold">{{ comment.author.name }}</p>
                                         <p class="small">Posted {{ formatDateTime(comment.created_at) }}</p>
                                         <a v-if="comment.attachments.length"
@@ -98,12 +125,13 @@
                                                 class="form-control small w-50 me-3"
                                                 style="height:40px; resize: none;"></textarea>
 
-                                            <input @change="handleFileChange($event)" id="fileInput2" type="file"
+                                            <input @change="handleEditFileChange($event)" id="fileInput2" type="file"
                                                 multiple accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
                                                 class="form-control w-auto d-none">
                                             <label for="fileInput2"
                                                 class="text-xs rounded border border-1 border-dark font-weight-bold me-2"
                                                 title="Add files" style="padding:11px">Add Files</label>
+                                    <p v-if="this.editselectedFiles.length>0" class="text-xs">{{ `${this.editselectedFiles.length} file selected` }}</p>
                                         </div>
                                         <div v-if="comment.editMode" class="d-flex flex-row gap-4">
                                             <p @click="editComment(comment)"
@@ -146,7 +174,10 @@ export default {
             commentDesc: '',
             comments: [],
             filterKey: '',
-            selectedFiles: []
+            postselectedFiles: [],
+            editselectedFiles: [],
+            showModal: false,
+            employees: []
         }
     },
     computed: {
@@ -173,14 +204,19 @@ export default {
             this.sprintID = sprintID
             this.issueID = issueID
         },
-        handleKeyDown(e) {
-            if (e.key === 'C' && !this.isCommentFocused) {
-                e.preventDefault()
-                this.$refs.doComment.focus()
-            }
+        // handleKeyDown(e) {
+        //     if (e.key === 'C' && !this.isCommentFocused) {
+        //         e.preventDefault()
+        //         this.$refs.doComment.focus()
+        //     }
+        // },
+        handlePostFileChange(e) {
+            this.postselectedFiles = e.target.files
+            console.log("post",this.postselectedFiles);
         },
-        handleFileChange(e) {
-            this.selectedFiles = e.target.files
+        handleEditFileChange(e) {
+            this.editselectedFiles = e.target.files
+            console.log("edit",this.editselectedFiles);
         },
         async postComment() {
             if (!this.commentDesc) {
@@ -202,9 +238,9 @@ export default {
                 if (this.filterKey == 'developers') {
                     formData.append('issueID', this.issueID)
                 }
-                if (this.selectedFiles.length) {
-                    for (let i = 0; i < this.selectedFiles.length; i++) {
-                        formData.append('attachments', this.selectedFiles[i])
+                if (this.postselectedFiles.length) {
+                    for (let i = 0; i < this.postselectedFiles.length; i++) {
+                        formData.append('attachments', this.postselectedFiles[i])
                     }
                 }
                 const response = await axios.post(`${BASE_URL}api/development/comments`, formData, {
@@ -277,9 +313,9 @@ export default {
             try {
                 this.$store.commit('showLoader');
                 const formData = new FormData();
-                if (this.selectedFiles.length) {
-                    for (let i = 0; i < this.selectedFiles.length; i++) {
-                        formData.append('attachments', this.selectedFiles[i])
+                if (this.editselectedFiles.length) {
+                    for (let i = 0; i < this.editselectedFiles.length; i++) {
+                        formData.append('attachments', this.editselectedFiles[i])
                     }
                 }
                 formData.append('desc', comment.description)
@@ -382,8 +418,17 @@ export default {
         },
         resetValues() {
             this.isCommentFocused = false
-            this.selectedFiles = []
+            this.postselectedFiles = []
+            this.editselectedFiles = []
             this.commentDesc = ''
+        },
+        checkForAtSymbol(event) {
+            const text = event.target.value;
+            if (text.includes('@')) {
+                console.log("OPEN");
+                this.showModal = true;
+
+            }
         }
     },
     mounted() {

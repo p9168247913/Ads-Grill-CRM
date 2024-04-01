@@ -35,26 +35,30 @@ class SalesView(CsrfExemptMixin, APIView):
             assignee_instance=Users.objects.get(pk=assignee_id)
             leads=Lead.objects.filter(pk__in=lead_ids)
             
-            with transaction.atomic():
-                sales_instance= [Sale(
-                    lead=lead_id,
-                    assignee=assignee_instance
-                )for lead_id in leads]
+            user_instance=request.user
+            if user_instance.role.name == "admin" or user_instance.role.name == "leads":
+                with transaction.atomic():
+                    sales_instance= [Sale(
+                        lead=lead_id,
+                        assignee=assignee_instance
+                    )for lead_id in leads]
 
-                for lead in leads:
-                    lead.is_assigned = True
-                    lead.save()
+                    for lead in leads:
+                        lead.is_assigned = True
+                        lead.save()
+
+                    Sale.objects.bulk_create(sales_instance)
+                    
+            else:
+                return JsonResponse({"message":"Sorry! You can not add sale"},status=status.HTTP_401_UNAUTHORIZED)
                 
-                Sale.objects.bulk_create(sales_instance)
-                
-        
         except IntegrityError as i:
             return JsonResponse({"message":str(i)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         except Exception as e:
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
-        return JsonResponse({'message':f"leads assigned successfully to {assignee_instance.name}"},status=status.HTTP_201_CREATED)
+        return JsonResponse({'message':f"Leads assigned successfully to {assignee_instance.name}"},status=status.HTTP_201_CREATED)
         
     
     def get(self, request):
@@ -133,41 +137,41 @@ class SalesView(CsrfExemptMixin, APIView):
             follow_date = None
             
             user_instance=request.user
-            if user_instance.role.name != "admin" and user_instance.role.name != "sales":
-                return JsonResponse({"message":"Sorry! You Can Not edit the sale"},status=status.HTTP_401_UNAUTHORIZED)
-            
-            if request.data.get('follow_date'):
-                follow_date_str= request.data.get('follow_date')
-                follow_date=datetime.strptime(follow_date_str,"%Y-%m-%dT%H:%M")
-            
-            with transaction.atomic():
-                upd_sale.sale_status=request.data.get('status') if request.data.get('status') else None
-                upd_sale.remark=request.data.get('remark') if request.data.get('remark') else None
-                upd_sale.follow_date=follow_date
-                upd_sale.save()
-                            
+            if user_instance.role.name == "admin" or user_instance.role.name == "sales":
+                if request.data.get('follow_date'):
+                    follow_date_str= request.data.get('follow_date')
+                    follow_date=datetime.strptime(follow_date_str,"%Y-%m-%dT%H:%M")
+
+                with transaction.atomic():
+                    upd_sale.sale_status=request.data.get('status') if request.data.get('status') else None
+                    upd_sale.remark=request.data.get('remark') if request.data.get('remark') else None
+                    upd_sale.follow_date=follow_date
+                    upd_sale.save()         
+            else:
+                return JsonResponse({"message":"Sorry! You can not edit the sale"},status=status.HTTP_401_UNAUTHORIZED)
+                                      
         except Exception as e:
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
-        return JsonResponse({"message":"Lead Updated Successfully"},status=status.HTTP_200_OK)
+        return JsonResponse({"message":"Sale Updated Successfully"},status=status.HTTP_200_OK)
         
         
     def delete(self, request):
         id = request.GET.get('id')
-        
-        user_instance=request.user
-        if user_instance.role.name != "admin" and user_instance.role.name != "sales":
-            return JsonResponse({"message":"Sorry! You Can Not delete the sale"},status=status.HTTP_401_UNAUTHORIZED)
+        print(id, '-----------------------')
         if not id:
-            
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            with transaction.atomic():
-                deleteSale = Sale.objects.get(pk=id)
-                deleteSale.lead.is_assigned=False
-                deleteSale.lead.save()
-                deleteSale.delete()
-                return JsonResponse({'message':'Sale deleted Successfully'}, status=status.HTTP_404_NOT_FOUND)
+            user_instance=request.user
+            if user_instance.role.name == "admin" or user_instance.role.name == "sales":
+                with transaction.atomic():
+                    deleteSale = Sale.objects.get(pk=id)
+                    deleteSale.lead.is_assigned=False
+                    deleteSale.lead.save()
+                    deleteSale.delete()
+                    return JsonResponse({'message':'Sale deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+            else:
+               return JsonResponse({"message":"Sorry! You can not delete the sale"},status=status.HTTP_401_UNAUTHORIZED) 
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
     

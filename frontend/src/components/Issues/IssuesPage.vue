@@ -101,7 +101,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="team lead" class="form-label">Team Lead</label>
-                                            <select class="form-select" v-model="issueData.team_lead_id">
+                                            <select :required="this.authUser.designation === 'project_manager'" class="form-select" v-model="issueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
                                                 <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
                                                     {{
@@ -117,7 +117,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="Assignee" class="form-label">Assignee</label>
-                                            <select required class="form-select" v-model="issueData.assignee_id">
+                                            <select :required="this.authUser.designation === 'team_lead'" class="form-select" v-model="issueData.assignee_id">
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
@@ -233,7 +233,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="Assignee" class="form-label">Assignee</label>
-                                            <select class="form-select" v-model="editIssueData.assignee_id" required>
+                                            <select :required="this.authUser.designation === 'team_lead'" class="form-select" v-model="editIssueData.assignee_id" >
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
@@ -255,7 +255,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="team lead" class="form-label">Team Lead</label>
-                                            <select class="form-select" v-model="editIssueData.team_lead_id">
+                                            <select :required="this.authUser.designation === 'project_manager'" class="form-select" v-model="editIssueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
                                                 <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
                                                     {{
@@ -491,11 +491,11 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="modal-footer"
+                                    <div class="modal-footer" v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'"
                                         style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button ref="editModal" type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal" @click="resetValues">Close</button>
-                                        <button type="submit" data-bs-dismiss="modal"
+                                        <button type="submit" 
                                             class="btn btn-primary">Save</button>
                                     </div>
                                 </form>
@@ -539,6 +539,11 @@
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
+                                                <h6 class="mb-0 text-sm">{{ issue.assignee.name }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 25px;">
+                                            <div class="d-flex flex-column justify-content-left">
                                                 <h6 class="mb-0 text-sm">{{ issue.type === "story" ? "Story" :
                                     issue.type === "epic" ? "Epic" : issue.type === "task" ? "Task" :
                                         issue.type === "subtask" ? "Subtask" : issue.type === "bug" ? "Bug"
@@ -560,22 +565,17 @@
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
+                                                <h6 class="mb-0 text-sm">{{ issue.reporter.name }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 25px;">
+                                            <div class="d-flex flex-column justify-content-left">
                                                 <h6 class="mb-0 text-sm">{{ formatDuration(issue.exp_duration) }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
                                                 <h6 class="mb-0 text-sm">{{ formatDuration(issue.org_duration) }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding: 25px;">
-                                            <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ issue.reporter.name }}</h6>
-                                            </div>
-                                        </td>
-                                        <td style="padding: 25px;">
-                                            <div class="d-flex flex-column justify-content-left">
-                                                <h6 class="mb-0 text-sm">{{ issue.assignee.name }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 30px;">
@@ -588,12 +588,16 @@
                                             </div>
                                         </td>
                                         <td class="align-middle d-md-table-cell actions">
-                                            <i title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3 icon"
+                                            <i  title="Edit Issue" class="fas fa-pencil-alt text-primary fa-md mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#editIssue"
                                                 @click="editData(issue)"
                                                 style="color: dodgerblue !important; cursor: pointer;"></i>
+                                            
 
-                                            <i title="Delete Issue" @click="deleteIssue(issue.id)"
+                                            <i v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'" title="Delete Issue" @click="deleteIssue(issue.id)"
+                                                class="fas fa-trash text-danger fa-md mx-3 icon"
+                                                style="cursor: pointer;"></i>
+                                            <i v-else @click="notAllowed"
                                                 class="fas fa-trash text-danger fa-md mx-3 icon"
                                                 style="cursor: pointer;"></i>
 
@@ -647,7 +651,7 @@ export default {
         return {
             editModalOpened: false,
             isEditIssueModalVisible: false,
-            headers: ['S.No.', 'Title', 'Type', 'Status', 'Sprint', 'Task duration', 'Actual duration', 'Reporting Manager', 'Assignee', 'Files'],
+            headers: ['S.No.', 'Title',  'Assignee', 'Type', 'Status', 'Sprint', 'Reporting Manager',  'Task duration', 'Actual duration', 'Files'],
             allIssues: [],
             selectedSprintId: '',
             selectedEditSprintId: '',
@@ -772,6 +776,13 @@ export default {
         }
     },
     methods: {
+        notAllowed() {
+            new Noty({
+                type: 'error',
+                text: "❌ Access denied!! ",
+                timeout: 500,
+            }).show()
+        },
         createSprint(){
             router.push("/backlogs")
         },
