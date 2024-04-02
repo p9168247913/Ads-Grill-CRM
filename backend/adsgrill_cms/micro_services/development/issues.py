@@ -167,8 +167,8 @@ class IssueView(CsrfExemptMixin, APIView):
 
                     LinkedIssue.objects.bulk_create(linked_issue_instances)
                                        
-                url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
-                # url = f'http://crm.adsgrill.com/issues'
+               # url = f'http://127.0.0.1:8000/api/development/issues?id={issue_instance.pk}'
+                url = 'https://crm.adsgrill.com/issues'
                 send_email = threading.Thread(target=self.send_issue_details, args=((issue_instance.title, issue_instance.type, issue_instance.priority, issue_instance.created_at, issue_instance.reporter.name, url, issue_instance.assignee.email)))
                 send_email.start()
         

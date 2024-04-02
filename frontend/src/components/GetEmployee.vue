@@ -408,7 +408,6 @@ export default {
                 'admin': ['Admin'],
 		"super_admin":["super_admin"],
 		"hr":["hr"]
-
             }
         }
     },

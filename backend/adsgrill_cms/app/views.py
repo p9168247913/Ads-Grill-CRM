@@ -59,7 +59,7 @@ class UserCreateView(CsrfExemptMixin, generics.CreateAPIView):
             subject = "Adsgrill crm Client login credentials"
         else:
             subject = "Adsgrill crm login credentials"
-        message = f'Your username is: {username} and password is: {password}'
+        message = f'Your username is: {username} and password is: {password} \n Please Visit : https://crm.adsgrill.com'
         from_email = settings.DEFAULT_FROM_EMAIL
         recipient_list = [username]
 
