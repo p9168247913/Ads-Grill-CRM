@@ -28,5 +28,6 @@ urlpatterns = [
     path("development/comments/download", comments.DownloadCommentsAttachments.as_view()),
     path("development/worklog",worklog.WorklogView.as_view()),
     path("development/worklog/download",worklog.DownloadWorklogAttachments.as_view()),
-    path("development/issueMetaData",issues.IssueMetaData.as_view())
+    path("development/issueMetaData",issues.IssueMetaData.as_view()),
+    path("development/downloadUserWorkReport",issues.downloadUserWorkReport.as_view())
 ]
