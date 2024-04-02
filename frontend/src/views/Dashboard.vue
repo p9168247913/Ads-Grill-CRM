@@ -126,7 +126,7 @@
 import DashboardClient from "./Dashboards/DashboardClient.vue";
 import DashboardAdmin from "./Dashboards/DashboardAdmin.vue";
 import DashboardSuperAdmin from "./Dashboards/DashboardSuperAdmin.vue";
-import DashboardDevelopment from "./Dashboards/DashboardDevelopment.vue";
+// import DashboardDevelopment from "./Dashboards/DashboardDevelopment.vue";
 import DashboardLeads from "./Dashboards/DashboardLeads.vue";
 import DashboardSales from "./Dashboards/DashboardSales.vue";
 import DashboardHrms from "./Dashboards/DashboardHrms.vue";
@@ -218,7 +218,7 @@ export default {
     DashboardClient,
     DashboardAdmin,
     DashboardSuperAdmin,
-    DashboardDevelopment,
+    // DashboardDevelopment,
     DashboardLeads,
     DashboardSales,
     DashboardHrms,
