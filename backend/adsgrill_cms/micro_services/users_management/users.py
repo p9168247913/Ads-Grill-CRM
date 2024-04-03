@@ -54,6 +54,10 @@ class UsersView(CsrfExemptMixin, APIView):
                     'profile_pic':imageData
                     }
                     user_data.append(User)
+                
+                employee_count = Users.objects.exclude(role__name="client").count()
+                user_data.append({"employee_count":employee_count})
+                
             except Users.DoesNotExist:
                 return JsonResponse({'Message': 'No users found for this department'}, status=404, safe=False)
         else:
