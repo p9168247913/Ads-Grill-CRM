@@ -56,13 +56,12 @@ class UsersView(CsrfExemptMixin, APIView):
                     user_data.append(User)
                 
                 employee_count = Users.objects.exclude(role__name="client").count()
-                user_data.append({"employee_count":employee_count})
                 
             except Users.DoesNotExist:
                 return JsonResponse({'Message': 'No users found for this department'}, status=404, safe=False)
         else:
             return JsonResponse({'users': '', 'message': 'Invalid Request Method'}, status=405, safe=False)
-        return JsonResponse({'users': user_data})
+        return JsonResponse({'users': user_data,"employee_count":employee_count})
     
     def delete(self, request):
         if request.method == 'DELETE':
