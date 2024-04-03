@@ -7,6 +7,7 @@ from micro_services.development import client, projects, sprints ,issues, commen
 
 urlpatterns = [
     path("users/", users.UsersView.as_view()),
+    path("users/getAllManagers",users.getAllManagers.as_view()),
     path("roles/", roles.RolesView.as_view()),
     path("leads/", leads.LeadView.as_view()),
     path("leadinfo/", leads.LeadInfo.as_view()),

@@ -33,19 +33,15 @@ class UsersView(CsrfExemptMixin, APIView):
         if request.method == 'GET':
             try:
                 user_data = []
-                imageData = None
                 role = request.GET.get('role')
                 requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
                 for user in requestedUsers:
-                    if user.profile_pic:
+                    imageData = None
+                    if user.profile_pic is not None and user.profile_pic !='' and user.profile_pic.name:
                         imagePath = user.profile_pic.path
                         if os.path.exists(imagePath):
                             with open(imagePath, 'rb') as f:
                                 imageData = base64.b64encode(f.read()).decode('utf-8')
-                        else:
-                            imageData = None
-                    else:
-                        imageData=None
                     
                     User = {
                     'id':user.pk,
@@ -58,6 +54,10 @@ class UsersView(CsrfExemptMixin, APIView):
                     'profile_pic':imageData
                     }
                     user_data.append(User)
+                
+                employee_count = Users.objects.exclude(role__name="client").count()
+                user_data.append({"employee_count":employee_count})
+                
             except Users.DoesNotExist:
                 return JsonResponse({'Message': 'No users found for this department'}, status=404, safe=False)
         else:
@@ -114,5 +114,36 @@ class UsersView(CsrfExemptMixin, APIView):
         except Exception as e:
             return Response({'message': str(e)})
         return Response({'message':'User Updated Successfully'}, status=200)
-            
+    
 
+class getAllManagers(CsrfExemptMixin, APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        try:
+            manager_instance = Users.objects.filter(designation__icontains="manager")
+            manager_data_list = []
+            for manager in manager_instance:
+                imageData = None
+                if manager.profile_pic and manager.profile_pic.name:
+                    imagePath = manager.profile_pic.path
+                    if os.path.exists(imagePath):
+                        with open(imagePath, 'rb') as f:
+                            imageData = base64.b64encode(f.read()).decode('utf-8')
+                data = {
+                    "id": manager.pk,
+                    "name": manager.name,
+                    "role": manager.role.name,
+                    "contact_no": manager.contact_no,
+                    "designation": manager.designation,
+                    "pincode": manager.pincode,
+                    "profile_pic": imageData,
+                    "created_at": manager.created_at
+                }
+                manager_data_list.append(data)  
+        except Users.DoesNotExist:
+            return JsonResponse({"message": "requested user not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({"message": str(e)})
+
+        return JsonResponse({"manager_data": manager_data_list})

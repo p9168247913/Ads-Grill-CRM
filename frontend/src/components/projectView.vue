@@ -85,8 +85,16 @@
                       <label for="type" class="form-label">Type</label>
                       <select class="form-control" v-model="projectData.type" required>
                         <option value="">Select Type</option>
-                        <option value="ERP">ERP</option>
-                        <option value="CRM">CRM</option>
+                        <option value="RERP">Retail Management System (ERP)</option>
+                        <option value="MERP">Manufacturing Management System (ERP)</option>
+			<option value="CRM">Customer Engagement Platform (CRM)</option>
+			<option value="E-Com">Online Retail Platform (E-Com)</option>
+			<option value="Game_Dev">Interactive Entertainment Solutions (Game_Dev)</option>
+			<option value="WordPress">Dynamic Web Content Management (WordPress)</option>
+			<option value="Magento">E-Commerce Powerhouse (Magento)</option>
+			<option value="Shopify">E-Commerce Simplified (Shopify)</option>
+			<option value="Mobile Application">Mobile Application Solutions</option>
+			<option value="Web Presence">Web Presence Solutions</option>
                         <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
                           tag.name }}</option> -->
                       </select>
