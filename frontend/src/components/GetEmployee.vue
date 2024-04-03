@@ -281,16 +281,45 @@
 
                 <!--Table-->
                 <div v-if="users?.length" class="card" style="margin-top: 2rem;">
-                    <div class="card-header pb-0">
+                    <div class="card-header pb-0 heads" style="overflow: auto; gap:20px;">
+
                         <h6>{{ $route.params.val.toUpperCase() }}</h6>
+
+                        <div class="col-md-3 col-lg-4 col-sm-6 mb-3 d-flex">
+                            <input class="form-control" v-model="start_date" type="date" placeholder="Start date" />
+                            <span class="mt-2">&nbsp;to&nbsp;</span>
+                            <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
+                                type="date" placeholder="End date" />
+                        </div>
+                        <div class="col-md-3 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
+                            <select
+                                v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'admin' || this.authUser.designation === 'super-admin'"
+                                v-model="selectedEmployee" class="form-select">
+                                <option value="" selected>Select Employee</option>
+                                <option v-for="(item, index) in users" :key="index" :value="item.id"> {{
+                                    item.name }}</option>
+                            </select>
+                            <select v-else v-model="selectedEmployee" class="form-select">
+                                <option :value="this.authUser.id" selected>{{ this.authUser.name }}</option>
+                                <!-- <option v-for="(item, index) in users" :key="index" :value="item.id"> {{
+                                    item.name }}</option> -->
+                            </select>
+                            <button @click="downloadReport($event)" type="button"
+                            v-if="this.selectedEmployee && this.start_date && this.end_date"
+                                style="width: auto; height: 40px !important;"
+                                class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
+                                <i class="bi bi-download"></i>
+                                <span class="d-none d-md-inline">&nbsp; &nbsp;Report</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
-                                <thead>
+                                <thead  style="position: sticky;  top: 0; background-color: whitesmoke; z-index: 1">
                                     <tr>
                                         <th style="color: #344767 !important;"
-                                            class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
+                                            class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head"
                                             v-for="(header) in headers" :key="header">{{ header }}</th>
                                     </tr>
                                 </thead>
@@ -381,6 +410,9 @@ export default {
     },
     data() {
         return {
+            start_date: '',
+            end_date: '',
+            selectedEmployee: '',
             isLoading: false,
             searchTerm: '',
             name: '', email: '', role: '', contact_no: '', designation: '', pincode: '', password: '',
@@ -431,6 +463,62 @@ export default {
         }
     },
     methods: {
+        extractFilename(response) {
+            const contentDisposition = response.headers['content-disposition'];
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
+                console.log("nmae", filenameMatch);
+                return filenameMatch ? filenameMatch[1] : 'download.zip';
+            } else {
+                return 'download.zip';
+            }
+        },
+        async downloadReport(e) { 
+            e.preventDefault()
+            const date_range = {
+                start_date: this.start_date,
+                end_date: this.end_date
+            }
+            try {
+                this.$store.commit('showLoader')
+                const response = await axios.get(`${BASE_URL}api/development/downloadUserWorkReport?id=${this.selectedEmployee}&date_range=${JSON.stringify(date_range)}`, {
+                    headers: {
+                        "Content-Type": "'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'",
+                        token: this.authToken
+                    },
+                    responseType: 'blob'
+                })
+                if (response?.status === 200 && response?.data) {
+                    const filename = this.extractFilename(response);
+                    const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.download = filename;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    Swal.fire({
+                        title: `Downloaded successfully!`,
+                        icon: 'success',
+                    });
+                    this.start_date="";
+                    this.end_date="";
+                    this.$store.commit('hideLoader');
+                    this.selectedEmployee="";
+                }
+                this.$store.commit('hideLoader')
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 500,
+                }).show()
+                this.$store.commit('hideLoader')
+            }
+        },
         formatText(inputText) {
             if (!inputText) {
                 return '';
@@ -696,7 +784,12 @@ export default {
         },
     },
     watch: {
-        '$route.params.val': 'getUsers'
+        '$route.params.val': 'getUsers',
+        start_date: {
+            handler() {
+                this.end_date = '';
+            }
+        },
     },
     created() {
         this.getUsers(this.$route.params.val)
@@ -706,6 +799,18 @@ export default {
 </script>
 
 <style>
+.heads {
+    display: flex;
+    justify-content: space-between
+}
+
+@media (max-width: 576px) {
+    .heads {
+        display: flex;
+        flex-direction: column
+    }
+}
+
 .modalBody {
     max-height: calc(100vh - 200px);
     overflow: auto;
@@ -721,6 +826,13 @@ export default {
     position: sticky;
     right: 0;
     z-index: 0;
+    background-color: white !important;
+}
+
+.action-head {
+    position: sticky;
+    right: 0;
+    z-index: 1;
     background-color: white !important;
 }
 
