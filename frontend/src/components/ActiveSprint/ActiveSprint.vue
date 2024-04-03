@@ -1,4 +1,9 @@
 <template>
+
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+    </head>
     <div class="wrapper" style="margin-bottom: 80px;">
         <div class="content-page">
             <div class="container-fluid" style="margin-top: 30px;">
@@ -33,7 +38,12 @@
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li> -->
-                                                <li @click="deleteIssue(issue.id)"><a class="dropdown-item" href="#"><i
+                                                <li v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'"
+                                                    @click="deleteIssue(issue.id)"><a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                                <li v-else @click="notAllowed" style="cursor: not-allowed !important;">
+                                                    <a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -78,7 +88,13 @@
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li> -->
-                                                <li><a class="dropdown-item" href="#"><i
+                                                <li
+                                                    v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'">
+                                                    <a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                                <li v-else @click="notAllowed" style="cursor: not-allowed !important;">
+                                                    <a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -122,7 +138,13 @@
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
                                                 </li> -->
-                                                <li><a class="dropdown-item" href="#"><i
+                                                <li
+                                                    v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'">
+                                                    <a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                                <li v-else @click="notAllowed" style="cursor: not-allowed !important;">
+                                                    <a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -317,6 +339,13 @@ export default {
         }
     },
     methods: {
+        notAllowed() {
+            new Noty({
+                type: 'error',
+                text: "❌ Access denied!! ",
+                timeout: 500,
+            }).show()
+        },
         resetValues() { },
         currentDateTime() {
             const now = new Date();

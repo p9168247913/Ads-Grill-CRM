@@ -33,19 +33,15 @@ class UsersView(CsrfExemptMixin, APIView):
         if request.method == 'GET':
             try:
                 user_data = []
-                imageData = None
                 role = request.GET.get('role')
                 requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
                 for user in requestedUsers:
-                    if user.profile_pic:
+                    imageData = None
+                    if user.profile_pic is not None and user.profile_pic !='' and user.profile_pic.name:
                         imagePath = user.profile_pic.path
                         if os.path.exists(imagePath):
                             with open(imagePath, 'rb') as f:
                                 imageData = base64.b64encode(f.read()).decode('utf-8')
-                        else:
-                            imageData = None
-                    else:
-                        imageData=None
                     
                     User = {
                     'id':user.pk,
