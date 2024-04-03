@@ -1,4 +1,4 @@
-from app.models import Users, Lead, Source, Tag, LeadStatus
+from app.models import Users, Lead, Source, Tag, LeadStatus,Sale
 from braces.views import CsrfExemptMixin
 from rest_framework.views import APIView
 from django.http import JsonResponse, HttpResponse
@@ -13,14 +13,26 @@ from os.path import basename
 import os
 import openpyxl
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from datetime import datetime,timedelta
+
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
 
+class CustomSessionAuthentication(SessionAuthentication):
+    def authenticate(self, request):
+        user_auth_tuple = super().authenticate(request)
+        if user_auth_tuple is None:
+            raise AuthenticationFailed('Your session has expired. Please log in again.')
+        return user_auth_tuple
+
 class LeadView(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         parser_classes = (MultiPartParser, FormParser)
@@ -28,133 +40,175 @@ class LeadView(CsrfExemptMixin, APIView):
         val = lead_data.get('key')
         if not lead_data or not val:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
-        if val =='post':
-            try:
-                with transaction.atomic():
-                    user_instance = Users.objects.get(pk=lead_data.get('userID'))
-                    source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
-                    tag_instance, _ = Tag.objects.get_or_create(name=lead_data.get('tag'))
-                    status_instance, _ = LeadStatus.objects.get_or_create(name=lead_data.get('status'))
-
-                    # Create Lead instance with related models
-                    create_lead = Lead.objects.create(
-                        user=user_instance,
-                        source=source_instance,
-                        tag=tag_instance,
-                        status=status_instance,
-                        client_name=lead_data.get('client_name'),
-                        contact_no=lead_data.get('contact_no'),
-                        email=lead_data.get('email'),
-                        country=lead_data.get('country'),
-                        state=lead_data.get('state'),
-                        city=lead_data.get('city'),
-                        file=lead_data.get('file'),
-                    )
-                    create_lead.save()
-            except IntegrityError as i:
-                return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
-            return JsonResponse({'message':'Lead Created Successfully'},status=status.HTTP_201_CREATED)
         
-        if val =='bulkUpload':
-            print('post')
-            parser_class = (FileUploadParser,)
-            up_file = request.FILES.get('file')
-            upload_folder = 'uploads/leads'
-            if not os.path.exists(upload_folder):
-                os.makedirs(upload_folder)
-                                                                                                         
-            destination_path = os.path.join(upload_folder, up_file.name)
-            with open(destination_path, "wb") as destination:
-                for i, chunk in enumerate(up_file.chunks()):
-                    destination.write(chunk)
-            df = pd.read_excel(destination_path, dtype=str)
-            df = df.dropna(how='all')
-            rowList = df.values.tolist()
-            rowList = rowList[:-1]
-            print(rowList) 
-            empty_cols = []
-            try:
-                for (ind, col) in enumerate(rowList):
-                    xl_sale_man, xl_source, xl_tag, xl_status, xl_cl_name, xl_email, xl_contact_no, xl_country, xl_state, xl_city = col[0], col[1], col[2], col[3], col[4], col[5], col[6], col[7], col[8], col[9]
-                    xl_cl_name = str(xl_cl_name)
-                    if pd.isna(xl_sale_man) or not str(xl_sale_man):
-                        empty_cols.append('sales_Manager')
-                    if pd.isna(xl_source) or not str(xl_source):
-                        empty_cols.append('source')
-                    if pd.isna(xl_tag) or not str(xl_tag):
-                        empty_cols.append('tag')
-                    if pd.isna(xl_status) or not str(xl_status):
-                        empty_cols.append('status')
-                    if pd.isna(xl_cl_name) or not str(xl_cl_name):
-                        empty_cols.append('client_name')
-                    if pd.isna(xl_email) or not str(xl_email):
-                        empty_cols.append('email')
-                    if pd.isna(xl_contact_no) or not str(xl_contact_no):
-                        empty_cols.append('contact_no')
-                    if pd.isna(xl_country) or not str(xl_country):
-                        empty_cols.append('country')
-                    if pd.isna(xl_state) or not str(xl_state):
-                        empty_cols.append('state')
-                    if pd.isna(xl_city) or not str(xl_city):
-                        empty_cols.append('city')
-                    if empty_cols:
-                        col_name = ', '.join(empty_cols)
-                        raise Exception(f'Empty fields in columns: {col_name}, Row {ind+2}')
+        user_instance=Users.objects.get(email=request.user.email)
+                
+        lead_instance = Lead.objects.filter(Q(contact_no=lead_data.get('contact_no')) | Q(email=lead_data.get('email')))
+        
+        if lead_instance.exists():
+            return JsonResponse({'message':'Lead with this contact or email already exists'},status=status.HTTP_400_BAD_REQUEST)
+        
+        if user_instance.role.name == "leads" or user_instance.role.name == "admin":    
+            if val =='post':
+                try:
+                    with transaction.atomic():            
+                        source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
 
-                    else:
+                        if lead_data.get('contact_no')==None:
+                            return JsonResponse({'message':"Please enter contact details"},status=status.HTTP_400_BAD_REQUEST)
+
+                        # Create Lead instance with related models
+                        create_lead = Lead.objects.create(
+                            sales_man=user_instance,
+                            source=source_instance,
+                            client_name=lead_data.get('client_name'),
+                            contact_no=lead_data.get('contact_no'),
+                            email=lead_data.get('email'),
+                            requirement=lead_data.get('requirement')
+                        )
+                        create_lead.save()
+                except IntegrityError as i:
+                    return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+                return JsonResponse({'message':'Lead created successfully'},status=status.HTTP_201_CREATED)
+
+            if val == 'bulkUpload':
+
+                parser_class = (FileUploadParser,)
+                up_file = request.FILES.get('file')
+                upload_folder = 'uploads/leads'
+                if not os.path.exists(upload_folder):
+                    os.makedirs(upload_folder)
+
+                destination_path = os.path.join(upload_folder, up_file.name)
+                with open(destination_path, "wb") as destination:
+                    for i, chunk in enumerate(up_file.chunks()):
+                        destination.write(chunk)
+
+                df = pd.read_excel(destination_path, dtype=str)
+                original_len = len(df)
+                df = df.drop_duplicates(subset=['Contact No'])
+                new_len = len(df)
+                if new_len < original_len:
+                    excel_response = {"message":f"{original_len-new_len} Duplicates(contact no) were founded and deleted"}
+                else:
+                    excel_response = {"message":"No duplicates found in the excel file"}
+
+                existing_rows = Lead.objects.values_list('contact_no', flat=True)
+                df = df[~df['Contact No'].isin(existing_rows)]
+                if df.empty:
+                    database_response = {"message":"No new records to save to the database"}
+                else:
+                    df = df.dropna(how='all')
+                    empty_cols = []
+
+                    try:
                         with transaction.atomic():
-                            user_instance = Users.objects.get(email = xl_sale_man.lower())
-                            source_instance, _ = Source.objects.get_or_create(name=xl_source)
-                            tag_instance, _ = Tag.objects.get_or_create(name=xl_tag)
-                            status_instance, _ = LeadStatus.objects.get_or_create(name=xl_status)
-                            create_lead = Lead.objects.create(
-                                user=user_instance,
-                                source=source_instance,
-                                tag=tag_instance,
-                                status=status_instance,
-                                client_name=xl_cl_name,
-                                contact_no=xl_contact_no,
-                                email=xl_email,
-                                country=xl_country,
-                                state=xl_state,
-                                city=xl_city,
-                                # file=lead_data.get('file'),
-                            )
-                            create_lead.save()
+                            for ind, row in df.iterrows():
+                                xl_source, xl_cl_name, xl_email, xl_contact_no, xl_requirement = row
+                                xl_cl_name = str(xl_cl_name)
 
-            except IntegrityError as i:
-                return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+                                if pd.isna(xl_contact_no) or not str(xl_contact_no):
+                                    empty_cols.append('contact_no')
+
+                                if empty_cols:
+                                    col_name = ', '.join(empty_cols)
+                                    raise Exception(f'Empty fields in columns: {col_name}, Row {ind+2}')
+                                else:
+                                    source_instance, _ = Source.objects.get_or_create(name=xl_source)
+
+                                    create_lead = Lead.objects.create(
+                                        sales_man=user_instance,
+                                        source=source_instance,
+                                        client_name=xl_cl_name,
+                                        contact_no=xl_contact_no,
+                                        email=xl_email,
+                                        requirement=xl_requirement
+                                    )
+                                    create_lead.save()
+                            database_response = {"message":f"{up_file.name} uploaded successfully", "status":status.HTTP_201_CREATED}
+
+                    except IntegrityError as i:
+                        return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
+
+                    except ObjectDoesNotExist:
+                        return JsonResponse({'message': f"No sales manager found at row: {ind+2}"},status=status.HTTP_404_NOT_FOUND)
+
+                    except Exception as exc:
+                        return JsonResponse({'message': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+                return JsonResponse({"excel_res":excel_response, "database_res":database_response})
             
-            except ObjectDoesNotExist:
-                return JsonResponse({'message':f"No Sale's Manager Found At Row: {ind+2}"})
-
-            except Exception as exc:
-            # import traceback
-            # traceback.print_exc()
-                return JsonResponse({'message': str(exc)}, status=400, safe=False)
-            return JsonResponse({'message':f'{up_file.name} Uploaded Successfully',}, status=status.HTTP_201_CREATED)
-    
+        else:
+            return JsonResponse({'message':"Sorry you can not add lead"},status=status.HTTP_401_UNAUTHORIZED)
+                
     def get(self, request):
         try:
+            pageNo = request.GET.get("page_no")
+            client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
+            contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
+            date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
+            noOfRecords = 15
+            
+            if date_range is not None:
+                date_range = json.loads(date_range)
+                startDate_str = date_range['start_date']
+                endDate_str = date_range['end_date']
+                start_datetime = datetime.strptime(startDate_str, "%Y-%m-%d").date()
+                end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
+                            
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
+                if client_name is not None:
+                    allLeads = allLeads.filter(client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
+
+                if contact_no is not None:
+                    allLeads = allLeads.filter(contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at') 
+                   
+                if date_range is not None: 
+                    allLeads = allLeads.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False).order_by('-created_at') 
+                    
+                if client_name is not None and contact_no is not None:
+                    allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
+
+                p = Paginator(allLeads, noOfRecords)
+                page_obj = p.get_page(pageNo)
+                
+                try:
+                    page_obj = p.page(pageNo)
+                except PageNotAnInteger:
+                    page_obj = p.page(1)
+                except EmptyPage:
+                    page_obj = p.page(p.num_pages)
+                
+                lead_count = allLeads.count()
+                assignedLeads = Sale.objects.all().count()
+                unassignedLeads = lead_count - assignedLeads
+                
                 leads_data = [{
-                    'id':lead.pk,
-                    'user':lead.user.name,
+                    'id': lead.pk,
                     'source': lead.source.name,
-                    'tag': lead.tag.name,
-                    'status': lead.status.name,
                     'client_name': lead.client_name,
                     'email': lead.email,
                     'contact_no': lead.contact_no,
-                    'country': lead.country,
-                    'state': lead.state,
-                    'city': lead.city,
-                    'file':basename(lead.file.name) if lead.file else None
-                } for lead in allLeads]
-                return JsonResponse({'leads':leads_data}, status=status.HTTP_200_OK)
+                    'requirement': lead.requirement,
+                    'is_assigned':lead.is_assigned,
+                    'date': lead.created_at
+                } for lead in page_obj]
+                
+                data = {
+                    'leads': leads_data,
+                    'total_leads': lead_count,
+                    'assigned_leads': assignedLeads,
+                    'unassigned_leads': unassignedLeads,
+                    'total_pages': p.num_pages
+                }
+                   
         except IntegrityError as i:
-            return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+            return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return JsonResponse({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'lead_data': data}, status=status.HTTP_200_OK)
         
     def put(self, request):
         parser_classes = (MultiPartParser, FormParser)
@@ -163,45 +217,65 @@ class LeadView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            with transaction.atomic():
-                updateLead = Lead.objects.get(pk=lead_data.get('id'))
-                user_instance = Users.objects.get(pk=lead_data.get('userID'))
-                source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
-                tag_instance, _ = Tag.objects.get_or_create(name=lead_data.get('tag'))
-                status_instance, _ = LeadStatus.objects.get_or_create(name=lead_data.get('status'))
-                updateLead.user = user_instance
-                updateLead.source =  source_instance
-                updateLead.tag =  tag_instance
-                updateLead.status =  status_instance
+            user_instance = Users.objects.get(email=request.user)            
+            
+            if lead_data.get('contact_no')==None:
+                return JsonResponse({'message':"Please enter contact no."},status=status.HTTP_400_BAD_REQUEST)
+            
+            if user_instance.role.name == "leads" or user_instance.role.name == "admin":    
+                with transaction.atomic():
+                    updateLead = Lead.objects.get(pk=lead_data.get('id'))
+                    source_instance, _ = Source.objects.get_or_create(name=lead_data.get('source'))
 
-                updateLead.client_name =  lead_data.get('client_name')
-                updateLead.email =  lead_data.get('email')
-                updateLead.contact_no = lead_data.get('contact_no')
-                updateLead.country =  lead_data.get('country')
-                updateLead.state =  lead_data.get('state')
-                updateLead.city =  lead_data.get('city')
-                updateLead.file = lead_data.get('file') if lead_data.get('file') else None
-                updateLead.save()
-                return JsonResponse({'message':'Lead Updated Successfully'}, status=status.HTTP_200_OK)
+                    updateLead.sales_man = user_instance
+                    updateLead.source =  source_instance
+                    updateLead.client_name =  lead_data.get('client_name')
+                    updateLead.email =  lead_data.get('email')
+                    updateLead.contact_no=lead_data.get('contact_no')
+                    updateLead.requirement=lead_data.get('requirement')
+                    updateLead.save()
+                    
+            else:
+                return JsonResponse({"message":"Sorry! You can not edit the lead"},status=status.HTTP_401_UNAUTHORIZED)
+                
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'message':'Lead updated successfully'}, status=status.HTTP_200_OK)
+        
         
     def delete(self,request):
-        id = request.GET.get('id')
+        id = request.GET.get('id')     
+        user_instance=request.user
         if not id:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             with transaction.atomic():
-                deleteLead = Lead.objects.get(pk=id)
-                deleteLead.is_deleted = True
-                deleteLead.save()
-                return JsonResponse({'message':'Lead deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
+                if user_instance.role.name == "leads" or user_instance.role.name == "admin":    
+                    deleteLead = Lead.objects.get(pk=id)
+                    deleteSale=Sale.objects.filter(lead=deleteLead)
+                    if deleteSale:
+                        deleteSale.delete()
+                    deleteLead.delete()
+                    
+                else:
+                    return JsonResponse({"message":"Sorry! You can not delete the lead"},status=status.HTTP_401_UNAUTHORIZED)
+                    
         except IntegrityError as i:
             return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({'message':'Lead deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        
         
         
 class LeadInfo(CsrfExemptMixin, APIView):
-    authentication_classes = [CsrfExemptSessionAuthentication, SessionAuthentication]
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
     def post(self, request):
         val = request.GET.get('key')
@@ -213,7 +287,7 @@ class LeadInfo(CsrfExemptMixin, APIView):
                 with transaction.atomic():
                     leadStatusInstance = LeadStatus.objects.create(name=name)
                     leadStatusInstance.save()
-                    return JsonResponse({'message':'Lead Status Created Successfully'}, status=status.HTTP_201_CREATED)
+                    return JsonResponse({'message':'Lead status created successfully'}, status=status.HTTP_201_CREATED)
             except IntegrityError as i:
                 return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -307,16 +381,11 @@ class LeadExcelDownload(APIView):
     def get(self, request):
         wb = openpyxl.Workbook()
         ws = wb.active
-        ws['A1'] = 'Sales Manager'
-        ws['B1'] = 'Source'
-        ws['C1'] = 'Tag'
-        ws['D1'] = 'Status'
-        ws['E1'] = 'Client Name'
-        ws['F1'] = 'Email'
-        ws['G1'] = 'Contact_No'
-        ws['H1'] = 'Country'
-        ws['I1'] = 'State'
-        ws['J1'] = 'City'
+        ws['A1'] = 'Source'
+        ws['B1'] = 'Client Name'
+        ws['C1'] = 'Email'
+        ws['D1'] = 'Contact No'
+        ws['E1'] = 'Requirement'
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         wb.save(response)
         return response 

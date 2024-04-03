@@ -1,20 +1,24 @@
 <template>
+
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+    </head>
     <div class="wrapper" style="margin-bottom: 80px;">
-        <div v-if="projectKey !== ''" class="content-page">
+        <div class="content-page">
             <div class="container-fluid" style="margin-top: 30px;">
-                <h5 class="sprint-head">{{ sprintData.activeSprint ? sprintData.activeSprint.name : "" }}</h5>
-                <div class="row">
-                    <div class="col-md-6 col-lg-6 col-sm-12 mb-3">
-                        <div class="input-group">
-                            <span class="input-group-text text-body">
-                                <i class="fas fa-search" aria-hidden="true"></i>
-                            </span>
-                            <input type="text" v-model="searchTerm" @change="filterUsers" class="form-control"
-                                placeholder="Search Issue..." />
-                        </div>
-                    </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <h5 style="margin-left: 1rem;" class="sprint-head">{{ sprintData.activeSprint ?
+                        sprintData.activeSprint.name : "" }}</h5>
+                    <button @click="addIssue" type="button" style="width: auto; height: 40px !important;"
+                        class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
+                        data-bs-target="#createIssue">
+                        <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp;
+                        &nbsp;Add Issue
+                    </button>
                 </div>
-                <div class="row">
+
+                <div style="margin-top: 3rem;" class="row">
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
                             <p class="card-head">TO DO</p>
@@ -27,13 +31,120 @@
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
+                                            <ul style="background-color: gainsboro;"
+                                                class="dropdown-menu dropdown-menu-end"
                                                 aria-labelledby="dropdownMenuButton">
-                                                <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                <!-- <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
                                                         class="dropdown-item" href="#"><i
                                                             class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                                </li> -->
+                                                <li v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'"
+                                                    @click="deleteIssue(issue.id)"><a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
-                                                <li><a class="dropdown-item" href="#"><i
+                                                <li v-else @click="notAllowed" style="cursor: not-allowed !important;">
+                                                    <a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center "
+                                        style="margin-left: 2px;width: 95%; margin-top: -20px;">
+                                        <img style="width: 45px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://static.vecteezy.com/ti/vecteur-libre/p3/421699-icone-de-documentss-gratuit-vectoriel.jpg"
+                                            aria-describedby="5673val-tooltip">
+                                        <p class="story-name col-10 ps-0"
+                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">{{
+                        this.projectName }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="no-issue">
+                                No issues here
+                                <!-- <button @click="addIssue"
+                                    style="font-weight: bold;padding: 5px 8px; border: none; border-radius: 4px; background-color: rgb(65,225,190);">
+                                    + Add</button> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border issue-div" style="">
+                            <p class="card-head">IN PROGRESS</p>
+                            <div v-if="sprintData.issues && sprintData.issues.in_progress.length > 0">
+                                <div class="issue-card" v-for="(issue, index) in sprintData.issues.in_progress"
+                                    :key="index">
+                                    <div class="row p-2 align-items-center">
+                                        <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
+                                        <div class="col text-end">
+                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul style="background-color: gainsboro;"
+                                                class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton">
+                                                <!-- <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                        class="dropdown-item" href="#"><i
+                                                            class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                                </li> -->
+                                                <li
+                                                    v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'">
+                                                    <a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                                <li v-else @click="notAllowed" style="cursor: not-allowed !important;">
+                                                    <a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="row align-items-center "
+                                        style="margin-left: 2px;width: 95%; margin-top: -20px;">
+                                        <img style="width: 45px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
+                                            src="https://static.vecteezy.com/ti/vecteur-libre/p3/421699-icone-de-documentss-gratuit-vectoriel.jpg"
+                                            aria-describedby="5673val-tooltip">
+                                        <p class="story-name col-10 ps-0"
+                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">{{
+                        this.projectName }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="no-issue">
+                                No issues here
+                                <!-- <button @click="addIssue"
+                                    style="font-weight: bold;padding: 5px 8px; border: none; border-radius: 4px; background-color: rgb(65,225,190);">
+                                    + Add</button> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="border issue-div">
+                            <p class="card-head">DONE</p>
+                            <div v-if="sprintData.issues && sprintData.issues.done.length > 0">
+                                <div class="issue-card" v-for="(issue, index) in sprintData.issues.done" :key="index">
+                                    <div class="row p-2 align-items-center">
+                                        <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
+                                        <div class="col text-end">
+                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                                id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <ul style="background-color: gainsboro;"
+                                                class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="dropdownMenuButton">
+                                                <!-- <li data-bs-toggle="modal" data-bs-target="#editIssue"><a
+                                                        class="dropdown-item" href="#"><i
+                                                            class="fas fa-edit text-success"></i>&nbsp;&nbsp;Edit</a>
+                                                </li> -->
+                                                <li
+                                                    v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'">
+                                                    <a class="dropdown-item" href="#"><i
+                                                            class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
+                                                </li>
+                                                <li v-else @click="notAllowed" style="cursor: not-allowed !important;">
+                                                    <a class="dropdown-item" href="#"><i
                                                             class="fas fa-trash-alt text-danger"></i>&nbsp;&nbsp;Delete</a>
                                                 </li>
                                             </ul>
@@ -42,27 +153,25 @@
                                     <div class="row align-items-center "
                                         style="margin-left: 2px;width: 95%; margin-top: -20px;">
                                         <img style="width: 40px;" class="sc-1j9o0vm-0 dMMVlq" alt="Story"
-                                            src="https://adsgrilltech.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium"
+                                            src="https://static.vecteezy.com/ti/vecteur-libre/p3/421699-icone-de-documentss-gratuit-vectoriel.jpg"
                                             aria-describedby="5673val-tooltip">
                                         <p class="story-name col-10 ps-0"
-                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">PROJECT NAME</p>
+                                            style="margin-top: 15px; font-size: 12px; font-weight: bold;">{{
+                        this.projectName }}</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="border issue-div" style="">
-                            <p class="card-head">IN PROGRESS</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="border issue-div">
-                            <p class="card-head">DONE</p>
+                            <div v-else class="no-issue">
+                                No issues here
+                                <!-- <button @click="addIssue"
+                                    style="font-weight: bold;padding: 5px 8px; border: none; border-radius: 4px; background-color: rgb(65,225,190);">
+                                    + Add</button> -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <!-- Modal for Create Sprint -->
             <div class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
                 aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
@@ -128,13 +237,13 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="task_name" class="form-label">Title</label>
-                                        <input type="text" class="form-control" v-model="sprintData.task_name" >
+                                        <input type="text" class="form-control" v-model="sprintData.task_name">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="sprint_name" class="form-label">Sprint Name</label>
                                         <!-- <input type="text" class="form-control" v-model="sprintData.sprint_name"
                                                 required> -->
-                                        <select class="form-select" v-model="sprintData.sprint_name" >
+                                        <select class="form-select" v-model="sprintData.sprint_name">
                                             <option value="">Select Sprint Name</option>
                                             <option value="Sprint 1">Sprint 1</option>
                                             <option value="Sprint 2">Sprint 2</option>
@@ -146,19 +255,17 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="expectedDuration" class="form-label">Estimated duration</label>
-                                        <input type="text" class="form-control" v-model="sprintData.expectedDuration"
-                                            >
+                                        <input type="text" class="form-control" v-model="sprintData.expectedDuration">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="actualDuration" class="form-label">Actual duration</label>
-                                        <input type="text" class="form-control" v-model="sprintData.actualDuration"
-                                            >
+                                        <input type="text" class="form-control" v-model="sprintData.actualDuration">
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="reportingManager" class="form-label">Reporting Manager</label>
-                                        <select class="form-select" v-model="sprintData.reportingManager" >
+                                        <select class="form-select" v-model="sprintData.reportingManager">
                                             <option value="">Select Sprint Name</option>
                                             <option value="Abhishek">Abhishek</option>
                                             <option value="Pawan">Pawan</option>
@@ -168,7 +275,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="assignee" class="form-label">Assignee</label>
-                                        <select class="form-select" v-model="sprintData.assignee" >
+                                        <select class="form-select" v-model="sprintData.assignee">
                                             <option value="">Assignee</option>
                                             <option value="Shantanu">Shantanu</option>
                                             <option value="Pushkaraj">Pushkaraj</option>
@@ -176,9 +283,10 @@
                                                     tag.name }}</option> -->
                                         </select>
                                     </div>
-                                    <div class="col-md-13 mb-3">
+                                    <div class="col-md-12 mb-3">
                                         <label for="type" class="form-label">Description</label>
-                                        <QuillEditor required ref="editor" :modules="modules" theme="snow" toolbar="full" />
+                                        <QuillEditor required ref="editor" :modules="modules" theme="snow"
+                                            toolbar="full" />
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -192,27 +300,28 @@
                 </div>
             </div>
         </div>
-        <div v-else>
-            <!-- <p>No project selected. Please select a project.</p> -->
-        </div>
     </div>
 </template>
-  
+
 <script>
 import { BASE_URL } from '../../config/apiConfig';
 import axios from 'axios';
 import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
+import Noty from 'noty';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import router from "@/router";
 
 export default {
     name: "active-sprint",
     data() {
         return {
             projectKey: localStorage.getItem("projectId"),
+            projectName: localStorage.getItem("projectname"),
             editorInstance: null,
             sprintData: {},
+            updateSprintData: {}
         };
     },
     components: {
@@ -230,11 +339,21 @@ export default {
         }
     },
     methods: {
+        notAllowed() {
+            new Noty({
+                type: 'error',
+                text: "❌ Access denied!! ",
+                timeout: 500,
+            }).show()
+        },
         resetValues() { },
         currentDateTime() {
             const now = new Date();
             const formattedDateTime = now.toISOString().slice(0, 16);
             return formattedDateTime;
+        },
+        addIssue() {
+            router.push("/issues")
         },
         createSprints() { },
         editIssue() { },
@@ -244,29 +363,72 @@ export default {
                 const quillEditor = this.$refs.editor;
                 if (quillEditor.getHTML) {
                     const htmlContent = quillEditor.getHTML();
-                    console.log(htmlContent);
+                    this.updateSprintData.description = htmlContent
                 } else {
-                    console.error('getHTML method is not available');
+                    new Noty({
+                        type: 'error',
+                        text: 'getHTML method is not available',
+                        timeout: 1000,
+                    }).show();
                 }
             } else {
-                console.error('Quill editor reference not found');
+                new Noty({
+                    type: 'error',
+                    text: 'Quill editor reference not found',
+                    timeout: 1000,
+                }).show();
             }
+        },
+        async deleteIssue(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You won\'t be able to revert this!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await axios.delete(`${BASE_URL}api/development/issues?id=${id}`, {
+                            headers: {
+                                token: this.authToken
+                            }
+                        })
+                        this.getSprintData();
+                        Swal.fire('Deleted!', response.data.message, 'success');
+                    } catch (error) {
+                        this.getSprintData();
+                        Swal.fire('Error!', error.response.data.message ? error.response.data.message : error.response.data.detail, 'error');
+                    }
+                }
+            });
         },
         async getSprintData() {
             const projectId = localStorage.getItem("projectId")
             try {
+                this.$store.commit('showLoader');
                 const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${projectId}`, {
                     headers: {
                         'Content-Type': "multipart/form-data",
                         token: this.authToken,
                     }
                 })
-                this.sprintData = response.data.activeSprintAndIssues
-                if (this.sprintData === undefined) {
-                    this.showNoActiveSprintAlert();
+                if (response.status === 200) {
+                    this.sprintData = response.data.activeSprintAndIssues
+                    if (this.sprintData === undefined) {
+                        this.showNoActiveSprintAlert();
+                    }
                 }
+                this.$store.commit('hideLoader');
             } catch (error) {
-                console.log(error);
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
+                }).show();
+                this.$store.commit('hideLoader');
             }
         },
         showSweetAlert() {
@@ -307,7 +469,7 @@ export default {
     },
 }
 </script>
-    
+
 <style scoped>
 ::v-deep .ql-container {
     max-height: 150px;
@@ -368,18 +530,35 @@ export default {
     height: 70vh;
     background-color: #f3f3f3;
     border-radius: 5px;
-    padding-top: 20px;
     overflow-y: auto;
+    position: relative;
 }
 
 .sprint-head {
     color: white;
 }
 
+.no-issue {
+    /* border: 1px solid red; */
+    font-size: 13px;
+    font-weight: bold;
+    padding-left: 15px;
+    position: sticky;
+    top: 0;
+    background-color: #f3f3f3;
+    z-index: 2;
+}
+
 .card-head {
     font-size: 12px;
     font-weight: bold;
-    margin-left: 15px;
+    padding-left: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    position: sticky;
+    top: 0;
+    background-color: #f3f3f3;
+    z-index: 2;
 }
 
 .issue-card {

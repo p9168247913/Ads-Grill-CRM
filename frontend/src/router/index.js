@@ -90,7 +90,7 @@ const routes = [
   },
   {
     path: "/client-signin",
-    name: "Cient Signin",
+    name: "Client Signin",
     component: ClientSignin,
   },
   {

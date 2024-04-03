@@ -1,4 +1,5 @@
 <template>
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -20,7 +21,8 @@
           <div class="row gx-4">
             <div class="col-auto">
               <div class="avatar avatar-xl position-relative">
-                <img src="../assets/img/team-1.jpg" alt="profile_image" class="shadow-sm w-100 border-radius-lg" />
+                <img :src="'data:image/jpeg;base64,' + userData.profile_pic" alt="profile_image"
+                  class="shadow-sm w-100 border-radius-lg" />
               </div>
             </div>
             <div class="col-auto my-auto">
@@ -29,13 +31,14 @@
                 <p class="mb-0 font-weight-bold text-sm">{{ authUser.email }}</p>
               </div>
             </div>
-            <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0">
+            <div class="mx-auto mt-3 col-lg-4 col-md-6 my-sm-auto ms-sm-auto me-sm-0" style=" z-index: 0;">
               <div class="nav-wrapper position-relative end-0">
                 <ul class="p-1 bg-transparent nav nav-pills" role="tablist">
                   <li class="nav-item col-lg-auto col-md-auto col-sm-auto w-100" style="width: 200px !important;"
                     @click="doLogout">
-                    <button style="width: 150px !important; height: 35px !important;"
-                      class="btn btn-sm btn-dark float-right mb-0 px-2 py-1 mb-0 nav-link active">
+                    <button style="width: 120px !important; height: 40px !important; z-index: 0 !important;"
+                      class="btn btn-sm btn-dark float-right nav-link active ">
+                      <i class="bi bi-box-arrow-right" style="color: white; height: 20px"></i> &nbsp;&nbsp;
                       <span class="ms-1" style="color: white;">Logout</span>
                     </button>
                   </li>
@@ -53,14 +56,16 @@
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
                 <p class="mb-0">Edit Profile</p>
-                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()">Save</argon-button>
+                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()"> <i
+                    class="bi bi-save-fill" style="color: white;"></i> &nbsp;&nbsp; Save</argon-button>
               </div>
             </div>
             <div class="card-body">
               <p class="text-uppercase text-sm">User Information</p>
               <div class="mb-3 col-md-6">
                 <label for="profileImage" class="form-label">Profile Picture</label>
-                <input type="file" class="form-control" id="profileImage" @change="onImageChange" />
+                <input accept=".jpeg, .png, .jpg" type="file" class="form-control" id="profileImage"
+                  @change="onImageChange($event)" />
               </div>
               <div class="row">
                 <div class="col-md-6">
@@ -105,7 +110,7 @@
                 </div>
                 <div class="col-md-4">
                   <label for="example-text-input" class="form-control-label">Confirm Password</label>
-                  <input class="form-control" type="password" :disabled="!userData.oldPassword"
+                  <input class="form-control" type="password" :disabled="!userData.oldPassword && userData.newPassword"
                     v-model="userData.confirmPassword" />
                 </div>
               </div>
@@ -124,6 +129,7 @@ import setTooltip from "@/assets/js/tooltip.js";
 import ArgonButton from "@/components/ArgonButton.vue";
 import { mapState, mapMutations, mapActions } from "vuex";
 import axios from "axios";
+import Swal from 'sweetalert2';
 import Noty from "noty";
 import router from "@/router";
 import { BASE_URL } from "../config/apiConfig";
@@ -139,12 +145,15 @@ export default {
   data() {
     return {
       showMenu: false,
+      selectedFiles: [],
       userData: {
+        id: '',
         name: '',
         email: '',
         designation: '',
         role: '',
         contact_no: '',
+        profile_pic: '',
         pincode: '',
         password: '',
         oldPassword: '',
@@ -165,7 +174,6 @@ export default {
       this.isFixedNavbar = window.scrollY > 1
     },
     doLogout() {
-      const role = localStorage.getItem('role')
       axios.get(`${BASE_URL}api/logout/`).
         then((r) => {
           if (r.status == 200) {
@@ -175,49 +183,127 @@ export default {
               timeout: 1000,
               layout: 'topCenter'
             }).show()
-            if (role === 'client') {
-              router.push('/client-signin')
-            } else {
-              router.push('/signin')
-            }
+            router.push('/signin')
             this.logout()
           }
         })
     },
     async saveChanges() {
-      if (this.userData.newPassword && this.userData.newPassword !== this.confirmPassword) {
+      try {
+        this.$store.commit('showLoader');
+        const formData = new FormData();
+        console.log("3", this.selectedFiles);
+
+        if (this.userData.oldPassword && this.userData.newPassword !== this.userData.confirmPassword) {
+          new Noty({
+            type: 'error',
+            text: "Confirm Password should be the same as New Password!",
+            timeout: 1000,
+            layout: 'topCenter'
+          }).show();
+          this.$store.commit('hideLoader')
+          return;
+        }
+        formData.append('userID', this.userData.id)
+        formData.append('name', this.userData.name)
+        formData.append('email', this.userData.email)
+        formData.append('designation', this.userData.designation)
+        formData.append('role', this.userData.role)
+        formData.append('contact_no', this.userData.contact_no)
+        formData.append('pincode', this.userData.pincode)
+        formData.append('oldPassword', this.userData.oldPassword)
+        formData.append('newPassword', this.userData.newPassword)
+        formData.append('confirmPassword', this.userData.confirmPassword)
+        if (this.selectedFiles.length) {
+          for (let i = 0; i < this.selectedFiles.length; i++) {
+            formData.append('profile_pic', this.selectedFiles[i])
+          }
+        }
+        const response = await axios.put(`${BASE_URL}api/users/`, formData, {
+          headers: {
+            'Content-Type': "multipart/form-data",
+            token: this.authToken,
+          }
+        });
+        if (response.status == 200) {
+          Swal.fire({
+            title: response.data.message,
+            icon: 'success',
+          })
+          this.userData.oldPassword = ''
+          this.userData.newPassword = ''
+          this.userData.confirmPassword = ''
+          setTimeout(() => {
+          // window.location.reload();
+           
+            new Noty({
+              type: 'info',
+              text: 'Please re-login to see profile changes',
+              timeout: 1000,
+            }).show()
+          }, 100)
+        }
+        this.$store.commit('hideLoader');
+      }
+      catch (error) {
         new Noty({
           type: 'error',
-          text: "Confirm Password should be the same as New Password!",
-          timeout: 1000,
-          layout: 'topCenter'
+          text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader');
+      }
+    },
+    onImageChange(e) {
+      let fileInput = e.target;
+      let file = fileInput.files[0];
+      if (!file) {
+        new Noty({
+          type: 'error',
+          text: 'No file selected.',
+          timeout: 2000,
         }).show();
+        fileInput.value = '';
         return;
       }
-      // console.log(this.userData);
-      // try {
-      //   const response =  await axios.put(`${BASE_URL}api/user`, this.userData)
-      //   console.log(response.data);
-      // } catch (error) {
-      //   console.log(error);
-      // }
-    },
-    onImageChange(event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          this.userData.profileImage = reader.result;
-        };
-        reader.readAsDataURL(file);
+
+      if (!file.type.match('image.*')) {
+        new Noty({
+          type: 'error',
+          text: 'Please select an image file.',
+          timeout: 2000,
+        }).show();
+        fileInput.value = '';
+        return;
       }
+
+      if (file.size > 409600) {
+        new Noty({
+          type: 'error',
+          text: 'Please select an image file less than 400KB.',
+          timeout: 2000,
+        }).show();
+        fileInput.value = '';
+      }
+      this.selectedFiles = [file];
+      console.log(this.selectedFiles);
+    },
+    setUserDataFromLocalStorage() {
+      this.userData.id = this.authUser.id
+      this.userData.name = this.authUser.name
+      this.userData.email = this.authUser.email
+      this.userData.designation = this.authUser.designation
+      this.userData.contact_no = this.authUser.contact_no
+      this.userData.role = this.authUser.role
+      this.userData.pincode = this.authUser.pincode
+      this.userData.profile_pic = this.authUser.profile_pic
     }
   },
   mounted() {
     this.$store.state.isAbsolute = true;
     setNavPills();
     setTooltip();
-    this.userData = { ...this.authUser };
+    this.setUserDataFromLocalStorage();
   },
   beforeMount() {
     this.$store.state.imageLayout = "profile-overview";
@@ -236,5 +322,4 @@ export default {
   }
 };
 </script>
-<style>
-</style>
+<style></style>

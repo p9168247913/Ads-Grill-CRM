@@ -140,21 +140,21 @@ export default {
                 if (result.isConfirmed) {
                     try {
                         // Make an HTTP DELETE request to delete the user
-                        await axios.delete('http://127.0.0.1:8000/api/users/', {
+                        const response = await axios.delete('http://127.0.0.1:8000/api/users/', {
                             params: {
                                 userID: ''
                             }
                         });
-                        Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                        if(response.status === 204){
+                            Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+                        }
                     } catch (error) {
-                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error', error.response.data.message ? error.response.data.message : error.response.data.detail, 'error');
                     }
                 }
             });
         },
-
     },
-
 }
 </script>
   

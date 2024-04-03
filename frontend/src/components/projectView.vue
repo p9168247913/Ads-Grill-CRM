@@ -1,5 +1,7 @@
 <!-- Home.vue -->
+
 <template>
+
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -23,12 +25,14 @@
             </div>
             <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
               <div class="d-grid gap-2" style="display: flex!important; flex-direction: row;">
-                <button type="button" style="width: auto; height: 40px !important;"
+                <button v-if="this.authUser.designation === 'project_manager'" type="button"
+                  style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createProject">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Project
                 </button>
-                <button type="button" style="width: auto; height: 40px !important;"
+                <button v-if="this.authUser.designation === 'project_manager'" @click="getClientRole" type="button"
+                  style="width: auto; height: 40px !important;"
                   class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active" data-bs-toggle="modal"
                   data-bs-target="#createClient">
                   <i class="fas fa-plus-circle text-success text-sm opacity-10"></i>&nbsp; &nbsp;Create Client
@@ -38,16 +42,17 @@
           </div>
         </div>
         <!-- Modal for Create Project -->
-        <div class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="createProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
           <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button ref="modalClose" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody">
-                <form @submit="createProjects($event)">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
+                <form @submit="createProjects($event), resetValues()">
                   <div class="row">
                     <div style="color: black;" class="col-md-6 mb-3">
                       <label for="client_name" class="form-label">Client Name</label>
@@ -61,7 +66,7 @@
                         <!-- <option value="18">Abhishek</option> -->
                         <!-- <option value="Pawan">Pawan</option> -->
                         <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
-                          manager.name }}</option>
+          manager.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -80,8 +85,16 @@
                       <label for="type" class="form-label">Type</label>
                       <select class="form-control" v-model="projectData.type" required>
                         <option value="">Select Type</option>
-                        <option value="ERP">ERP</option>
-                        <option value="CRM">CRM</option>
+                        <option value="RERP">Retail Management System (ERP)</option>
+                        <option value="MERP">Manufacturing Management System (ERP)</option>
+			<option value="CRM">Customer Engagement Platform (CRM)</option>
+			<option value="E-Com">Online Retail Platform (E-Com)</option>
+			<option value="Game_Dev">Interactive Entertainment Solutions (Game_Dev)</option>
+			<option value="WordPress">Dynamic Web Content Management (WordPress)</option>
+			<option value="Magento">E-Commerce Powerhouse (Magento)</option>
+			<option value="Shopify">E-Commerce Simplified (Shopify)</option>
+			<option value="Mobile Application">Mobile Application Solutions</option>
+			<option value="Web Presence">Web Presence Solutions</option>
                         <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
                           tag.name }}</option> -->
                       </select>
@@ -90,9 +103,9 @@
                       <label for="team_lead_id" class="form-label">Team Lead</label>
                       <select class="form-control" v-model="projectData.team_lead_id" required>
                         <option value="">Select Team Lead</option>
-                        <option value="7">Shyam</option>
-                        <!-- <option v-for="(tag, index) in tags" :key="index" :value="tag.name">{{
-                          tag.name }}</option> -->
+                        <!-- <option value="7">Shyam</option> -->
+                        <option v-for="(tag, index) in team_lead" :key="index" :value="tag.id">{{
+          tag.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -113,10 +126,11 @@
                         @change="handleFileChange">
                     </div>
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer"
+                    style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                   </div>
                 </form>
               </div>
@@ -125,15 +139,16 @@
         </div>
 
         <!-- Modal for Edit Project -->
-        <div class="modal fade" ref="createProjectModal" id="editProject" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="editProject" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="editProjects">
           <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Edit Project</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button ref="modalCloseBtn" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:64vh">
                 <form @submit="editProjects($event, updateProjectData.id)">
                   <div class="row">
                     <div style="color: black;" class="col-md-6 mb-3">
@@ -143,23 +158,23 @@
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="reporter_id" class="form-label">Manager</label>
-                      <select class="form-control" v-model="updateProjectData.reporter_id">
+                      <select class="form-control" v-model="updateProjectData.reporter_id" required>
                         <option value="">Select Manager</option>
                         <option v-for="(manager, index) in projectManager" :key="index" :value="manager.id">{{
-                          manager.name }}</option>
+          manager.name }}</option>
                       </select>
                     </div>
                   </div>
                   <div class="row">
                     <div class="col-md-6 mb-3">
                       <label for="name" class="form-label">Project Name</label>
-                      <input style="cursor:not-allowed;" type="text" class="form-control" v-model="updateProjectData.name"
-                        @input="generateKey" required disabled>
+                      <input style="cursor:not-allowed;" type="text" class="form-control"
+                        v-model="updateProjectData.name" @input="generateKey" required disabled>
                     </div>
                     <div class="col-md-6 mb-3">
                       <label for="key" class="form-label">Key</label>
-                      <input style="cursor:not-allowed;" type="text" class="form-control" v-model="updateProjectData.key"
-                        disabled required>
+                      <input style="cursor:not-allowed;" type="text" class="form-control"
+                        v-model="updateProjectData.key" disabled required>
                     </div>
                   </div>
                   <div class="row">
@@ -178,8 +193,8 @@
                       <select class="form-control" v-model="updateProjectData.team_lead_id" required>
                         <option value="">Select Team Lead</option>
                         <!-- <option value="7">Shyam</option> -->
-                        <option v-for="(tag, index) in team_lead" :key="index" :value="tag.id">{{
-                          tag.name }}</option>
+                        <option v-for="(lead, index) in team_lead" :key="index" :value="lead.id">{{
+          lead.name }}</option>
                       </select>
                     </div>
                   </div>
@@ -200,10 +215,11 @@
                         @change="handleUpdateFileChange">
                     </div>
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer"
+                    style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Save</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                   </div>
                 </form>
               </div>
@@ -214,15 +230,16 @@
         <vue-progress-bar :progress="uploadProgress" />
 
         <!-- Modal for Create Client -->
-        <div class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="createClient" tabindex="-1"
           aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createProjects">
           <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
               <div class="modal-header">
                 <h5 class="modal-title" id="createProjectLabel">Create Client</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button ref="createClient" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                  aria-label="Close"></button>
               </div>
-              <div class="modal-body modalBody">
+              <div class="modal-body modalBody" style="padding-bottom: 0; height:34vh">
                 <form @submit="createClient($event), resetValues()">
                   <div class="row">
                     <div class="col-md-6 mb-3">
@@ -244,11 +261,11 @@
                       <input type="text" class="form-control" v-model="clientData.pincode" required>
                     </div>
                   </div>
-
-                  <div class="modal-footer">
+                  <div class="modal-footer"
+                    style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                       @click="resetValues">Close</button>
-                    <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Create</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                   </div>
                 </form>
               </div>
@@ -257,87 +274,92 @@
         </div>
 
         <!--Table-->
-        <div class="card" style="margin-top: 2rem;">
+        <div class="card" style="margin-top: 2rem; padding: 5px;">
           <div class="card-header pb-0">
             <h6>PROJECTS</h6>
           </div>
           <div class="card-body px-0 pt-0 pb-2">
             <div class="table-responsive p-0">
               <table class="table align-items-center mb-0">
-                <thead>
+                <thead style="position: sticky; top: 0; background-color: white; z-index: 2;">
                   <tr>
                     <th style="color: #344767 !important;"
                       class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                       v-for="(head) in headers" :key="head">{{ head }}</th>
+                    <th style="color: #344767 !important;"
+                      class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head">
+                      Actions</th>
                   </tr>
                 </thead>
                 <tbody v-for="(project, index) in paginatedProjects" :key="index">
-                  <tr>
+                  <tr class="tableRow" @click="openProject(project)">
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center project-name">
-                        <h6 style="margin-top: 14px;" @click="openProject(project.id)" class="mb-0 text-sm">{{
-                          project.name ?
-                          limitedTeamMembers(project.name) : '' }}
+                      <div class="d-flex flex-row justify-content-left project-name">
+                        <h6 style="margin-top: 14px;" @click="openProject(project)" class="mb-0 text-sm">{{
+          project.name ?
+            limitedTeamMembers(project.name) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.name && project.name.length > 15" data-bs-toggle="modal"
-                          data-bs-target="#showTeam" @mouseover="openModal(project.name)">
+                          data-bs-target="#showTeam" @click.stop="openModal(project.name)">
                           ...more
                         </p>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.key }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.client.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.type }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.reporter.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center">
+                      <div class="d-flex flex-row justify-content-left">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ project.team_members ?
-                          limitedTeamMembers(project.team_members) : '' }}
+          limitedTeamMembers(project.team_members) : '' }}
                         </h6>
                         <p class="show-more" v-if="project.team_members && project.team_members.length > 15"
-                          data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.team_members)">
+                          data-bs-toggle="modal" data-bs-target="#showTeam"
+                          @click.stop="openModal(project.team_members)">
                           ...more
                         </p>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-row justify-content-center">
+                      <div class="d-flex flex-row justify-content-left">
                         <h6 style="margin-top: 14px;" class="mb-0 text-sm">{{ limitedTeamMembers(project.tech_stacks) }}
                         </h6>
                         <p class="show-more" v-if="project.tech_stacks && project.tech_stacks.length > 15"
-                          data-bs-toggle="modal" data-bs-target="#showTeam" @click="openModal(project.tech_stacks)">
+                          data-bs-toggle="modal" data-bs-target="#showTeam"
+                          @click.stop="openModal(project.tech_stacks)">
                           ...more
                         </p>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">{{ project.team_lead.name }}</h6>
                       </div>
                     </td>
                     <td style="padding-left: 25px;">
-                      <div class="d-flex flex-column justify-content-center">
+                      <div class="d-flex flex-column justify-content-left">
                         <h6 class="mb-0 text-sm">
                           <argon-progress :percentage="project.progress" color="success" />
                         </h6>
@@ -345,29 +367,23 @@
                     </td>
                     <td style="padding-left: 30px;">
                       <div class="d-flex flex-column justify-content-center">
-                        <a v-if="project.attachments.length" @click="getAttachmentUrl($event, project.id)">
+                        <a v-if="project.attachments.length" @click.stop="getAttachmentUrl($event, project.id)">
                           <i class="fas fa-download"></i>
                         </a>
                         <span v-else>No Files</span>
                       </div>
                     </td>
-                    <td class="align-middle" style="margin-left: 15px !important;">
-                      <!-- <i v-if="authUser.role == 'admin'"
-                                            class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
-                                            data-bs-toggle="modal" data-bs-target="#edituser"
-                                            style="margin-left: 20px; cursor: pointer;" @click="handleEditClick"></i>
-                                        <i v-else class="fas fa-pencil-alt text-primary fa-xs pr-4"
-                                            style="color: dodgerblue !important; margin-left: 20px; cursor: not-allowed;"></i> -->
+                    <td class="align-middle d-md-table-cell actions">
 
-                      <!-- <i v-if="authUser.role == 'admin'"
-                                            class="fas fa-trash text-danger m-3 fa-xs delete-icon" style="cursor: pointer;"
-                                            @click="deleteUser" data-toggle="tooltip" data-original-title="Delete user"></i>
-                                        <i v-else class="fas fa-trash text-danger m-3 fa-xs"
-                                            style="cursor: not-allowed;"></i> -->
-                      <i data-bs-toggle="modal" data-bs-target="#editProject" @click="editModal(project)"
-                        class="fas fa-pencil-alt text-primary fa-xs pr-4 edit-icon"
+                      <i v-if="this.authUser.designation === 'project_manager'" data-bs-toggle="modal"
+                        data-bs-target="#editProject" @click.stop="editModal(project)"
+                        class="fas fa-pencil-alt text-primary mx-3 icon"
                         style="margin-left: 20px; cursor: pointer;"></i>
-                      <i @click="deleteProject(project.id)" class="fas fa-trash text-danger m-3 fa-xs delete-icon"
+                      <i v-else @click.stop="notAllowed" class="fas fa-pencil-alt text-primary mx-3 icon"
+                        style="margin-left: 20px; cursor: pointer;"></i>
+                      <i v-if="this.authUser.designation === 'project_manager'" @click.stop="deleteProject(project.id)"
+                        class="fas fa-trash text-danger m-3 mx-3 icon" style="cursor: pointer;"></i>
+                      <i v-else @click.stop="notAllowed" class="fas fa-trash text-danger m-3 mx-3 icon"
                         style="cursor: pointer;"></i>
                     </td>
                   </tr>
@@ -381,8 +397,8 @@
         </div>
 
         <!-- Modal for detailed view -->
-        <div class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1" aria-labelledby="createProjectLabel"
-          aria-hidden="true">
+        <div data-bs-backdrop="static" class="modal fade" ref="createProjectModal" id="showTeam" tabindex="-1"
+          aria-labelledby="createProjectLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
               <span class="close" data-bs-dismiss="modal"
@@ -395,7 +411,7 @@
     </div>
   </div>
 </template>
-    
+
 <script>
 import { BASE_URL } from '../config/apiConfig';
 import axios from 'axios';
@@ -404,7 +420,7 @@ import Swal from 'sweetalert2';
 import { mapState } from 'vuex'
 import vSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-import ArgonProgress from './ArgonProgress.vue'
+import ArgonProgress from './ArgonProgress.vue';
 import VueProgressBar from 'vue-progressbar';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import router from "@/router";
@@ -413,6 +429,7 @@ export default {
   name: "projects",
   data() {
     return {
+      clientRoleID: null,
       currentPage: 1,
       itemsPerPage: 10,
       uploadProgress: 0,
@@ -426,14 +443,11 @@ export default {
       selectedClient: null,
       selectedFiles: [],
       selectedUpdateFiles: [],
-      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Files', 'Actions'],
+      headers: ['S.No.', 'Project Name', 'Key', 'Client Name', 'Type', 'Manager', 'Team Members', 'Technology', 'Team Lead', 'Progress', 'Files'],
       allProjects: [],
       existingKeys: [],
       projectManager: [],
-      team_lead: [{
-        id: 7,
-        name: "Shyam",
-      }],
+      team_lead: [],
       projectData: {
         client_id: '',
         name: '',
@@ -490,6 +504,13 @@ export default {
     }
   },
   methods: {
+    notAllowed() {
+      new Noty({
+        type: 'error',
+        text: "❌ Access denied!! ",
+        timeout: 500,
+      }).show()
+    },
     nextPage() {
       if (this.currentPage * this.itemsPerPage < this.filteredProjects.length) {
         this.currentPage++;
@@ -512,6 +533,33 @@ export default {
         ? teamMembers.substring(0, maxLength) + " "
         : teamMembers;
     },
+    async getClientRole() {
+      try {
+        this.$store.commit('showLoader')
+        let response = await axios.get(`${BASE_URL}api/roles/`);
+        console.log('resp', response);
+        let clientRole = response.data.roles.find((role) => {
+          return role.name == 'client'
+        })
+        console.log('clientRole', clientRole)
+        if (clientRole) {
+          this.$store.commit('hideLoader')
+          this.clientRoleID = clientRole.id
+        }
+        else {
+          this.$store.commit('hideLoader')
+          this.clientRoleID = null;
+        }
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+      this.$store.commit('hideLoader')
+    },
     openModal(teamMembers) {
       this.detailedTeamMembers = teamMembers;
       this.modalOpen = true;
@@ -533,6 +581,19 @@ export default {
         host_address: '',
         attachments: []
       }
+      this.updateProjectData = {
+        id: '',
+        client_id: '',
+        name: '',
+        reporter_id: '',
+        key: '',
+        type: '',
+        team_lead_id: '',
+        tech_stacks: '',
+        host_address: '',
+        status: '',
+        attachments: []
+      }
       this.clientData = {
         client_name: '',
         email: '',
@@ -548,12 +609,12 @@ export default {
             token: this.authToken,
           }
         })
-        this.projectManager = response.data.lead_man;
+        this.projectManager = response.data.project_managers;
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader');
@@ -588,7 +649,8 @@ export default {
         }
       } catch (error) {
         new Noty({
-          text: 'An error occurred',
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show();
       }
@@ -604,19 +666,22 @@ export default {
     },
     async getProjects() {
       try {
-        this.$store.commit('showLoader');
-        const response = await axios.get(`${BASE_URL}api/development/projects`, {
+
+        const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
           headers: {
             'Content-Type': "multipart/form-data",
             token: this.authToken,
           }
         })
-        this.allProjects = response.data.projects;
+        this.$store.commit('showLoader');
+        if (response.status === 200) {
+          this.allProjects = response.data.projects;
+        }
         this.$store.commit('hideLoader');
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader');
@@ -643,11 +708,11 @@ export default {
         formData.append('reporter_id', this.projectData.reporter_id);
         formData.append('host_address', this.projectData.host_address);
         formData.append('tech_stacks', this.projectData.tech_stacks);
+        formData.append('team_lead_id', this.projectData.team_lead_id);
 
         for (let i = 0; i < this.selectedFiles.length; i++) {
           formData.append('attachments', this.selectedFiles[i]);
         }
-        console.log("postData", formData);
         const response = await axios.post(`${BASE_URL}api/development/projects`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
@@ -659,6 +724,7 @@ export default {
           },
         });
         if (response.status === 201) {
+          this.$refs.modalClose.click()
           Swal.fire({
             title: response.data.message,
             icon: 'success',
@@ -670,7 +736,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show();
         this.$store.commit('hideLoader');
@@ -690,7 +756,6 @@ export default {
       try {
         this.$store.commit('showLoader');
         let updateFormData = new FormData();
-        console.log("formData1", updateFormData);
         updateFormData.append('id', this.updateProjectData.id);
         updateFormData.append('client_id', this.updateProjectData.client.id);
         updateFormData.append('name', this.updateProjectData.name);
@@ -717,6 +782,7 @@ export default {
         });
 
         if (response.status === 200) {
+          this.$refs.modalCloseBtn.click()
           Swal.fire({
             title: response.data.message,
             icon: 'success',
@@ -728,14 +794,14 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.response.data.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show();
         this.$store.commit('hideLoader');
       }
     },
     editModal(project) {
-      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id, };
+      this.updateProjectData = { ...project, client_id: project.client.id, reporter_id: project.reporter.id, team_lead_id: project.team_lead.id };
       this.selectedClient = project.client
       this.selectedUpdateFiles = []
       this.isEditModalOpen = true;
@@ -757,12 +823,13 @@ export default {
                 token: this.authToken
               }
             })
-            this.getProjects();
-            Swal.fire('Deleted!', response.data.message, 'success');
+            if (response.status === 204) {
+              this.getProjects();
+              Swal.fire('Deleted!', response.data.message, 'success');
+            }
           } catch (error) {
             this.getProjects();
-            Swal.fire('Deleted!', error.response.data.message, 'success');
-
+            Swal.fire('Deleted!', error.response.data.message ? error.response.data.message : error.response.data.detail, 'success');
           }
         }
       });
@@ -775,45 +842,71 @@ export default {
     },
     async createClient(e) {
       e.preventDefault();
+      this.clientData.role = this.clientRoleID
+      console.log(this.clientData);
       try {
-        const response = await axios.post(`${BASE_URL}api/client/`, this.clientData)
+        this.$store.commit('showLoader');
+        this.clientData.role = this.clientRoleID
+        this.clientData.designation = 'client'
+        const response = await axios.post(`${BASE_URL}api/create/user/`, this.clientData, {
+          headers: {
+            token: this.authToken,
+            "Content-Type": "multipart/form-data",
+          }
+        })
         if (response.status == 201) {
+          this.$refs.createClient.click()
           Swal.fire({
             title: "Client created successfully!",
             icon: 'success',
           })
+          this.resetValues()
+          this.getClients()
         }
-      } catch (error) {
-        new Noty({
-          type: 'error',
-          text: error.message,
-          timeout: 500,
-        }).show()
-      }
-    },
-    // async getLeadsInfo() {
-    //   try {
-    //     const response = await axios.get(`${BASE_URL}api/leadinfo/`)
-    //     this.tags = response.data.leadInfoData['leadTag']
-
-    //   } catch (error) {
-    //     new Noty({
-    //       type: 'error',
-    //       text: error.message,
-    //       timeout: 500,
-    //     }).show()
-    //   }
-    // },
-    async getClients() {
-      try {
-        this.$store.commit('showLoader')
-        const response = await axios.get(`${BASE_URL}api/client/`)
-        this.allClients = response.data.clients
         this.$store.commit('hideLoader')
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.message,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 500,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+    },
+    async getTeamLead() {
+      try {
+        const response = await axios.get(`${BASE_URL}api/development/getTeamLeaders`, {
+          headers: {
+            token: this.authToken
+          }
+        })
+        if (response.status === 200) {
+          this.team_lead = response.data.team_leaders
+        }
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 500,
+        }).show()
+      }
+    },
+    async getClients() {
+      try {
+        this.$store.commit('showLoader')
+        const response = await axios.get(`${BASE_URL}api/client/`, {
+          headers: {
+            token: this.authToken,
+          }
+        })
+        if (response.status === 200) {
+          this.allClients = response.data.clients
+        }
+        this.$store.commit('hideLoader')
+      } catch (error) {
+        new Noty({
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 500,
         }).show()
         this.$store.commit('hideLoader')
@@ -834,10 +927,11 @@ export default {
       let uniqueKey = key ? `${key}_${randomNumber}` : '';
       this.projectData.key = uniqueKey;
     },
-    async openProject(id) {
-      localStorage.setItem('projectId', id)
+    async openProject(project) {
+      localStorage.setItem('projectId', project.id)
+      localStorage.setItem('projectname', project.name)
       try {
-        const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${id}`, {
+        const response = await axios.get(`${BASE_URL}api/development/sprints?key=active_sprint&id=${project.id}`, {
           headers: {
             'Content-Type': "multipart/form-data",
             token: this.authToken,
@@ -850,12 +944,17 @@ export default {
             type: 'warning',
             text: "No active sprints found!!",
             timeout: 2000,
-            position:"top-center"
+            position: "top-center"
           }).show();
           return;
         }
       } catch (error) {
-        console.log(error);
+        new Noty({
+          type: 'error',
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 2000,
+          position: "top-center"
+        }).show();
       }
     }
   },
@@ -863,11 +962,12 @@ export default {
     this.getClients();
     this.getProjectManagers();
     this.getProjects();
+    this.getTeamLead();
   }
 };
 </script>
 
-<style >
+<style>
 :root {
   --vs-line-height: 1.8;
 }
@@ -883,6 +983,18 @@ export default {
 .vs__search,
 .vs__search:focus {
   line-height: var(--vs-line-height);
+}
+
+.icon:hover {
+  transform: scale(1.1);
+}
+
+.tableRow {
+  cursor: pointer;
+}
+
+.tableRow:hover {
+  background-color: rgb(244, 244, 244);
 }
 
 /* Loader styles */
@@ -902,6 +1014,12 @@ export default {
   border: 6px solid #ccc;
   border-color: #ccc transparent #ccc transparent;
   animation: loader 1.2s linear infinite;
+}
+
+.modalBody {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+  height: auto
 }
 
 @keyframes loader {
@@ -961,5 +1079,57 @@ export default {
 
 .show-more:hover {
   cursor: pointer;
+}
+
+.actions {
+  margin-left: 15px !important;
+  position: sticky;
+  right: 0;
+  z-index: 0;
+  background-color: white !important;
+}
+
+.action-head {
+  position: sticky;
+  right: 0;
+  z-index: 999;
+  background-color: white !important;
+}
+
+@media (max-width: 576px) {
+  .actions {
+    margin-left: 15px !important;
+    z-index: 1;
+    position: relative;
+  }
+
+  .action-head {
+    position: relative;
+
+    z-index: 1;
+  }
+
+  .modal-dialog {
+    max-width: 99%;
+    margin: auto;
+  }
+
+  .sprint-card {
+    gap: 40px;
+  }
+}
+
+@media (min-width: 577px) and (max-width: 992px) {
+  .modal-dialog {
+    max-width: 80%;
+    margin: auto;
+  }
+}
+
+@media (min-width: 993px) {
+  .modal-dialog {
+    max-width: 50%;
+    margin: auto;
+  }
 }
 </style>
