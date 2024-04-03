@@ -305,7 +305,7 @@
                                     item.name }}</option> -->
                             </select>
                             <button @click="downloadReport($event)" type="button"
-                            v-if="this.selectedEmployee && this.start_date && this.end_date"
+                                v-if="this.selectedEmployee && this.start_date && this.end_date"
                                 style="width: auto; height: 40px !important;"
                                 class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
                                 <i class="bi bi-download"></i>
@@ -316,7 +316,7 @@
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
-                                <thead  style="position: sticky;  top: 0; background-color: whitesmoke; z-index: 1">
+                                <thead style="position: sticky;  top: 0; background-color: whitesmoke; z-index: 1">
                                     <tr>
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold action-head"
@@ -433,13 +433,13 @@ export default {
             currentPage: 1,
             itemsPerPage: 10,
             designations: {
-                "development": ['FE_Developer', 'BE_Developer', 'Full_Stack_Developer', 'Team_Lead', 'Project_Manager', 'Tester', 'Dev_Ops_Engineer', 'Product_Manager', 'QA_Engineer', 'UI_Designer','Junior_Web_Developer','Web_Developer','App_Developer', 'Software_Architecture'],
+                "development": ['FE_Developer', 'BE_Developer', 'Full_Stack_Developer', 'Team_Lead', 'Project_Manager', 'Tester', 'Dev_Ops_Engineer', 'Product_Manager', 'QA_Engineer', 'UI_Designer', 'Junior_Web_Developer', 'Web_Developer', 'App_Developer', 'Software_Architecture'],
                 "sales": ["Sales_Manager", "Sales_Associate"],
-		"leads":["Leads_Manager", "Leads_Associate", "Marketing_Manager"],
+                "leads": ["Leads_Manager", "Leads_Associate", "Marketing_Manager"],
                 "client": ["Client"],
                 'admin': ['Admin'],
-		"super_admin":["super_admin"],
-		"hr":["hr"]
+                "super_admin": ["super_admin"],
+                "hr": ["hr"]
             }
         }
     },
@@ -476,7 +476,7 @@ export default {
                 return 'download.zip';
             }
         },
-        async downloadReport(e) { 
+        async downloadReport(e) {
             e.preventDefault()
             const date_range = {
                 start_date: this.start_date,
@@ -507,10 +507,10 @@ export default {
                         title: `Downloaded successfully!`,
                         icon: 'success',
                     });
-                    this.start_date="";
-                    this.end_date="";
+                    this.start_date = "";
+                    this.end_date = "";
                     this.$store.commit('hideLoader');
-                    this.selectedEmployee="";
+                    this.selectedEmployee = "";
                 }
                 this.$store.commit('hideLoader')
             } catch (error) {
@@ -772,6 +772,7 @@ export default {
                     headers: { token: this.authToken },
                 },
                 )
+                console.log(response);
                 if (response.status == 200) {
                     this.users = response.data.users
                 }

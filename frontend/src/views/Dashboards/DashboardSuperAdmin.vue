@@ -81,6 +81,21 @@
             </div> -->
         </div>
     </div>
+    <div class="container" style="background-color: white; border-radius: 10px; padding-bottom: 0;">
+        <h5>MANAGERS</h5>
+        <div class="row" style="padding: 10px;">
+            <div class="col-lg-3 col-md-6 col-sm-12 mb-4" v-for="(manager, index) in managers" :key="index">
+                <div class="card p-1" style="align-items: center; height: 250px; border: 1px solid red;">
+                    <img :src="'data:image/jpeg;base64,' + manager.profile_pic" class="card-img-top" alt="Manager Image"
+                        style="width: 130px; height: 130px; border: 1px solid red;">
+                    <div class="card-body" style="border: 1px solid red; padding-bottom: 0; padding-top: 1">
+                        <h5 class="card-title" style="text-align: center;">{{ manager.name }}</h5>
+                        <p class="card-text" style="text-align: center;">{{ manager.designation }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
 import Card from "@/examples/Cards/Card.vue";
@@ -165,7 +180,19 @@ export default {
                 },
             },
             currentPage: 1,
-            managers:[]
+            // managers: [],
+            // managers: [
+            //     { name: 'Manager 1', designation: 'Project Manager', image: 'manager1.jpg' },
+            //     { name: 'Manager 2', designation: 'Team Lead', image: 'manager2.jpg' },
+            //     { name: 'Manager 3', designation: 'HR Manager', image: 'manager3.jpg' },
+
+            //     { name: 'Manager 1', designation: 'Project Manager', image: 'manager1.jpg' },
+            //     { name: 'Manager 2', designation: 'Team Lead', image: 'manager2.jpg' },
+            //     { name: 'Manager 3', designation: 'HR Manager', image: 'manager3.jpg' },
+            //     { name: 'Manager 1', designation: 'Project Manager', image: 'manager1.jpg' },
+            //     { name: 'Manager 2', designation: 'Team Lead', image: 'manager2.jpg' },
+            //     { name: 'Manager 3', designation: 'HR Manager', image: 'manager3.jpg' },
+            // ]
         }
     },
     components: {
@@ -212,7 +239,7 @@ export default {
                 })
                 this.$store.commit('showLoader');
                 if (response.status === 200) {
-                    this.stats.users.value = response.data.projects.length;
+                    this.stats.users.value = response?.data?.projects?.length;
                 }
                 this.$store.commit('hideLoader');
             } catch (error) {
@@ -233,7 +260,7 @@ export default {
                 })
                 if (response.status === 200) {
                     console.log(response);
-                    // this.managers=reapons
+                    this.managers = response.data.manager_data;
                 }
             } catch (error) {
                 new Noty({
@@ -251,3 +278,26 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+.card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.card-img-top {
+    width: 100%;
+    height: auto;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 1rem;
+}
+</style>
