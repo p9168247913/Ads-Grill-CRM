@@ -96,8 +96,25 @@ class IssueView(CsrfExemptMixin, APIView):
 
             if Issue.objects.filter(title=title, project=project_id, sprint = sprint_id).exists():
                 return JsonResponse({"message": "Issue with this title already exists"})
-                
+                         
+            days=0
             issue_exp_duration = convert_to_duration(exp_duration)
+            
+            days+=issue_exp_duration.days
+            seconds=issue_exp_duration.seconds
+             
+            if seconds > 27000:
+                while seconds > 27000:
+                    days+=1
+                    seconds-=27000
+                
+            hours = seconds // 3600
+            remaining_seconds = seconds % 3600
+            minutes = remaining_seconds // 60
+            
+            updated_exp_duration = f'{days}d {hours}h {minutes}m'
+            issue_exp_duration=convert_to_duration(updated_exp_duration)
+            
             existing_issue_duration=Issue.objects.filter(sprint=sprint_instance).aggregate(Sum('exp_duration'))['exp_duration__sum']
             if existing_issue_duration:
                 existing_issue_duration = existing_issue_duration
@@ -126,7 +143,7 @@ class IssueView(CsrfExemptMixin, APIView):
                     description=description,
                     type=type,
                     priority=priority,
-                    exp_duration=exp_duration
+                    exp_duration=issue_exp_duration
                 )
               
                 attachment_file_names = []
@@ -573,7 +590,7 @@ class downloadUserWorkReport(APIView):
             wb.save(output)
             output.seek(0)
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename="{user_instance.name}_report.xlsx.xlsx"'
+            response['Content-Disposition'] = f'attachment; filename={user_instance.name}_report.xlsx'
             response.write(output.getvalue())
         
         except Issue.DoesNotExist:

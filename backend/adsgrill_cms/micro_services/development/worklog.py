@@ -90,11 +90,14 @@ class WorklogView(CsrfExemptMixin, APIView):
             checkDays = issue_instance.exp_duration - (saved_logged_time)
             if checkDays.days:
                 upd_logged_time = convert_to_duration(logged_time)+convert_to_duration('16h 30m 0s')
-            else:
+            else:    
                 upd_logged_time = convert_to_duration(logged_time)
+
             remaining_time = issue_instance.exp_duration-(saved_logged_time+upd_logged_time)
-            if remaining_time < timedelta(0):
+            print("remaining time",saved_logged_time+upd_logged_time)
+            if remaining_time <= timedelta(0):
                 remaining_time = timedelta(0)
+            
             with transaction.atomic():
                 worklog_instance = WorkLog.objects.create(
                     sprint=sprint_instance,
@@ -131,28 +134,44 @@ class WorklogView(CsrfExemptMixin, APIView):
     def get(self, request):
         try:
             issue_id = request.GET.get('issue_id')
+
             issue_instance = Issue.objects.get(pk=issue_id)
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
             if worklogs:
                 saved_logged_time = worklogs.aggregate(Sum('logged_time'))['logged_time__sum']
                 extra_efforts = worklogs.aggregate(Sum('extra_efforts'))['extra_efforts__sum']
                 remaining_time = issue_instance.exp_duration - saved_logged_time
+                
+                if remaining_time < timedelta(days=1) and remaining_time > timedelta(hours=16,minutes=30):
+                    remaining_time -= timedelta(hours=16, minutes=30)
+                    
+                if saved_logged_time < timedelta(days=1) and saved_logged_time > timedelta(hours=16,minutes=30):
+                    saved_logged_time -= timedelta(hours=16, minutes=30)
+                                
                 if remaining_time < timedelta(0):
                     remaining_time = timedelta(0)
-                worklogs = [{
-                    'id':worklog.pk,
-                    "author": worklog.author.name,
-                    "issue": worklog.issue.pk,
-                    "description": worklog.description,
-                    "logged_time": worklog.logged_time,
-                    "extra_efforts":worklog.extra_efforts,
-                    "status":worklog.issue.status,
-                    "created_at": worklog.created_at,
-                    "remaining_time":worklog.remaining_time,
-                    "attachments": worklog.attachment
-                } for worklog in worklogs]
+                worklogData = []
+                for worklog in worklogs:
+                    if worklog.logged_time > convert_to_duration('16h 30m 0s'):
+                        print('true', worklog.id)
+                        loggedTime = worklog.logged_time - convert_to_duration('16h 30m 0s')
+                    else:
+                        loggedTime = worklog.logged_time
+                    log = {
+                        'id':worklog.pk,
+                        "author": worklog.author.name,
+                        "issue": worklog.issue.pk,
+                        "description": worklog.description,
+                        "logged_time": loggedTime,
+                        "extra_efforts":worklog.extra_efforts,
+                        "status":worklog.issue.status,
+                        "created_at": worklog.created_at,
+                        "remaining_time":worklog.remaining_time,
+                        "attachments": worklog.attachment
+                    }
+                    worklogData.append(log)
                 time_tracking = {'total_logged_time':saved_logged_time, 'actual_remaining_time':remaining_time, 'extra_efforts':extra_efforts}
-                response = JsonResponse({"worklogs": worklogs, 'time_tracking':time_tracking}, status=status.HTTP_200_OK)
+                response = JsonResponse({"worklogs": worklogData, 'time_tracking':time_tracking}, status=status.HTTP_200_OK)
             else:
                 response = JsonResponse({"message":"No worklogs found for this issue", "worklogs":[]})
         except Issue.DoesNotExist:
