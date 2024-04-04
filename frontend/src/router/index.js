@@ -15,6 +15,7 @@ import IssuesPage from '../components/Issues/IssuesPage.vue'
 import Backlogs from '../components/Backlogs/BackLogs.vue'
 import ActiveSprint from '../components/ActiveSprint/ActiveSprint.vue'
 import ClientSignin from '.././views/ClientSignin.vue'
+import Template from '../components/Template/Template.vue'
 
 const routes = [
   {
@@ -102,6 +103,11 @@ const routes = [
     path: "/employees/:val",
     name: 'Employees/',
     component: GetEmployee,
+  },
+  {
+    path: "/templates",
+    name: 'Templates',
+    component: Template,
   },
 ];
 
