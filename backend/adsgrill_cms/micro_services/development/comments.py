@@ -1,4 +1,4 @@
-from app.models import Project, Issue, Users, Sprint, Comment, LinkedIssue
+from app.models import Project, Issue, Users, Sprint, Comment, LinkedIssue, Users
 from rest_framework.views import APIView
 from rest_framework import status
 import os
@@ -10,9 +10,13 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from braces.views import CsrfExemptMixin
+from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 from io import BytesIO
 import zipfile
 import uuid
+import threading
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -28,6 +32,15 @@ class CustomSessionAuthentication(SessionAuthentication):
 class CommentsView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+    def send_comment_details(self, to_email, from_email, commentInstance):
+        local_time=commentInstance.created_at.astimezone(timezone.get_current_timezone())
+        time=local_time.strftime('%d-%m-%y  %H:%M:%S')
+        subject = f'(comment) {commentInstance.issue.key}'
+        message = f'Tagged_by : {from_email}\n \n Description : {commentInstance.description}'
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient = [to_email]
+        send_mail(subject,message,from_email, recipient)
 
     def post(self, request):
         try:
@@ -87,6 +100,33 @@ class CommentsView(CsrfExemptMixin, APIView):
                     if attachment_file_names:
                         commentInstance['attachment'] = attachment_file_names
                     commentInstance = Comment.objects.create(**commentInstance)
+                if requestData.get('desc'):
+                    current_user = request.user.email
+                    commentDesc = requestData.get('desc')
+                    if '.com' in commentDesc:
+                        emails = []
+                        substring = ''
+                        start_index = 0
+                        end_index = 0
+                        while True:
+                            index = commentDesc.find('.com', start_index)
+                            if index != -1:
+                                start_index = commentDesc.rfind(" ", 0, index) + 1
+                                end_index = commentDesc.find(" ", index)
+                                if end_index == -1:
+                                    substring = commentDesc[start_index:]
+                                else:
+                                    substring = commentDesc[start_index:end_index]
+                                emails.append(substring)
+                                start_index = index + len('.com')
+                            else:
+                                break
+                        for email in emails:
+                            valid_users = Users.objects.filter(email=email)
+                            for user in valid_users:
+                                if email == user.email:
+                                    send_email = threading.Thread(target=self.send_comment_details, args=((email, currentUser, commentInstance)))
+                                    send_email.start()
             else:
                 return JsonResponse({"message":"You dont have access to comment on other's issues"})
         except IndentationError as i:

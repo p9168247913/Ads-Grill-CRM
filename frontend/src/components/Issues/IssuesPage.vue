@@ -604,7 +604,7 @@
                                             <!-- Comment Section Button -->
                                             <i title="Comments" class="fas fa-comment text-info fa-md mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#comments"
-                                                @click="sendDataToComments(issue.id, issue.sprint.id)"
+                                                @click="sendDataToComments(issue.id, issue.sprint.id), getDevUsers()"
                                                 style="cursor: pointer;"></i>
 
                                             <!-- Worklog Section Button -->
@@ -1508,6 +1508,9 @@ export default {
         },
         getWorkLogs() {
             this.$refs.workLogView.getWorkLogs()
+        },
+        getDevUsers(){
+            this.$refs.commentsView.getDevUsers()
         }
     },
     mounted() {

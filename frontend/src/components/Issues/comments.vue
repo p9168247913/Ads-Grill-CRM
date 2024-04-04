@@ -41,10 +41,15 @@
                             <div v-if="filterKey" class="row mt-3">
                                 <!-- <button>open</button> -->
                                 <div class="col-md-10 mb-3">
-                                    <textarea v-model="commentDesc" ref="doComment" @input="checkForAtSymbol"
+                                    <textarea v-model="commentDesc" ref="doComment" @input="checkMail()"
                                         style="height: 40px; resize: none; max-height: auto;"
                                         placeholder=" Add Comments..." type="text" class="form-control"
                                         required></textarea>
+                                        <div class="col-md-4">
+                                    <ul v-if="showEmailSelector" name="emailSelector" id="emailSelector">
+                                        <li @click="selectEmail(item.email)" v-for="item in devUsers" :key="item.id" :value="item.email">{{ item.email }}</li>
+                                    </ul>
+                                </div>
                                 </div>
 
                                 <!-- <div >
@@ -177,7 +182,8 @@ export default {
             postselectedFiles: [],
             editselectedFiles: [],
             showModal: false,
-            employees: []
+            devUsers: [],
+            showEmailSelector:false
         }
     },
     computed: {
@@ -203,6 +209,9 @@ export default {
         getDataFromIssuePage(issueID, sprintID) {
             this.sprintID = sprintID
             this.issueID = issueID
+        },
+        getDevUsersFromIssuePage(devUsers){
+            this.devUsers = devUsers
         },
         // handleKeyDown(e) {
         //     if (e.key === 'C' && !this.isCommentFocused) {
@@ -421,15 +430,43 @@ export default {
             this.postselectedFiles = []
             this.editselectedFiles = []
             this.commentDesc = ''
+            this.showEmailSelector=false
         },
-        checkForAtSymbol(event) {
-            const text = event.target.value;
-            if (text.includes('@')) {
-                console.log("OPEN");
-                this.showModal = true;
-
+        async getDevUsers(){
+            try {
+                const response = await axios.get(`${BASE_URL}api/users/?role=development`, {
+                    headers: {
+                        token: this.authToken
+                    },
+                });
+                if (response && response.status === 200 && response.data) {
+                    this.devUsers = response.data.users
+                }
+                console.log("allUsers", this.devUsers)
+            } catch (error) {
+                new Noty({
+                    type: "error",
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 500,
+                }).show();
             }
+        },
+        checkMail() {
+        let value = this.commentDesc;
+        if (value.slice(-1) == '@') { 
+          this.showEmailSelector = true;
         }
+        else{
+          this.showEmailSelector =false;
+        }
+      },
+      selectEmail(email) {
+        let content = this.commentDesc
+        content =content.slice(0, -1)+' '+email+" "
+        this.commentDesc=content
+        this.showEmailSelector = false
+        this.$refs.doComment.focus()
+ }
     },
     mounted() {
         document.addEventListener('keydown', this.handleKeyDown)
