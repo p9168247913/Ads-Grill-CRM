@@ -63,18 +63,21 @@ class WorklogView(CsrfExemptMixin, APIView):
         try:
             requestData = request.data
             issue_instance = Issue.objects.get(pk=requestData.get('issue_id'))
-            
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
+            logged_time = requestData.get('logged_time')
             if worklogs:
-                lastWorklogRemainingTime = worklogs.first().remaining_time
-                if lastWorklogRemainingTime <= timedelta(0):
+                total_time=worklogs.aggregate(Sum("logged_time"))["logged_time__sum"]+convert_to_duration(logged_time)
+                issue_exp_time=issue_instance.exp_duration
+                if issue_exp_time-total_time < timedelta(0):
+                # lastWorklogRemainingTime = worklogs.first().remaining_time
+                # if lastWorklogRemainingTime <= timedelta(0):
                     return JsonResponse({"message":"You can't add more logs because of issue expected duration ends"}, status=status.HTTP_400_BAD_REQUEST)
             if 'sprint_id' not in requestData and 'logged_time' not in requestData and 'issue_id' not in requestData:
                 return JsonResponse({'message': 'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
             sprint_instance = Sprint.objects.get(pk=requestData.get('sprint_id'))
             
             assignee_instance = request.user
-            logged_time = requestData.get('logged_time')
+            
             attachments = request.FILES.getlist('attachments', [])
             if issue_instance and issue_instance.assignee and issue_instance.assignee != assignee_instance and issue_instance.assignee.designation !='project_manager':
                 return JsonResponse({"message": "You don't have access to log time on other's issue (Invalid user)"}, status=status.HTTP_400_BAD_REQUEST)
@@ -193,8 +196,17 @@ class WorklogView(CsrfExemptMixin, APIView):
             issue_instance = upd_worklog.issue
             worklogs = WorkLog.objects.filter(issue=issue_instance).order_by('-created_at')
             
-            if worklogs.filter(remaining_time__lte =timedelta(0)):
-                return JsonResponse({"message":"can not update time as remaining time is zero"})
+            
+            if worklogs:
+                total_time=worklogs.exclude(pk=upd_worklog.pk).aggregate(Sum("logged_time"))["logged_time__sum"]+convert_to_duration(logged_time)
+                issue_exp_time=issue_instance.exp_duration
+                if issue_exp_time-total_time < timedelta(0):
+                # lastWorklogRemainingTime = worklogs.first().remaining_time
+                # if lastWorklogRemainingTime <= timedelta(0):
+                    return JsonResponse({"message":"You can't add more logs because of issue expected duration ends"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # if worklogs.filter(remaining_time__lte =timedelta(0)):
+            #     return JsonResponse({"message":"can not update time as remaining time is zero"})
             if upd_worklog.created_at.date() != datetime.now().date() and logged_time:
                 return JsonResponse({"message": "You can update the logged time only on the same day as the post day"}, status=status.HTTP_400_BAD_REQUEST)
             if logged_time and convert_to_duration(logged_time) > convert_to_duration('7h 30m 0s'):
