@@ -59,7 +59,8 @@
             </sidenav-item>
           </li>
 
-          <li class=" " v-if="authUser.role !== 'development' && authUser.role !== 'leads'  && authUser.role !== 'sales'">
+          <li class=" "
+            v-if="authUser.role !== 'development' && authUser.role !== 'leads' && authUser.role !== 'sales'">
             <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="{ 'active': getRoute() === 'hrms' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
 
@@ -95,7 +96,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads'  && authUser.role !== 'sales'">
+      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales'">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
 
@@ -144,8 +145,7 @@
       </li>
 
       <!-- Sales -->
-      <li
-        v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
+      <li v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
         class="nav-item">
         <sidenav-item url="/sales" :class="getRoute() === 'billing' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الفواتیر' : 'Sales'">
@@ -190,6 +190,17 @@
         </sidenav-item>
       </li>
 
+      <!-- Templates -->
+      <li class="nav-item">
+        <sidenav-item url="/templates" :class="getRoute() === 'templates' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Templates'
+      ">
+
+          <template v-slot:icon>
+            <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
       <li class="mt-3 nav-item">
         <h6 v-if="this.$store.state.isRTL" class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="this.$store.state.isRTL ? 'me-4' : 'ms-2'">
@@ -209,6 +220,8 @@
           </template>
         </sidenav-item>
       </li>
+
+
     </ul>
     <ul class="navbar-nav" v-else>
       <li class="nav-item">
