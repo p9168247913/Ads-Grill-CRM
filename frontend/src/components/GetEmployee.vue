@@ -19,7 +19,7 @@
                                     <i class="fas fa-search" aria-hidden="true"></i>
                                 </span>
                                 <input type="text" v-model="searchTerm" class="form-control"
-                                    placeholder="Search by name, role, designation or number..." />
+                                    placeholder="Search by name, email, designation or number..." />
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-6 col-sm-12 d-flex justify-content-lg-end justify-content-md-end">
@@ -59,11 +59,11 @@
                         <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody"
-                                style="padding-bottom: 0; height:52vh; border: 1px solid red;">
+                                style="padding-bottom: 0; height:22vh;">
                                 <form @submit="createRole($event)">
                                     <div class="mb-3">
                                         <label for="roleName" class="form-label">Role Name</label>
@@ -89,11 +89,11 @@
                         <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create Admin</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody"
-                                style="padding-bottom: 0; height:52vh; border: 1px solid red;">
+                                style="padding-bottom: 0; height:52vh; ">
                                 <form @submit="createUser($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -328,7 +328,7 @@
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex">
                                                 <div>
-                                                    <img :src="'data:image/jpeg;base64,' + user.profile_pic"
+                                                    <img :src="getProfilePic(user)"
                                                         class="avatar avatar-sm me-3 rounded-circle" />
                                                 </div>
                                             </div>
@@ -450,7 +450,7 @@ export default {
             return this.users.filter(user => {
                 return (
                     user.name.toLowerCase().includes(searchLowerCase) ||
-                    user.role.toLowerCase().includes(searchLowerCase) ||
+                    user.email.toLowerCase().includes(searchLowerCase) ||
                     user.designation.toLowerCase().includes(searchLowerCase) ||
                     user.contact_no.toLowerCase().includes(searchLowerCase)
                 );
@@ -466,6 +466,9 @@ export default {
         }
     },
     methods: {
+        getProfilePic(manager) {
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "https://www.kindpng.com/picc/m/78-786678_avatar-hd-png-download.png";
+        },
         extractFilename(response) {
             const contentDisposition = response.headers['content-disposition'];
             if (contentDisposition) {

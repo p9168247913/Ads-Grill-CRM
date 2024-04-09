@@ -1,34 +1,41 @@
 <template>
-    <!-- <h1>Dashboard Lead</h1> -->
-    <div class="row">
-        <div class="col-lg-12">
-            <!-- <h1>Leads</h1> -->
-            <div class="row">
-                <div class="col-lg-4 col-md-6 col-12">
-                    <card :title="stats.money.title" :value="stats.money.value" :percentage="stats.money.percentage"
-                        :iconClass="stats.money.iconClass" :iconBackground="stats.money.iconBackground"
-                        :detail="stats.money.detail" directionReverse></card>
-                </div>
-                <div class="col-lg-4 col-md-6 col-12">
-                    <card :title="stats.users.title" :value="stats.users.value" :percentage="stats.users.percentage"
-                        :iconClass="stats.users.iconClass" :iconBackground="stats.users.iconBackground"
-                        :detail="stats.users.detail" directionReverse></card>
-                </div>
-                <div class="col-lg-4 col-md-6 col-12">
-                    <card :title="stats.clients.title" :value="stats.clients.value"
-                        :percentage="stats.clients.percentage" :iconClass="stats.clients.iconClass"
-                        :iconBackground="stats.clients.iconBackground" :percentageColor="stats.clients.percentageColor"
-                        :detail="stats.clients.detail" directionReverse>
-                    </card>
-                </div>
-                <!-- <div class="col-lg-3 col-md-6 col-12">
-                    <card :title="stats.sales.title" :value="stats.sales.value" :percentage="stats.sales.percentage"
-                        :iconClass="stats.sales.iconClass" :iconBackground="stats.sales.iconBackground"
-                        :detail="stats.sales.detail" directionReverse></card>
-                </div> -->
-            </div>
+    <div class="wrapper" style="margin-bottom: 80px; padding: 0; ">
+        <div class="content-page">
+            <!-- <h1>Dashboard Lead</h1> -->
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <!-- <h1>Leads</h1> -->
+                        <div class="row">
+                            <div style="cursor: pointer;" class="col-lg-4 col-md-6 col-12" @click="redirect('lead')">
+                                <card :title="stats.money.title" :value="stats.money.value"
+                                    :percentage="stats.money.percentage" :iconClass="stats.money.iconClass"
+                                    :iconBackground="stats.money.iconBackground" :detail="stats.money.detail"
+                                    directionReverse></card>
+                            </div>
+                            <div style="cursor: pointer;" class="col-lg-4 col-md-6 col-12" @click="redirect('pro')">
+                                <card :title="stats.users.title" :value="stats.users.value"
+                                    :percentage="stats.users.percentage" :iconClass="stats.users.iconClass"
+                                    :iconBackground="stats.users.iconBackground" :detail="stats.users.detail"
+                                    directionReverse></card>
+                            </div>
+                            <div style="cursor: pointer;" class="col-lg-4 col-md-6 col-12" @click="redirect('deve')">
+                                <card :title="stats.clients.title" :value="stats.clients.value"
+                                    :percentage="stats.clients.percentage" :iconClass="stats.clients.iconClass"
+                                    :iconBackground="stats.clients.iconBackground"
+                                    :percentageColor="stats.clients.percentageColor" :detail="stats.clients.detail"
+                                    directionReverse>
+                                </card>
+                            </div>
+                            <!-- <div class="col-lg-3 col-md-6 col-12">
+                                <card :title="stats.sales.title" :value="stats.sales.value"
+                                    :percentage="stats.sales.percentage" :iconClass="stats.sales.iconClass"
+                                    :iconBackground="stats.sales.iconBackground" :detail="stats.sales.detail"
+                                    directionReverse></card>
+                            </div> -->
+                        </div>
 
-            <!-- <div class="row mt-4">
+                        <!-- <div class="row mt-4">
                 <div class="col-lg-7 mb-lg-0 mb-4">
                     <div class="card">
                         <div class="p-3 pb-0 card-header">
@@ -79,18 +86,28 @@
                     <categories-card />
                 </div>
             </div> -->
-        </div>
-    </div>
-    <div class="container" style="background-color: white; border-radius: 10px; padding-bottom: 0;">
-        <h5>MANAGERS</h5>
-        <div class="row" style="padding: 10px;">
-            <div class="col-lg-3 col-md-6 col-sm-12 mb-4" v-for="(manager, index) in managers" :key="index">
-                <div class="card p-1" style="align-items: center; height: 250px; border: 1px solid red;">
-                    <img :src="'data:image/jpeg;base64,' + manager.profile_pic" class="card-img-top" alt="Manager Image"
-                        style="width: 130px; height: 130px; border: 1px solid red;">
-                    <div class="card-body" style="border: 1px solid red; padding-bottom: 0; padding-top: 1">
-                        <h5 class="card-title" style="text-align: center;">{{ manager.name }}</h5>
-                        <p class="card-text" style="text-align: center;">{{ manager.designation }}</p>
+                    </div>
+                </div>
+                <div class="card" style="background-color: white; border-radius: 10px; padding: 10px;">
+                    <h5>MANAGERS</h5>
+                    <div class="row" style="padding: 10px; ">
+                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" v-for="(manager, index) in managers" :key="index">
+                            <div class="card p-1"
+                                style="height: 140px; display: flex; flex-direction: row; gap: 5px; overflow: auto;">
+                                <img :src="getProfilePic(manager)" alt="Manager Image"
+                                    style="width: 130px; height: 130px; border-radius: 5px;">
+                                <div class="card-body" style="padding-bottom: 0; padding-top: 1">
+                                    <p class="card-title" style="font-weight: bold; font-size: 15px">{{ manager.name }}
+                                    </p>
+                                    <p class="card-text" style="font-size: 13px">{{ manager.designation ===
+                                'project_manager' ? "Project Manager" : manager.designation === 'sales_manager'
+                                ?
+                                "Sales Manager" : manager.designation === 'lead_manager'
+                                    ?
+                                    "Lead Manager" : manager.designation }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -110,6 +127,7 @@ import BR from "@/assets/img/icons/flags/BR.png";
 import axios from 'axios';
 import { BASE_URL } from '../../config/apiConfig';
 import { mapState } from 'vuex';
+import router from "@/router";
 
 export default {
     data() {
@@ -132,7 +150,7 @@ export default {
                     detail: "",
                 },
                 clients: {
-                    title: "Unassigned Leads",
+                    title: "Total Employees",
                     value: "",
                     percentage: "",
                     iconClass: "ni ni-paper-diploma",
@@ -180,19 +198,7 @@ export default {
                 },
             },
             currentPage: 1,
-            // managers: [],
-            // managers: [
-            //     { name: 'Manager 1', designation: 'Project Manager', image: 'manager1.jpg' },
-            //     { name: 'Manager 2', designation: 'Team Lead', image: 'manager2.jpg' },
-            //     { name: 'Manager 3', designation: 'HR Manager', image: 'manager3.jpg' },
-
-            //     { name: 'Manager 1', designation: 'Project Manager', image: 'manager1.jpg' },
-            //     { name: 'Manager 2', designation: 'Team Lead', image: 'manager2.jpg' },
-            //     { name: 'Manager 3', designation: 'HR Manager', image: 'manager3.jpg' },
-            //     { name: 'Manager 1', designation: 'Project Manager', image: 'manager1.jpg' },
-            //     { name: 'Manager 2', designation: 'Team Lead', image: 'manager2.jpg' },
-            //     { name: 'Manager 3', designation: 'HR Manager', image: 'manager3.jpg' },
-            // ]
+            managers: [],
         }
     },
     components: {
@@ -205,6 +211,12 @@ export default {
         ...mapState(['authUser', 'authToken']),
     },
     methods: {
+        redirect(parameter) {
+            parameter === 'deve' ? router.push('/employees/development') : parameter === 'pro' ? router.push('/projects') : parameter === 'lead' ? router.push('/leads') : router.push('/dashboard')
+        },
+        getProfilePic(manager) {
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "https://www.kindpng.com/picc/m/78-786678_avatar-hd-png-download.png";
+        },
         async getLeads() {
             let queryParams = {
                 page_no: this.currentPage ? this.currentPage : 1,
@@ -217,8 +229,6 @@ export default {
                 })
                 if (response.status === 200) {
                     this.stats.money.value = response?.data?.lead_data?.total_leads
-                    this.stats.users.value = response?.data?.lead_data?.assigned_leads
-                    this.stats.clients.value = response?.data?.lead_data?.unassigned_leads
                 }
             } catch (error) {
                 new Noty({
@@ -259,8 +269,25 @@ export default {
                     }
                 })
                 if (response.status === 200) {
-                    console.log(response);
                     this.managers = response.data.manager_data;
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error,
+                    timeout: 500,
+                }).show()
+            }
+        },
+        async getEmployees() {
+            try {
+                const response = await axios.get(`${BASE_URL}api/users/?role=client`, {
+                    headers: {
+                        token: this.authToken,
+                    }
+                })
+                if (response.status === 200) {
+                    this.stats.clients.value = response.data.employee_count;
                 }
             } catch (error) {
                 new Noty({
@@ -275,6 +302,7 @@ export default {
         this.getLeads();
         this.getProjects();
         this.getAllManagers();
+        this.getEmployees();
     }
 }
 </script>
