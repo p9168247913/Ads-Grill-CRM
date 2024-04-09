@@ -1,7 +1,5 @@
 <template>
-
     <head>
-        <!-- Include necessary CSS files -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
@@ -52,30 +50,6 @@
                                 </div>
                                 </div>
 
-                                <!-- <div >
-                                    <ul>
-                                        <li></li>
-                                    </ul>
-                                </div> -->
-                                
-                                <!-- <div class="modal fade" id="employeeModal" tabindex="-1"
-                                    aria-labelledby="employeeModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="employeeModalLabel">Employee List</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <ul>
-                                                    <li v-for="employee in employees" :key="employee.id">{{
-                        employee.name }}</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <div class="col-md-2 mb-1">
                                     <input @change="handlePostFileChange($event)" id="fileInput1" type="file" multiple
                                         accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"

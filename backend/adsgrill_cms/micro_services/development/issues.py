@@ -22,6 +22,10 @@ from django.core.mail import send_mail
 import asyncio
 from datetime import datetime, time
 import threading
+import pandas as pd
+import openpyxl
+import json
+import uuid
 
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -500,6 +504,86 @@ class IssueMetaData(APIView):
             return JsonResponse({'error':str(e)})
         
         return JsonResponse({"Data":issue_data},status=status.HTTP_200_OK)
+    
+class downloadUserWorkReport(APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        id = request.GET.get("id")
+        date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
+        if not id:
+            return JsonResponse({"message": "Please provide Employee id"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            
+            if date_range is not None:
+                date_range = json.loads(date_range)
+                startDate_str = date_range['start_date']
+                endDate_str = date_range['end_date']
+                start_datetime = datetime.strptime(startDate_str, "%Y-%m-%d").date()
+                end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
+            
+            user_instance = Users.objects.get(pk=id)
+            all_issues = Issue.objects.filter(assignee=user_instance).order_by("-created_at")
+            
+            if date_range is not None: 
+                all_issues = all_issues.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime).order_by('-created_at') 
+            
+            wb=openpyxl.Workbook()
+            ws=wb.active
+            
+            ws['A1'] = 'Assignee'
+            ws['B1'] = 'Designation'
+            ws['C1'] = 'Project Name'
+            ws['D1'] = 'Sprint Name'
+            ws['E1'] = 'Issue Name'
+            ws['F1'] = 'Status'
+            ws['G1'] = 'Expected Estimate'
+            ws['H1'] = 'Original Estimate'
+            ws['I1'] = 'Logged Time'
+            ws['J1'] = 'Remaining Time'
+            ws['K1'] = 'Log Created At'
+            ws['L1'] = 'Total Logged Time'
+            ws['M1'] = 'Extra Effort'
+            # ws['N1'] = 'Comments'
+            
+            
+            for issue in all_issues:
+                all_worklogs=WorkLog.objects.filter(issue=issue).order_by('-created_at')
+                total_logged_time=all_worklogs.aggregate(Sum('logged_time'))['logged_time__sum']
+                total_extra_effort=all_worklogs.aggregate(Sum('extra_efforts'))['extra_efforts__sum']
+                for worklog in all_worklogs:
+                    ws.append([
+                        worklog.issue.assignee.name,
+                        worklog.issue.assignee.designation,
+                        worklog.issue.sprint.project.name,
+                        worklog.issue.sprint.name,
+                        worklog.issue.title,
+                        worklog.issue.status,
+                        worklog.issue.exp_duration,      
+                        worklog.issue.org_duration if worklog.issue.org_duration else "N/A",
+                        worklog.logged_time,
+                        worklog.remaining_time,
+                        worklog.created_at.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%d %H:%M:%S'),
+                        total_logged_time,
+                        total_extra_effort,
+                        # worklog.description
+                    ])
+            output = BytesIO()
+            wb.save(output)
+            output.seek(0)
+            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            response['Content-Disposition'] = f'attachment; filename="{user_instance.name}_report.xlsx.xlsx"'
+            response.write(output.getvalue())
+        
+        except Issue.DoesNotExist:
+            return JsonResponse({"message":"Issues on this user not exists"},status=status.HTTP_404_NOT_FOUND)
+        except Users.DoesNotExist:
+            return JsonResponse({"message": "Requested user not exist"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({"message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return response
+                
         
         
     
