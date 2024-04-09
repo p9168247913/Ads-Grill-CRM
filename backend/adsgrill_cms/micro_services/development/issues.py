@@ -96,8 +96,25 @@ class IssueView(CsrfExemptMixin, APIView):
 
             if Issue.objects.filter(title=title, project=project_id, sprint = sprint_id).exists():
                 return JsonResponse({"message": "Issue with this title already exists"})
-                
+                         
+            days=0
             issue_exp_duration = convert_to_duration(exp_duration)
+            
+            days+=issue_exp_duration.days
+            seconds=issue_exp_duration.seconds
+             
+            if seconds > 27000:
+                while seconds > 27000:
+                    days+=1
+                    seconds-=27000
+                
+            hours = seconds // 3600
+            remaining_seconds = seconds % 3600
+            minutes = remaining_seconds // 60
+            
+            updated_exp_duration = f'{days}d {hours}h {minutes}m'
+            issue_exp_duration=convert_to_duration(updated_exp_duration)
+            
             existing_issue_duration=Issue.objects.filter(sprint=sprint_instance).aggregate(Sum('exp_duration'))['exp_duration__sum']
             if existing_issue_duration:
                 existing_issue_duration = existing_issue_duration
@@ -126,7 +143,7 @@ class IssueView(CsrfExemptMixin, APIView):
                     description=description,
                     type=type,
                     priority=priority,
-                    exp_duration=exp_duration
+                    exp_duration=issue_exp_duration
                 )
               
                 attachment_file_names = []
@@ -243,9 +260,26 @@ class IssueView(CsrfExemptMixin, APIView):
             assignee_instance=Users.objects.get(pk=requestData.get("assignee_id"))
             parent_issues=requestData.getlist('parent_issues',[])
             attachments = request.FILES.getlist('attachments', [])
-            
             sprint_exp_duration=sprint_instance.exp_duration
+            
+            days=0
             issue_exp_duration = convert_to_duration(request.data.get('exp_duration'))
+
+            days+=issue_exp_duration.days
+            seconds=issue_exp_duration.seconds
+             
+            if seconds > 27000:
+                while seconds > 27000:
+                    days+=1
+                    seconds-=27000
+                
+            hours = seconds // 3600
+            remaining_seconds = seconds % 3600
+            minutes = remaining_seconds // 60
+            
+            updated_exp_duration = f'{days}d {hours}h {minutes}m'
+            issue_exp_duration=convert_to_duration(updated_exp_duration)
+            
             existing_issue_duration=Issue.objects.filter(sprint=sprint_instance).exclude(pk=upd_issue.pk).aggregate(Sum('exp_duration'))['exp_duration__sum']
             if existing_issue_duration:
                 existing_issue_duration = existing_issue_duration
@@ -256,7 +290,6 @@ class IssueView(CsrfExemptMixin, APIView):
 
             if total_duration > sprint_exp_duration:
                 return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
-            
             
             if(request.user.designation=="project_manager" and request.user.role.name=="development"):
                 if requestData.get("status")=="done":
@@ -302,7 +335,6 @@ class IssueView(CsrfExemptMixin, APIView):
                     attachment_file_names.append(attachment_path)
                 upd_issue.attachments.extend(attachment_file_names)
                 upd_issue.save()
-                
         except Project.DoesNotExist:
             return JsonResponse({"message":"Requested Project not exists"})
         except Sprint.DoesNotExist:
@@ -573,7 +605,7 @@ class downloadUserWorkReport(APIView):
             wb.save(output)
             output.seek(0)
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            response['Content-Disposition'] = f'attachment; filename="{user_instance.name}_report.xlsx.xlsx"'
+            response['Content-Disposition'] = f'attachment; filename={user_instance.name}_report.xlsx'
             response.write(output.getvalue())
         
         except Issue.DoesNotExist:
