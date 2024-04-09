@@ -537,11 +537,9 @@ export default {
       try {
         this.$store.commit('showLoader')
         let response = await axios.get(`${BASE_URL}api/roles/`);
-        console.log('resp', response);
         let clientRole = response.data.roles.find((role) => {
           return role.name == 'client'
         })
-        console.log('clientRole', clientRole)
         if (clientRole) {
           this.$store.commit('hideLoader')
           this.clientRoleID = clientRole.id
@@ -637,7 +635,6 @@ export default {
           const link = document.createElement('a');
           link.href = window.URL.createObjectURL(blob);
           link.download = filename;
-          console.log("filename",filename);
 
           document.body.appendChild(link);
           link.click();
@@ -667,7 +664,6 @@ export default {
     },
     async getProjects() {
       try {
-
         const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
           headers: {
             'Content-Type': "multipart/form-data",
@@ -844,7 +840,6 @@ export default {
     async createClient(e) {
       e.preventDefault();
       this.clientData.role = this.clientRoleID
-      console.log(this.clientData);
       try {
         this.$store.commit('showLoader');
         this.clientData.role = this.clientRoleID
