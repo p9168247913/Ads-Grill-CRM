@@ -130,7 +130,7 @@ class IssueView(CsrfExemptMixin, APIView):
                 project_instance = Project.objects.get(pk=project_id)
                 reporter_instance = Users.objects.get(pk=reporter_id)
                 team_lead_instance = Users.objects.get(pk=team_lead_id) if team_lead_id else None
-                assignee_instance=Users.objects.get(pk=assignee_id)
+                assignee_instance=Users.objects.get(pk=assignee_id) if assignee_id else None
                 
                 issue_instance = Issue.objects.create(
                     project=project_instance,

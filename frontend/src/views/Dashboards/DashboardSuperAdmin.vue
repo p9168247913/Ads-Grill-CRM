@@ -90,10 +90,10 @@
                 </div>
                 <div class="card" style="background-color: white; border-radius: 10px; padding: 10px;">
                     <h5>MANAGERS</h5>
-                    <div class="row" style="padding: 10px; ">
-                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" v-for="(manager, index) in managers" :key="index">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" style="width:auto;" v-for="(manager, index) in managers" :key="index">
                             <div class="card p-1"
-                                style="height: 140px; display: flex; flex-direction: row; gap: 5px; overflow: auto;">
+                                style="height: 140px; display: flex; flex-direction: row; gap: 5px;">
                                 <img :src="getProfilePic(manager)" alt="Manager Image"
                                     style="width: 130px; height: 130px; border-radius: 5px;">
                                 <div class="card-body" style="padding-bottom: 0; padding-top: 1">
@@ -102,7 +102,7 @@
                                     <p class="card-text" style="font-size: 13px">{{ manager.designation ===
                                 'project_manager' ? "Project Manager" : manager.designation === 'sales_manager'
                                 ?
-                                "Sales Manager" : manager.designation === 'lead_manager'
+                                "Sales Manager" : manager.designation === 'leads_manager'
                                     ?
                                     "Lead Manager" : manager.designation }}</p>
                                 </div>
