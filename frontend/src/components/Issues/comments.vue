@@ -1,7 +1,5 @@
 <template>
-
     <head>
-        <!-- Include necessary CSS files -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
@@ -41,36 +39,17 @@
                             <div v-if="filterKey" class="row mt-3">
                                 <!-- <button>open</button> -->
                                 <div class="col-md-10 mb-3">
-                                    <textarea v-model="commentDesc" ref="doComment" @input="checkForAtSymbol"
+                                    <textarea v-model="commentDesc" ref="doComment" @input="checkMail()"
                                         style="height: 40px; resize: none; max-height: auto;"
                                         placeholder=" Add Comments..." type="text" class="form-control"
                                         required></textarea>
+                                        <div class="col-md-4">
+                                    <ul v-if="showEmailSelector" name="emailSelector" id="emailSelector">
+                                        <li @click="selectEmail(item.email)" v-for="item in devUsers" :key="item.id" :value="item.email">{{ item.email }}</li>
+                                    </ul>
+                                </div>
                                 </div>
 
-                                <!-- <div >
-                                    <ul>
-                                        <li></li>
-                                    </ul>
-                                </div> -->
-                                
-                                <!-- <div class="modal fade" id="employeeModal" tabindex="-1"
-                                    aria-labelledby="employeeModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="employeeModalLabel">Employee List</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <ul>
-                                                    <li v-for="employee in employees" :key="employee.id">{{
-                        employee.name }}</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <div class="col-md-2 mb-1">
                                     <input @change="handlePostFileChange($event)" id="fileInput1" type="file" multiple
                                         accept=".xlsx, .xls, .doc, .ppt, .pdf, .png, .jpeg, .jpg"
@@ -177,7 +156,8 @@ export default {
             postselectedFiles: [],
             editselectedFiles: [],
             showModal: false,
-            employees: []
+            devUsers: [],
+            showEmailSelector:false
         }
     },
     computed: {
@@ -203,6 +183,9 @@ export default {
         getDataFromIssuePage(issueID, sprintID) {
             this.sprintID = sprintID
             this.issueID = issueID
+        },
+        getDevUsersFromIssuePage(devUsers){
+            this.devUsers = devUsers
         },
         // handleKeyDown(e) {
         //     if (e.key === 'C' && !this.isCommentFocused) {
@@ -421,15 +404,43 @@ export default {
             this.postselectedFiles = []
             this.editselectedFiles = []
             this.commentDesc = ''
+            this.showEmailSelector=false
         },
-        checkForAtSymbol(event) {
-            const text = event.target.value;
-            if (text.includes('@')) {
-                console.log("OPEN");
-                this.showModal = true;
-
+        async getDevUsers(){
+            try {
+                const response = await axios.get(`${BASE_URL}api/users/?role=development`, {
+                    headers: {
+                        token: this.authToken
+                    },
+                });
+                if (response && response.status === 200 && response.data) {
+                    this.devUsers = response.data.users
+                }
+                console.log("allUsers", this.devUsers)
+            } catch (error) {
+                new Noty({
+                    type: "error",
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 500,
+                }).show();
             }
+        },
+        checkMail() {
+        let value = this.commentDesc;
+        if (value.slice(-1) == '@') { 
+          this.showEmailSelector = true;
         }
+        else{
+          this.showEmailSelector =false;
+        }
+      },
+      selectEmail(email) {
+        let content = this.commentDesc
+        content =content.slice(0, -1)+' '+email+" "
+        this.commentDesc=content
+        this.showEmailSelector = false
+        this.$refs.doComment.focus()
+ }
     },
     mounted() {
         document.addEventListener('keydown', this.handleKeyDown)

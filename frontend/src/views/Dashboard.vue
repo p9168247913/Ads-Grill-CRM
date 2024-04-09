@@ -1,5 +1,5 @@
 <template>
-  <div class="py-4 container-fluid">
+  <div class="py-1 container">
     <!-- <div class="row">
       <div class="col-lg-12">
         <div class="row">
@@ -114,9 +114,9 @@
     </div> -->
 
     <dashboard-client v-if="authUser.role === 'client'" />
-    <dashboard-admin v-if="authUser.role === 'admin'" />
-    <dashboard-super-admin v-if="authUser.role === 'super-admin'" />
-    <dashboard-development v-if="authUser.role === 'Development'" />
+    <!-- <dashboard-admin v-if="authUser.role === 'admin'" /> -->
+    <dashboard-super-admin v-if="authUser.role === 'super-admin' || authUser.role === 'admin'" />
+    <!-- <dashboard-development v-if="authUser.role === 'Development'" /> -->
     <dashboard-leads v-if="authUser.role === 'leads'" />
     <dashboard-sales v-if="authUser.role === 'sales'" />
     <dashboard-hrms v-if="authUser.role === 'hrms'" />
@@ -124,9 +124,9 @@
 </template>
 <script>
 import DashboardClient from "./Dashboards/DashboardClient.vue";
-import DashboardAdmin from "./Dashboards/DashboardAdmin.vue";
+// import DashboardAdmin from "./Dashboards/DashboardAdmin.vue";
 import DashboardSuperAdmin from "./Dashboards/DashboardSuperAdmin.vue";
-import DashboardDevelopment from "./Dashboards/DashboardDevelopment.vue";
+// import DashboardDevelopment from "./Dashboards/DashboardDevelopment.vue";
 import DashboardLeads from "./Dashboards/DashboardLeads.vue";
 import DashboardSales from "./Dashboards/DashboardSales.vue";
 import DashboardHrms from "./Dashboards/DashboardHrms.vue";
@@ -216,9 +216,9 @@ export default {
   },
   components: {
     DashboardClient,
-    DashboardAdmin,
+    // DashboardAdmin,
     DashboardSuperAdmin,
-    DashboardDevelopment,
+    // DashboardDevelopment,
     DashboardLeads,
     DashboardSales,
     DashboardHrms,
