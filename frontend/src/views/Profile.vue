@@ -192,7 +192,6 @@ export default {
       try {
         this.$store.commit('showLoader');
         const formData = new FormData();
-        console.log("3", this.selectedFiles);
 
         if (this.userData.oldPassword && this.userData.newPassword !== this.userData.confirmPassword) {
           new Noty({
@@ -249,7 +248,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader');
       }
@@ -286,7 +285,6 @@ export default {
         fileInput.value = '';
       }
       this.selectedFiles = [file];
-      console.log(this.selectedFiles);
     },
     setUserDataFromLocalStorage() {
       this.userData.id = this.authUser.id

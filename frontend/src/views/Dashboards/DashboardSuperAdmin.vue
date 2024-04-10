@@ -1,4 +1,12 @@
 <template>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Webkit | Responsive Bootstrap 4 Admin Dashboard Template</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+    </head>
     <div class="wrapper" style="margin-bottom: 80px; padding: 0; ">
         <div class="content-page">
             <!-- <h1>Dashboard Lead</h1> -->
@@ -91,20 +99,20 @@
                 <div class="card" style="background-color: white; border-radius: 10px; padding: 10px;">
                     <h5>MANAGERS</h5>
                     <div class="row">
-                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" style="width:auto;" v-for="(manager, index) in managers" :key="index">
-                            <div class="card p-1"
-                                style="height: 140px; display: flex; flex-direction: row; gap: 5px;">
+                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" style="width:auto;"
+                            v-for="(manager, index) in managers" :key="index">
+                            <div class="card p-1" style="height: 140px; display: flex; flex-direction: row; gap: 5px;">
                                 <img :src="getProfilePic(manager)" alt="Manager Image"
                                     style="width: 130px; height: 130px; border-radius: 5px;">
                                 <div class="card-body" style="padding-bottom: 0; padding-top: 1">
                                     <p class="card-title" style="font-weight: bold; font-size: 15px">{{ manager.name }}
                                     </p>
                                     <p class="card-text" style="font-size: 13px">{{ manager.designation ===
-                                'project_manager' ? "Project Manager" : manager.designation === 'sales_manager'
-                                ?
-                                "Sales Manager" : manager.designation === 'leads_manager'
-                                    ?
-                                    "Lead Manager" : manager.designation }}</p>
+                                        'project_manager' ? "Project Manager" : manager.designation === 'sales_manager'
+                                        ?
+                                        "Sales Manager" : manager.designation === 'leads_manager'
+                                            ?
+                                            "Lead Manager" : manager.designation }}</p>
                                 </div>
                             </div>
                         </div>
@@ -233,14 +241,13 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
         async getProjects() {
             try {
-
                 const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
                     headers: {
                         'Content-Type': "multipart/form-data",
@@ -256,7 +263,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -274,8 +281,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -290,10 +297,11 @@ export default {
                     this.stats.clients.value = response.data.employee_count;
                 }
             } catch (error) {
+                console.log("err", error);
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },

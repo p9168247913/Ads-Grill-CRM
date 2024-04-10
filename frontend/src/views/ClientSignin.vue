@@ -1,4 +1,5 @@
 <template>
+
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
@@ -61,7 +62,7 @@
         </section>
     </main>
 </template>
-  
+
 <script>
 import ArgonSwitch from "@/components/ArgonSwitch.vue";
 import ArgonButton from "@/components/ArgonButton.vue";
@@ -175,4 +176,3 @@ export default {
     },
 };
 </script>
-  

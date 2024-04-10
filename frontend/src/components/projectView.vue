@@ -552,7 +552,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader')
       }
@@ -613,7 +613,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader');
       }
@@ -649,7 +649,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show();
       }
     },
@@ -679,7 +679,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader');
       }
@@ -734,7 +734,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show();
         this.$store.commit('hideLoader');
       }
@@ -792,7 +792,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show();
         this.$store.commit('hideLoader');
       }
@@ -864,7 +864,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader')
       }
@@ -883,7 +883,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show()
       }
     },
@@ -903,7 +903,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader')
       }

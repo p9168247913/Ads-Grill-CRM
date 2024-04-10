@@ -803,27 +803,21 @@ export default {
             if (!matches) {
                 return '';
             }
-
             const [, days, hours, minutes, seconds] = matches;
 
             const formattedParts = [];
-
             if (days) {
                 formattedParts.push(`${parseInt(days, 10)}d`);
             }
-
             if (hours) {
                 formattedParts.push(`${parseInt(hours, 10)}h`);
             }
-
             if (minutes) {
                 formattedParts.push(`${parseInt(minutes, 10)}m`);
             }
-
             if (seconds) {
                 formattedParts.push(`${parseInt(seconds, 10)}s`);
             }
-
             return formattedParts.join(' ');
         },
         nextPage() {
@@ -872,7 +866,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show();
             }
         },
@@ -1115,14 +1109,14 @@ export default {
                     new Noty({
                         type: 'error',
                         text: 'rootHTML method is not available',
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                 }
             } else {
                 new Noty({
                     type: 'error',
                     text: 'Quill editor reference not found',
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -1144,7 +1138,7 @@ export default {
                     new Noty({
                         type: 'error',
                         text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                     this.$store.commit('hideLoader');
                 }
@@ -1287,7 +1281,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1407,7 +1401,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1426,7 +1420,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1448,7 +1442,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1469,7 +1463,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }

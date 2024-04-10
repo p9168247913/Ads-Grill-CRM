@@ -17,16 +17,8 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
-
     <body class="  ">
-        <!-- <div id="loading">
-          <div id="loading-center">
-          </div>
-    </div> -->
-
         <div class="wrapper">
-            <!-- <h1>This is navbar</h1>
-        <button @click="loggers">click me</button> -->
             <div class="iq-top-navbar" :class="{ 'fixed': isFixedNavbar }">
                 <div class="iq-navbar-custom">
                     <nav class="navbar navbar-expand-lg navbar-light p-0">
@@ -34,7 +26,6 @@
                             <i class="ri-menu-line wrapper-menu"></i>
                             <a href="./backend/index.html" class="header-logo">
                                 <h4 class="logo-title text-uppercase">Webkit</h4>
-
                             </a>
                         </div>
                         <div class="navbar-breadcrumb">
@@ -297,7 +288,6 @@
                 </div>
             </div>
         </div>
-
     </body>
 </template>
 
@@ -333,7 +323,7 @@ export default {
                         new Noty({
                             type: 'success',
                             text: r.data.message,
-                            timeout: 500,
+                            timeout: 1000,
                         }).show()
                         this.logout
                         setTimeout(()=>{

@@ -587,7 +587,6 @@ export default {
             this.selectedDesgination = ''
         },
         removeUnderScores(value) {
-            // return value.replace(/_/g, ' ')
             let result = ''
             for (let i = 0; i < value.length; i++) {
                 if (value[i] == '_') {
@@ -775,7 +774,6 @@ export default {
                     headers: { token: this.authToken },
                 },
                 )
-                console.log(response);
                 if (response.status == 200) {
                     this.users = response.data.users
                 }

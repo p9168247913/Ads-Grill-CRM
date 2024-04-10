@@ -269,8 +269,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
-                    timeout: 500,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -302,7 +302,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
                     timeout: 1000,
                 }).show()
             }
@@ -324,12 +324,10 @@ export default {
                                 token: this.authToken
                             }
                         })
-                        console.log(response)
                         this.getLeads();
                         Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
-                        console.log(error)
-                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error', error.response.data.message? error.response.data.message: error.response.data.detail, 'error');
                     }
                 }
             });

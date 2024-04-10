@@ -395,7 +395,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
                     timeout: 1000,
                 }).show()
             }
@@ -427,8 +427,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.message,
-                    timeout: 500,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -468,11 +468,10 @@ export default {
                     this.totalPages = response?.data?.lead_data?.total_pages
                     this.leads = response?.data?.lead_data?.leads
                 }
-                // console.log(this.leads);
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
                     timeout: 500,
                 }).show()
             }
@@ -538,8 +537,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
-                    timeout: 500,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -556,8 +555,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message,
-                    timeout: 500,
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -601,10 +600,10 @@ export default {
                         timeout: 3000
                     }).show()
                     }
-                })).catch(e => {
+                })).catch(error => {
                     new Noty({
                         type: 'error',
-                        text: e,
+                        text: error.response.data.message? error.response.data.message: error.response.data.detail,
                         timeout: 1000
                     }).show()
                 })
@@ -630,7 +629,7 @@ export default {
                         this.getLeads();
                         Swal.fire('Deleted!', response.data.message, 'success');
                     } catch (error) {
-                        Swal.fire('Error', 'An error occurred while deleting the user.', 'error');
+                        Swal.fire('Error', error.response.data.message? error.response.data.message: error.response.data.detail, 'error');
                     }
                 }
             });
