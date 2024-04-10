@@ -45,7 +45,7 @@
         </label>
         <div class="belowTag2">
           <input class="input_form" type="text" v-model="newCustomModuleLabel">
-          <button class="btn_form" @click="addCustomModule">Add Custom Module</button>
+          <button class="btn_form" @click="addCustomModule">Add Module</button>
         </div>
       </div>
     </div>
@@ -53,30 +53,27 @@
       Sub Modules
     </label>
     <div class="module">
-    <!-- Iterate over selected modules -->
-    <div v-for="(subModuleval, index) in selectedModule" :key="index">
+      <div v-for="(subModuleval, index) in selectedModule" :key="index">
         <label class="form-label">{{ subModuleval }}</label>
         <div>
-            <!-- Iterate over submodules for the selected module -->
-            <label class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]" :key="'sub_'+subIndex">
-                <input type="checkbox" v-model="selectedSubModules" :value="subModule.value">
-                {{ subModule.key }}
-            </label>
-            <!-- Input field for adding custom submodules -->
-            <div>
-                <input type="text" v-model="newSubModuleName[subModuleval]">
-                <button @click="addSubModule(subModuleval)">Add Submodule</button>
-            </div>
+          <label class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]"
+            :key="'sub_' + subIndex">
+            <input type="checkbox" v-model="selectedSubModules" :value="subModule.value">
+            {{ subModule.key }}
+          </label>
+
+          <div class="belowTag2">
+            <input class="input_form" type="text" v-model="newSubModuleName[subModuleval]">
+            <button class="btn_form" @click="addSubModule(subModuleval)">Add Submodule</button>
+          </div>
         </div>
+      </div>
     </div>
-</div>
 
     <div>
       <div class="module">
 
-        <div>
 
-        </div>
         <div>
           <label for="sprint" class="form-label">Select Sidebar</label>
           <select required class="form-select selecBox" v-model="sidebarValue">
@@ -84,33 +81,36 @@
             <option v-for="(sprint, index) in sidbar" :key="index" :value="sprint.value">{{ sprint.key }}</option>
           </select>
         </div>
-
+        <div>
+          <label for="sprint" class="form-label">What sidebar/top bar do you want to show on the website</label>
+          <select required class="form-select selecBox" v-model="sidebarValue">
+            <option value="">Select Sidebar Type</option>
+            <option v-for="(sprint, index) in sidbar" :key="index" :value="sprint.value">{{ sprint.key }}</option>
+          </select>
+        </div>
 
       </div>
 
     </div>
     <div>
-      <div>
-        <label for="sprint" class="form-label">What sidebar/top bar do you want to show on the website</label>
-        <select required class="form-select selecBox" v-model="sidebarValue">
-          <option value="">Select Sidebar Type</option>
-          <option v-for="(sprint, index) in sidbar" :key="index" :value="sprint.value">{{ sprint.key }}</option>
-        </select>
-      </div>
-      <div>
-        <div>Select feature modules to be shown with each role</div>
 
+      <div>
+        <label>Select feature modules to be shown with each role</label>
+        <div>
+          <label>Roles</label>
+          <div class="roleBaseAccess" v-for="(role, index) in selecteRole" :key="index">
+            {{ role }}
+      
+            <label class="" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
+              <input type="checkbox" v-model="selectedRoleBasedAccess" :value="module.value">
+              {{ module }}
+            </label>
+         
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- <div>
-    <div v-for="(item, index) in dataItems" :key="index">
-      <input type="text" v-model="item.key" :placeholder="'Enter Key ' + (index + 1)">
-      <input type="text" v-model="item.value" :placeholder="'Enter Value for '">
-    </div>
-    <button @click="addInputFields">Add Key-Value Pair</button>
-    <button @click="generatePDF">Generate PDF</button>
-  </div> -->
   </div>
 
 </template>
@@ -173,6 +173,35 @@ export default {
         value: "CRM Module"
       }
       ],
+
+      sidbar: [{
+        key: "Top Sidebar",
+        value: "Top Sidebar"
+      },
+      {
+        key: "Left Sidebar",
+        value: "Left Sidebar"
+      },
+      {
+        key: "Both Sidebar",
+        value: "Both Sidebar"
+      }
+
+
+      ],
+      authenticationTypes: ['Username/Password', 'OAuth', 'Two-Factor Authentication', 'Social Login authentication', 'Biometric authentication', "Client Certification"],
+      roles: ["Super Admin", "Admin", "Manager", "Employee", "Customer", "Viewer"],
+      selecteRole: [],
+      customModules: '',
+      selectedAuthTypes: [],
+      modelValue: '',
+      projectTypeValue: '',
+      customAuthType: '',
+      selectedModule: [],
+      sidebarValue: '',
+      customRole: '',
+      newSubModuleName: {},
+      subModulesArray: [],
       newCustomModuleLabel: '',
 
       subModules: {
@@ -770,171 +799,95 @@ export default {
           }
         ],
       },
-      projectType: [{
-        key: 'Retail management System(ERP)',
-        value: 'Retail management System (ERP)'
-      },
-      {
-        key: 'Manufacturing Management System(ERP)',
-        value: 'Manufacturing Management System(ERP)'
-      },
-      {
-        key: 'Customer Enagement Platform(CRM)',
-        value: 'Customer Enagement Platform(CRM)'
-      },
+      projectType: [
+        {
+          key: 'Enterprise Resource Planning System (ERPS)',
+          value: 'Enterprise Resource Planning System (ERPS)'
+        },
+        {
+          key: 'Customer Enagement Platform(CRM)',
+          value: 'Customer Enagement Platform(CRM)'
+        },
 
-      {
-        key: 'Online Retail Platform (E-Com)',
-        value: 'Online Retail Platform (E-Com)'
-      },
-      {
-        key: 'Interactive Entertainment Solutions(Game_Dev)',
-        value: 'Interactive Entertainment Solutions(Game_Dev)'
-      },
-      {
-        key: 'Dynamic Web Content Management(WordPress)',
-        value: 'Dynamic Web Content Management(WordPress)'
-      },
-      {
-        key: 'E-commerce Powerhouse (magento)',
-        value: 'E-commerce Powerhouse (magento)'
-      },
-      {
-        key: 'E-commerce Simplified (Shopify)',
-        value: 'E-commerce Simplified (Shopify)'
-      },
-      {
-        key: 'Mobile Application Solution',
-        value: 'Mobile Application Solution'
-      },
-      {
-        key: "Web Presence Solution",
-        value: "Web Presence Solution"
-      },
+        {
+          key: 'Online Retail Platform (E-Com)',
+          value: 'Online Retail Platform (E-Com)'
+        },
+        {
+          key: 'Interactive Entertainment Solutions(Game_Dev)',
+          value: 'Interactive Entertainment Solutions(Game_Dev)'
+        },
+        {
+          key: 'Dynamic Web Content Management(WordPress)',
+          value: 'Dynamic Web Content Management(WordPress)'
+        },
+        {
+          key: 'E-commerce Powerhouse (magento)',
+          value: 'E-commerce Powerhouse (magento)'
+        },
+        {
+          key: 'E-commerce Simplified (Shopify)',
+          value: 'E-commerce Simplified (Shopify)'
+        },
+        {
+          key: 'Mobile Application Solution',
+          value: 'Mobile Application Solution'
+        },
+        {
+          key: "Web Presence Solution",
+          value: "Web Presence Solution"
+        },
 
       ],
-      subProjectType: [{
-        key: 'Retail management System(ERP)',
-        value: 'Retail management System (ERP)'
-      },
-      {
-        key: 'Manufacturing Management System(ERP)',
-        value: 'Manufacturing Management System(ERP)'
-      },
-      {
-        key: 'Customer Enagement Platform(CRM)',
-        value: 'Customer Enagement Platform(CRM)'
-      },
 
-      {
-        key: 'Online Retail Platform (E-Com)',
-        value: 'Online Retail Platform (E-Com)'
-      },
-      {
-        key: 'Interactive Entertainment Solutions(Game_Dev)',
-        value: 'Interactive Entertainment Solutions(Game_Dev)'
-      },
-      {
-        key: 'Dynamic Web Content Management(WordPress)',
-        value: 'Dynamic Web Content Management(WordPress)'
-      },
-      {
-        key: 'E-commerce Powerhouse (magento)',
-        value: 'E-commerce Powerhouse (magento)'
-      },
-      {
-        key: 'E-commerce Simplified (Shopify)',
-        value: 'E-commerce Simplified (Shopify)'
-      },
-      {
-        key: 'Mobile Application Solution',
-        value: 'Mobile Application Solution'
-      },
-      {
-        key: "Web Presence Solution",
-        value: "Web Presence Solution"
-      },
-
-      ],
-      sidbar: [{
-        key: "Top Sidebar",
-        value: "Top Sidebar"
-      },
-      {
-        key: "Left Sidebar",
-        value: "Left Sidebar"
-      },
-      {
-        key: "Both Sidebar",
-        value: "Both Sidebar"
-      }
-
-
-      ],
-      authenticationTypes: ['Username/Password', 'OAuth', 'Two-Factor Authentication', 'Social Login authentication', 'Biometric authentication', "Client Certification"],
-      roles: ["superAdmin", "admin", "Manager", "Employee", "Customer", "Viewer"],
-      selecteRole: [],
-      customModules: '',
-      selectedAuthTypes: [],
-      modelValue: '',
-
-      projectTypeValue: '',
-      customAuthType: '',
-      selectedModule: [],
-      sidebarValue: '',
-      customRole: '',
-      newSubModuleName: {},
-      subModulesArray: [],
-      subProjectTypeValue: ''
     }
   },
 
   computed: {
-    // filteredSubModules() {
-    //   return this.subModulesArray.push(this.selectedModule) || subModulesArray;
-    // }
-    // combinedModules() {
-    //     // Concatenate mainfilled with customModules
-    //     return this.mainfilled.push({key:this.customModules,value:this.customModules});
-    // }
+
   },
   methods: {
     updateSubModules() {
       this.selectedSubModule = '';
     },
     addSubModule(moduleName) {
-        if (this.newSubModuleName[moduleName].trim() !== '') {
-            const newSubModule = {
-                key: this.newSubModuleName[moduleName],
-                value: this.newSubModuleName[moduleName].toLowerCase().replace(/\s/g, '_')
-            };
-            if (this.subModules[moduleName] === undefined) {
-                this.$set(this.subModules, moduleName, [newSubModule]);
-            } else {
-                this.subModules[moduleName].push(newSubModule);
-            }
-            this.newSubModuleName[moduleName] = ''; // Clear the input field after adding
+      if (this.newSubModuleName[moduleName].trim() !== '') {
+        const newSubModule = {
+          key: this.newSubModuleName[moduleName],
+          value: this.newSubModuleName[moduleName]
+        };
+        if (this.subModules[moduleName] === undefined) {
+          this.subModules[moduleName] = [newSubModule];
+        } else {
+          this.subModules[moduleName].push(newSubModule);
         }
+        this.newSubModuleName[moduleName] = '';
+
+        if (!this.mainfilled.some(module => module.key === moduleName)) {
+          this.selectedModule.push(moduleName);
+        }
+      }
     },
+
     addCustomModule() {
       if (this.newCustomModuleLabel.trim() !== '') {
         const newCustomModule = {
           key: this.newCustomModuleLabel,
-          value: this.newCustomModuleLabel.toLowerCase().replace(/\s/g, '_')
+          value: this.newCustomModuleLabel
         };
         this.mainfilled.push(newCustomModule);
         this.selectedModule.push(this.newCustomModuleLabel);
-        this.newCustomModuleLabel = ''; // Clear the input field after adding
+        this.newCustomModuleLabel = '';
       }
     },
     generatePDF() {
       const doc = new jsPDF();
-      // Example HTML content
+
       const htmlContent = `
         <h1 style="color: red;">PDF Example</h1>
         <p ref="p1">This is a paragraph inside a PDF generated from HTML content with styling.</p>
       `;
-      // Convert HTML to PDF
+
       doc.html(htmlContent, {
         callback: function (doc) {
           doc.save('example.pdf');
@@ -948,14 +901,14 @@ export default {
       if (this.customAuthType.trim() !== '') {
         this.authenticationTypes.push(this.customAuthType.trim());
         this.selectedAuthTypes.push(this.customAuthType.trim());
-        this.customAuthType = ''; // Clear the input field after adding custom type
+        this.customAuthType = '';
       }
     },
     addCustomRole() {
       if (this.customRole.trim() !== '') {
         this.roles.push(this.customRole.trim());
         this.selecteRole.push(this.customRole.trim());
-        this.customRole = ''; // Clear the input field after adding custom type
+        this.customRole = '';
       }
     },
     addInputFields() {
@@ -980,7 +933,11 @@ export default {
 .checkbox-label {
   display: block;
   margin-bottom: 5px;
-  /* Adjust the spacing between checkboxes if needed */
+
+}
+
+.roleBaseAccess {
+  display: flex;
 }
 
 .module_box {
@@ -998,14 +955,16 @@ export default {
   margin-right: 5px;
   border-radius: 10px;
 }
-.belowTag2{
+
+.belowTag2 {
   display: flex;
   gap: 8px;
-width: fit-content;
+  width: fit-content;
   border-radius: 5px;
 
   border: 1px solid gray;
 }
+
 .input_form {
   widows: 100%;
   border: none;
