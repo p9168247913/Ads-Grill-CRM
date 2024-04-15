@@ -21,7 +21,7 @@
         </button>
       </li>
       <router-link style="height:auto;" class="p-4 mb-3" to="">
-        <img style="width: 150px; height:58px; margin-top: 20px;" src="../../assets/img/logos/ag_logo.png"
+        <img @click="home" style="width: 150px; height:58px; margin-top: 20px;" src="../../assets/img/logos/ag_logo.png"
           alt="main_logo" />
       </router-link>
     </div>
@@ -33,7 +33,8 @@
 import SidenavList from "./SidenavList.vue";
 import logo from "@/assets/img/logo-ct-dark.png";
 import logoWhite from "@/assets/img/logo-ct.png";
-import { mapMutations, mapActions } from "vuex";
+import { mapMutations, mapActions, mapState } from "vuex";
+import router from "@/router";
 
 export default {
   name: "index",
@@ -47,12 +48,23 @@ export default {
     };
   },
   props: ["custom_class", "layout"],
+  computed:{
+    ...mapState(["authToken", "authUser"]),
+  },
   methods: {
     ...mapMutations(["navbarMinimize", "toggleConfigurator"]),
     ...mapActions(["toggleSidebarColor"]),
     toggleSidebar() {
       this.toggleSidebarColor("bg-white");
       this.navbarMinimize();
+    },
+    home() {
+      console.log(this.authUser.role);
+      if (this.authUser.role === 'development') {
+        router.push('/projects')
+      } else {
+        router.push('/dashboard')
+      }
     }
   }
 };
@@ -65,15 +77,17 @@ export default {
   transform: scale(1.4);
   margin-top: 10px;
 }
+
 #sidenav-main {
   overflow: auto;
   scrollbar-width: none;
-  -ms-overflow-style: none; 
+  -ms-overflow-style: none;
 }
 
 #sidenav-main::-webkit-scrollbar {
-  display: none; 
+  display: none;
 }
+
 .bg-custom1 {
   background-image: linear-gradient(to top, #37ecba 0%, #72afd3 100%);
 }

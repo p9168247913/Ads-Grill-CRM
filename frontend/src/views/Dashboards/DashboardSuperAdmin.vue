@@ -223,7 +223,7 @@ export default {
             parameter === 'deve' ? router.push('/employees/development') : parameter === 'pro' ? router.push('/projects') : parameter === 'lead' ? router.push('/leads') : router.push('/dashboard')
         },
         getProfilePic(manager) {
-            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "https://www.kindpng.com/picc/m/78-786678_avatar-hd-png-download.png";
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "/img/User_Image.f332022c.png";
         },
         async getLeads() {
             let queryParams = {

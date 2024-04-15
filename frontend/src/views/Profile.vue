@@ -21,8 +21,9 @@
           <div class="row gx-4">
             <div class="col-auto">
               <div class="avatar avatar-xl position-relative">
-                <img :src="'data:image/jpeg;base64,' + userData.profile_pic" alt="profile_image"
-                  class="shadow-sm w-100 border-radius-lg" />
+                <img
+                  :src="userData.profile_pic ? 'data:image/jpeg;base64,' + userData.profile_pic : '/img/User_Image.f332022c.png'"
+                  alt="profile_image" class="shadow-sm w-100 border-radius-lg" />
               </div>
             </div>
             <div class="col-auto my-auto">
@@ -56,7 +57,7 @@
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
                 <p class="mb-0">Edit Profile</p>
-                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()"> <i
+                <argon-button color="success" size="sm" class="ms-auto" @click="confirmSaveChanges()"> <i
                     class="bi bi-save-fill" style="color: white;"></i> &nbsp;&nbsp; Save</argon-button>
               </div>
             </div>
@@ -182,20 +183,51 @@ export default {
     fixedNavbar() {
       this.isFixedNavbar = window.scrollY > 1
     },
-    doLogout() {
-      axios.get(`${BASE_URL}api/logout/`).
-        then((r) => {
-          if (r.status == 200) {
+    async doLogout() {
+      const result = await Swal.fire({
+        title: 'Are you sure you want to logout?',
+        text: "You will be logged out of your account.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '✔ Yes, logout',
+        cancelButtonText: '✖ No, stay'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.get(`${BASE_URL}api/logout/`);
+          if (response.status === 200) {
             new Noty({
               type: 'success',
-              text: r.data.message,
+              text: response.data.message,
               timeout: 1000,
               layout: 'topCenter'
-            }).show()
-            router.push('/signin')
-            this.logout()
+            }).show();
+            router.push('/signin');
+            this.logout();
           }
-        })
+        } catch (error) {
+          new Noty({
+            type: 'error',
+            text: error.response?.data?.detail || error.response?.data?.message || 'An error occurred during logout',
+            timeout: 1000,
+          }).show();
+        }
+      }
+    },
+    async confirmSaveChanges() {
+      const result = await Swal.fire({
+        title: 'Are you sure you want to save changes?',
+        text: "Any unsaved changes will be lost if you navigate away from this page.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '✔ Yes, save changes',
+        cancelButtonText: '✖ No, cancel'
+      });
+
+      if (result.isConfirmed) {
+        await this.saveChanges();
+      }
     },
     async saveChanges() {
       try {
