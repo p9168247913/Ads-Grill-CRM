@@ -70,7 +70,7 @@
               <div class="row">
                 <div class="col-md-6">
                   <label for="name" class="form-control-label">Name</label>
-                  <input class="form-control" type="text" v-model="userData.name" />
+                  <input class="form-control" type="text" v-model="capitalizedName" />
                 </div>
                 <div class="col-md-6">
                   <label for="email" class="form-control-label">Email address</label>
@@ -141,6 +141,15 @@ export default {
   computed: {
     ...mapState(["authToken", "authUser"]),
     ...mapMutations(["setAuthToken", "setAuthUser"]),
+    capitalizedName: {
+      get() {
+        return this.userData.name;
+      },
+      set(value) {
+        const formattedName = value.replace(/\b\w/g, (match) => match.toUpperCase());
+        this.userData.name = formattedName;
+      }
+    }
   },
   data() {
     return {
@@ -233,8 +242,8 @@ export default {
           this.userData.newPassword = ''
           this.userData.confirmPassword = ''
           setTimeout(() => {
-          // window.location.reload();
-           
+            // window.location.reload();
+
             new Noty({
               type: 'info',
               text: 'Please re-login to see profile changes',

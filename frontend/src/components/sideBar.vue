@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="./assets/vendor/tui-calendar/tui-time-picker/dist/tui-time-picker.css">
     </head>
     <div class="wrapper">
-        <div class="iq-sidebar  sidebar-default ">
+        <div class="iq-sidebar  sidebar-default "> 
             <div class="iq-sidebar-logo d-flex align-items-center">
                 <a href="../backend/index.html" class="header-logo">
                     <img src="../../public/assets/images/icon/adsgrill.webp" alt="logo">
