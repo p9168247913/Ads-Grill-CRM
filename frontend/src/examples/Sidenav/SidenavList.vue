@@ -159,6 +159,17 @@
         </sidenav-item>
       </li>
 
+      <!-- Templates -->
+      <li class="nav-item">
+        <sidenav-item url="/templates" :class="getRoute() === 'templates' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Templates'
+      ">
+
+          <template v-slot:icon>
+            <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
       <li class="mt-3 nav-item">
         <h6 v-if="this.$store.state.isRTL" class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"
           :class="this.$store.state.isRTL ? 'me-4' : 'ms-2'">
@@ -178,6 +189,8 @@
           </template>
         </sidenav-item>
       </li>
+
+
     </ul>
     <ul class="navbar-nav" v-else>
       <li class="nav-item">

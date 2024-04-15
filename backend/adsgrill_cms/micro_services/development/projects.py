@@ -293,7 +293,7 @@ class GetAllAssignees(CsrfExemptMixin, APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
         try:
-            all_assignees = Users.objects.filter(Q(designation__icontains='developer'), role__name='development')
+            all_assignees = Users.objects.filter(Q(designation__icontains='developer') | Q(designation__icontains='team_lead'), role__name='development')
             res_data = [{
                 'id':assignee.pk,
                 'name': assignee.name

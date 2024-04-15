@@ -65,7 +65,15 @@ export default {
   transform: scale(1.4);
   margin-top: 10px;
 }
+#sidenav-main {
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none; 
+}
 
+#sidenav-main::-webkit-scrollbar {
+  display: none; 
+}
 .bg-custom1 {
   background-image: linear-gradient(to top, #37ecba 0%, #72afd3 100%);
 }

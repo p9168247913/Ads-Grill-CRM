@@ -85,8 +85,7 @@
                       <label for="type" class="form-label">Type</label>
                       <select class="form-control" v-model="projectData.type" required>
                         <option value="">Select Type</option>
-                        <option value="RERP">Retail Management System (ERP)</option>
-                        <option value="MERP">Manufacturing Management System (ERP)</option>
+                        <option value="ERPS">Enterprise Resource Planning System (ERPS)</option>
 			<option value="CRM">Customer Engagement Platform (CRM)</option>
 			<option value="E-Com">Online Retail Platform (E-Com)</option>
 			<option value="Game_Dev">Interactive Entertainment Solutions (Game_Dev)</option>
