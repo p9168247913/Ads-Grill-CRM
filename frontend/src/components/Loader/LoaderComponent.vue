@@ -17,7 +17,7 @@ export default {}
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(255, 255, 255, 0.8); /* Add a semi-transparent background for better visibility */
+    background: rgba(255, 255, 255, 0.8);
     z-index: 9999999;
 }
 

@@ -124,19 +124,12 @@
 </template>
 <script>
 import DashboardClient from "./Dashboards/DashboardClient.vue";
-// import DashboardAdmin from "./Dashboards/DashboardAdmin.vue";
 import DashboardSuperAdmin from "./Dashboards/DashboardSuperAdmin.vue";
 // import DashboardDevelopment from "./Dashboards/DashboardDevelopment.vue";
 import DashboardLeads from "./Dashboards/DashboardLeads.vue";
 import DashboardSales from "./Dashboards/DashboardSales.vue";
 import DashboardHrms from "./Dashboards/DashboardHrms.vue";
 import { mapState } from 'vuex'
-
-// import Card from "@/examples/Cards/Card.vue";
-// import GradientLineChart from "@/examples/Charts/GradientLineChart.vue";
-// import Carousel from "./components/Carousel.vue";
-// import CategoriesCard from "./components/CategoriesCard.vue";
-
 import US from "@/assets/img/icons/flags/US.png";
 import DE from "@/assets/img/icons/flags/DE.png";
 import GB from "@/assets/img/icons/flags/GB.png";
@@ -144,7 +137,6 @@ import BR from "@/assets/img/icons/flags/BR.png";
 
 export default {
   name: "dashboard-default",
-
   data() {
     return {
       stats: {

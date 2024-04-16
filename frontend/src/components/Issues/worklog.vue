@@ -65,12 +65,13 @@
                                                 <span
                                                     style="border-radius: 50%; margin-top:-4px; width:30px; height:30px; text-align: center;  background-color:lightgray;"
                                                     class="small font-weight-bold me-2 pt-1">{{
-        worklog.author.charAt(0).toUpperCase()
-    }}</span>
+                                                    worklog.author.charAt(0).toUpperCase()
+                                                    }}</span>
                                                 <p class="pe-2 small font-weight-bold">{{ worklog.author }}</p>
-                                                <p class="small"> logged - {{ formatDuration2(worklog.logged_time)+' on' }} {{
-        formatDateTime(worklog.created_at)
-    }}
+                                                <p class="small"> logged - {{ formatDuration2(worklog.logged_time) + ' on'
+                                                    }} {{
+                                                    formatDateTime(worklog.created_at)
+                                                    }}
                                                 </p>
                                                 <a v-if="worklog.attachments.length"
                                                     @click="downloadCommentAttachments($event, worklog.id)">
@@ -225,27 +226,21 @@ export default {
             if (!matches) {
                 return '';
             }
-
             const [, days, hours, minutes, seconds] = matches;
 
             const formattedParts = [];
-
             if (days) {
                 formattedParts.push(`${parseInt(days, 10)}d`);
             }
-
             if (hours) {
                 formattedParts.push(`${parseInt(hours, 10)}h`);
             }
-
             if (minutes) {
                 formattedParts.push(`${parseInt(minutes, 10)}m`);
             }
-
             if (seconds) {
                 formattedParts.push(`${parseInt(seconds, 10)}s`);
             }
-
             return formattedParts.join(' ');
         },
         formatDuration2(duration) {
@@ -255,25 +250,18 @@ export default {
             if (!matches) {
                 return '';
             }
-
             const [, hours, minutes, seconds] = matches;
 
             const formattedParts = [];
-
-
-
             if (hours) {
                 formattedParts.push(`${parseInt(hours, 10)}h`);
             }
-
             if (minutes) {
                 formattedParts.push(`${parseInt(minutes, 10)}m`);
             }
-
             if (seconds) {
                 formattedParts.push(`${parseInt(seconds, 10)}s`);
             }
-
             return formattedParts.join(' ');
         },
         openEditWorklogModal(worklog) {
@@ -303,7 +291,6 @@ export default {
                 document.addEventListener('keydown', this.closeEditModal);
             }
 
-            // Close the Work Log modal
             const workLogModal = this.$refs.createWorklogModal;
             if (workLogModal) {
                 workLogModal.hide();
@@ -318,7 +305,6 @@ export default {
                 editModal.removeEventListener('click', this.closeEditModal);
                 document.removeEventListener('keydown', this.closeEditModal);
 
-                // Optionally, open the Work Log modal
                 const workLogModal = this.$refs.createWorklogModal;
                 if (workLogModal) {
                     workLogModal.show();
@@ -444,8 +430,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.detail,
-                    timeout: 500,
+                    text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -520,7 +506,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -564,7 +550,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show();
             }
         },
@@ -573,10 +559,6 @@ export default {
 </script>
 
 <style scoped>
-/* ::v-deep .ql-container {
-    max-height: 500px;
-} */
-
 ::v-deep .ql-editor img {
     width: 150px;
     height: auto;
@@ -612,7 +594,6 @@ export default {
 
 ::v-deep .ql-editor img:hover {
     transform: scale(2.5);
-    /* Adjust the scale factor as needed */
 }
 
 .modalBody {
