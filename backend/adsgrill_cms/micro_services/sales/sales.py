@@ -158,7 +158,6 @@ class SalesView(CsrfExemptMixin, APIView):
         
     def delete(self, request):
         id = request.GET.get('id')
-        print(id, '-----------------------')
         if not id:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -190,4 +189,29 @@ class getAllSaleEmployees(CsrfExemptMixin, APIView):
         except Exception as e:
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'employee_data':employee_data},status=status.HTTP_200_OK)
+    
+class clientTemplateView(CsrfExemptMixin,APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def put(self,request):
+        try:
+            data=request.data.get("data")
+            sale_instance=Sale.objects.get(lead__email=request.user)
+            
+            with transaction.atomic():
+                sale_instance.temp_data=data
+                sale_instance.save()
+            
+        except Sale.DoesNotExist:
+            return JsonResponse({"message":"Sale with this user does not exist"},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message":"Requirements Submitted"},status=status.HTTP_200_OK)
+    
+    def delete(self,request):
+        try:
+            pass
+        except Exception as e:
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message":"Lead deleted succesfully"},status=status.HTTP_200_OK)
         
