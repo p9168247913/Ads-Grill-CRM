@@ -23,7 +23,7 @@
       <div>
         <label class="form-label">Roles </label>
         <div class="selecBox" v-for="(role, index) in roles" :key="index">
-          <input type="checkbox" :id="'role' + index" :value="role" v-model="selecteRole">
+          <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
           <label :for="'role' + index">{{ role }}</label>
         </div>
         <div class="belowTag">
@@ -98,7 +98,7 @@
         <label>Select feature modules to be shown with each role</label>
         <div>
           <label>Roles</label>
-          <div class="roleBaseAccess" v-for="(role, index) in selecteRole" :key="index">
+          <div class="roleBaseAccess" v-for="(role, index) in selectedRole" :key="index">
             {{ role }}
       
             <label class="" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
@@ -111,13 +111,44 @@
       </div>
     </div>
 
+    <div>
+      <button @click="convertDataToHTML">Save</button>
+    </div>
+
+  </div>
+
+  <div style="display: flex; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
+    <div>
+      <p style="font-weight: bold; font-size: small;">Project Type</p>
+        <p style="font-size: smaller;">{{ projectTypeValue }}</p>
+    </div>
+    <div v-if="selectedAuthTypes.length">
+      <p style="font-weight: bold; font-size: small;">Authentication Types</p>
+        <ul>
+          <li style="font-size:smaller" v-for="item in selectedAuthTypes" :key="item">{{ item }}</li>
+        </ul>
+    </div>
+    <div v-if="selectedRole.length">
+      <p style="font-weight: bold; font-size: small;">Roles & Departments</p>
+    <ul>
+      <li style="font-size:smaller" v-for="item in selectedRole" :key="item">{{ item }}</li>
+    </ul>
+    </div>
+    <div v-if="selectedModule.length">
+      <p style="font-weight: bold; font-size: small;">Modules</p>
+      <li style="font-size:smaller" v-for="item in selectedModule" :key="item">{{ item }}</li>
+    </div>
+    <div v-if="subModulesArray.length">
+      <p style="font-weight: bold; font-size: small;">Modules</p>
+      <li style="font-size:smaller" v-for="item in subModulesArray" :key="item">{{ item }}</li>
+    </div>
   </div>
 
 </template>
 
 <script>
-import jsPDF from 'jspdf';
-
+// import jsPDF from 'jspdf';
+import html2pdf from 'html2pdf.js';
 export default {
   data() {
     return {
@@ -191,7 +222,7 @@ export default {
       ],
       authenticationTypes: ['Username/Password', 'OAuth', 'Two-Factor Authentication', 'Social Login authentication', 'Biometric authentication', "Client Certification"],
       roles: ["Super Admin", "Admin", "Manager", "Employee", "Customer", "Viewer"],
-      selecteRole: [],
+      selectedRole: [],
       customModules: '',
       selectedAuthTypes: [],
       modelValue: '',
@@ -847,6 +878,9 @@ export default {
 
   },
   methods: {
+    convertDataToHTML(){
+      this.generatePDF()
+    },
     updateSubModules() {
       this.selectedSubModule = '';
     },
@@ -881,21 +915,22 @@ export default {
       }
     },
     generatePDF() {
-      const doc = new jsPDF();
-
-      const htmlContent = `
-        <h1 style="color: red;">PDF Example</h1>
-        <p ref="p1">This is a paragraph inside a PDF generated from HTML content with styling.</p>
-      `;
-
-      doc.html(htmlContent, {
-        callback: function (doc) {
-          doc.save('example.pdf');
+      console.log(html2pdf)
+      var opt = {
+        margin: 0.1,
+        fileName: 'new.pdf',
+        image: {
+          type: 'jpeg',
+          quality: 0.99
         },
-        margin: 10,
-        x: 10,
-        y: 10
-      });
+        html2canvas: { scale: 2 },
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+      html2pdf().from(this.$refs.temp1.outerHTML).set(opt).save();
     },
     addCustomAuthType() {
       if (this.customAuthType.trim() !== '') {
@@ -907,7 +942,7 @@ export default {
     addCustomRole() {
       if (this.customRole.trim() !== '') {
         this.roles.push(this.customRole.trim());
-        this.selecteRole.push(this.customRole.trim());
+        this.selectedRole.push(this.customRole.trim());
         this.customRole = '';
       }
     },
@@ -916,8 +951,8 @@ export default {
     }
   },
   mounted() {
-    console.log(this.selectedSubModules)
-    console.log(this.modelValue);
+    //console.log(this.selectedSubModules)
+    //console.log(this.modelValue);
   },
   watch: {
     selectedSubModule: {
@@ -928,7 +963,6 @@ export default {
   },
 }
 </script>
-
 <style>
 .checkbox-label {
   display: block;
