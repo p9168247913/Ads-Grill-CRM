@@ -144,8 +144,8 @@ export default {
               router.push('/projects')
               this.$store.commit('hideLoader')
             }
-            else { 
-              router.push('/dashboard') 
+            else {
+              router.push('/dashboard')
               this.$store.commit('hideLoader')
             }
           }, 1000);
@@ -164,7 +164,7 @@ export default {
       } catch (error) {
         new Noty({
           type: 'error',
-          text: error.response.data.message ? error.response.data.message :error.response.data.detail,
+          text: error.response.data.message ? error.response.data.message : error.response.data.detail,
           timeout: 3000,
           layout: 'topCenter'
         }).show()

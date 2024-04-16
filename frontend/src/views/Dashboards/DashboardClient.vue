@@ -11,13 +11,13 @@
         <div class="content-page">
             <div class="container-fluid p-0">
                 <!--Table-->
-                <div class="card" style="margin-top: 2rem; padding: 3px; padding-bottom: 8px; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;">
+                <div class="card"
+                    style="margin-top: 2rem; padding: 3px; padding-bottom: 8px; box-shadow: rgba(50, 50, 93, 0.25) 0px 30px 60px -12px inset, rgba(0, 0, 0, 0.3) 0px 18px 36px -18px inset;">
                     <div class="card-header pb-0">
                         <h6>PROJECTS</h6>
                     </div>
-
                     <div class="card-body px-0 pt-0 pb-1" style="border-top: 1px solid gray;">
-                        <div class="table-responsive p-1" >
+                        <div class="table-responsive p-1">
                             <div class="align-items-center p-1 project-card" v-for="(project, index) in allProjects"
                                 :key="index">
                                 <div class="align-items-center mb-0 sprintRow" @click="toggleDropdown(index)">
@@ -35,25 +35,25 @@
                                         </div>
                                         <div class="d-flex flex-row justify-content-center ">
                                             <p class="mb-0 text-sm" style="font-size: smaller; white-space: nowrap;">{{
-                                formatDate(project.created_at) }}</p>
+                                                formatDate(project.created_at) }}</p>
                                         </div>
                                         <div class="d-flex flex-row justify-content-center">
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">{{
-                                project.status === 'to_do' ? "To Do" : project.status === 'in_progress'
-                                    ?
-                                    'In Progress' : project.status === 'done' ? "Done" : '' }}</p>
+                                                project.status === 'to_do' ? "To Do" : project.status === 'in_progress'
+                                                    ?
+                                                    'In Progress' : project.status === 'done' ? "Done" : '' }}</p>
                                         </div>
                                         <div class="d-flex flex-row justify-content-center">
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">{{
-                                project.reporter.name }}</p>
+                                                project.reporter.name }}</p>
                                         </div>
                                         <div class="d-flex flex-row justify-content-center">
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">{{
-                                project.tech_stacks }}</p>
+                                                project.tech_stacks }}</p>
                                         </div>
                                         <div class="d-flex flex-row justify-content-center">
                                             <p class="mb-0 text-sm" style="font-size: smaller;white-space: nowrap;">{{
-                                project.host_address }}</p>
+                                                project.host_address }}</p>
                                         </div>
                                         <div class="d-flex flex-column justify-content-left" style="padding: 0px 10px;">
                                             <h6 class="mb-0 text-sm">
@@ -85,28 +85,28 @@
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
-                                sprint.name }}</h6>
+                                                                sprint.name }}</h6>
                                                         </div>
                                                     </td>
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
-                                sprint.key }}</h6>
+                                                                sprint.key }}</h6>
                                                         </div>
                                                     </td>
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{ sprint.status === 'done' ?
-                                "Done"
-                                :
-                                sprint.status === 'in_progress' ? 'In Progress' :
-                                    sprint.status === 'to_do' ? "To Do" : '' }}</h6>
+                                                                "Done"
+                                                                :
+                                                                sprint.status === 'in_progress' ? 'In Progress' :
+                                                                    sprint.status === 'to_do' ? "To Do" : '' }}</h6>
                                                         </div>
                                                     </td>
                                                     <td style="padding-left: 25px;">
                                                         <div class="d-flex flex-column justify-content-center">
                                                             <h6 class="mb-0 text-sm">{{
-                                formatDate(sprint.start_date) }}</h6>
+                                                                formatDate(sprint.start_date) }}</h6>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -204,7 +204,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </template>
 
@@ -288,7 +287,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -317,7 +316,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -361,7 +360,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show();
             }
         },
@@ -409,7 +408,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -445,7 +444,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -470,7 +469,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }

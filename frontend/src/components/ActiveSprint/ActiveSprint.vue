@@ -343,10 +343,9 @@ export default {
             new Noty({
                 type: 'error',
                 text: "❌ Access denied!! ",
-                timeout: 500,
+                timeout: 1000,
             }).show()
         },
-        resetValues() { },
         currentDateTime() {
             const now = new Date();
             const formattedDateTime = now.toISOString().slice(0, 16);
@@ -356,7 +355,6 @@ export default {
             router.push("/issues")
         },
         createSprints() { },
-        editIssue() { },
         saveContent(e) {
             e.preventDefault()
             if (this.$refs.editor) {

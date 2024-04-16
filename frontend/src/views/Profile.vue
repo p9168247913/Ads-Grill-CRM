@@ -21,8 +21,9 @@
           <div class="row gx-4">
             <div class="col-auto">
               <div class="avatar avatar-xl position-relative">
-                <img :src="'data:image/jpeg;base64,' + userData.profile_pic" alt="profile_image"
-                  class="shadow-sm w-100 border-radius-lg" />
+                <img
+                  :src="userData.profile_pic ? 'data:image/jpeg;base64,' + userData.profile_pic : '/img/User_Image.f332022c.png'"
+                  alt="profile_image" class="shadow-sm w-100 border-radius-lg" />
               </div>
             </div>
             <div class="col-auto my-auto">
@@ -56,7 +57,7 @@
             <div class="card-header pb-0">
               <div class="d-flex align-items-center">
                 <p class="mb-0">Edit Profile</p>
-                <argon-button color="success" size="sm" class="ms-auto" @click="saveChanges()"> <i
+                <argon-button color="success" size="sm" class="ms-auto" @click="confirmSaveChanges()"> <i
                     class="bi bi-save-fill" style="color: white;"></i> &nbsp;&nbsp; Save</argon-button>
               </div>
             </div>
@@ -70,7 +71,7 @@
               <div class="row">
                 <div class="col-md-6">
                   <label for="name" class="form-control-label">Name</label>
-                  <input class="form-control" type="text" v-model="userData.name" />
+                  <input class="form-control" type="text" v-model="capitalizedName" />
                 </div>
                 <div class="col-md-6">
                   <label for="email" class="form-control-label">Email address</label>
@@ -141,6 +142,15 @@ export default {
   computed: {
     ...mapState(["authToken", "authUser"]),
     ...mapMutations(["setAuthToken", "setAuthUser"]),
+    capitalizedName: {
+      get() {
+        return this.userData.name;
+      },
+      set(value) {
+        const formattedName = value.replace(/\b\w/g, (match) => match.toUpperCase());
+        this.userData.name = formattedName;
+      }
+    }
   },
   data() {
     return {
@@ -173,26 +183,56 @@ export default {
     fixedNavbar() {
       this.isFixedNavbar = window.scrollY > 1
     },
-    doLogout() {
-      axios.get(`${BASE_URL}api/logout/`).
-        then((r) => {
-          if (r.status == 200) {
+    async doLogout() {
+      const result = await Swal.fire({
+        title: 'Are you sure you want to logout?',
+        text: "You will be logged out of your account.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '✔ Yes, logout',
+        cancelButtonText: '✖ No, stay'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.get(`${BASE_URL}api/logout/`);
+          if (response.status === 200) {
             new Noty({
               type: 'success',
-              text: r.data.message,
+              text: response.data.message,
               timeout: 1000,
               layout: 'topCenter'
-            }).show()
-            router.push('/signin')
-            this.logout()
+            }).show();
+            router.push('/signin');
+            this.logout();
           }
-        })
+        } catch (error) {
+          new Noty({
+            type: 'error',
+            text: error.response?.data?.detail || error.response?.data?.message || 'An error occurred during logout',
+            timeout: 1000,
+          }).show();
+        }
+      }
+    },
+    async confirmSaveChanges() {
+      const result = await Swal.fire({
+        title: 'Are you sure you want to save changes?',
+        text: "Any unsaved changes will be lost if you navigate away from this page.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '✔ Yes, save changes',
+        cancelButtonText: '✖ No, cancel'
+      });
+
+      if (result.isConfirmed) {
+        await this.saveChanges();
+      }
     },
     async saveChanges() {
       try {
         this.$store.commit('showLoader');
         const formData = new FormData();
-        console.log("3", this.selectedFiles);
 
         if (this.userData.oldPassword && this.userData.newPassword !== this.userData.confirmPassword) {
           new Noty({
@@ -234,8 +274,8 @@ export default {
           this.userData.newPassword = ''
           this.userData.confirmPassword = ''
           setTimeout(() => {
-          // window.location.reload();
-           
+            // window.location.reload();
+
             new Noty({
               type: 'info',
               text: 'Please re-login to see profile changes',
@@ -249,7 +289,7 @@ export default {
         new Noty({
           type: 'error',
           text: error.response.data.detail ? error.response.data.detail : error.response.data.message,
-          timeout: 500,
+          timeout: 1000,
         }).show()
         this.$store.commit('hideLoader');
       }
@@ -286,7 +326,6 @@ export default {
         fileInput.value = '';
       }
       this.selectedFiles = [file];
-      console.log(this.selectedFiles);
     },
     setUserDataFromLocalStorage() {
       this.userData.id = this.authUser.id

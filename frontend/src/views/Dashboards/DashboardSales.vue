@@ -83,9 +83,6 @@
 </template>
 <script>
 import Card from "@/examples/Cards/Card.vue";
-// import GradientLineChart from "@/examples/Charts/GradientLineChart.vue";
-// import Carousel from "../components/Carousel.vue";
-// import CategoriesCard from "../components/CategoriesCard.vue";
 import Noty from 'noty';
 import US from "@/assets/img/icons/flags/US.png";
 import DE from "@/assets/img/icons/flags/DE.png";
@@ -168,9 +165,6 @@ export default {
     },
     components: {
         Card,
-        // GradientLineChart,
-        // Carousel,
-        // CategoriesCard,
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
@@ -195,8 +189,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
