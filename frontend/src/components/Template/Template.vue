@@ -58,8 +58,11 @@
         <div>
           <label class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]"
             :key="'sub_' + subIndex">
-            <input type="checkbox" v-model="selectedSubModules" :value="subModule.value">
+            <input type="checkbox" @click="subModuleclick(subModuleval, subModule.value)" v-model="selectedSubModules"
+              :value="subModule.value" :checked="shouldShowPopupButton(subModule, subModuleval)">
             {{ subModule.key }}
+            <button v-if="shouldShowPopupButton(subModule, subModuleval)" @click="openPopup(subModule)">Open
+              Popup</button>
           </label>
 
           <div class="belowTag2">
@@ -67,13 +70,11 @@
             <button class="btn_form" @click="addSubModule(subModuleval)">Add Submodule</button>
           </div>
         </div>
+
       </div>
     </div>
-
     <div>
       <div class="module">
-
-
         <div>
           <label for="sprint" class="form-label">Select Sidebar</label>
           <select required class="form-select selecBox" v-model="sidebarValue">
@@ -81,17 +82,39 @@
             <option v-for="(sprint, index) in sidbar" :key="index" :value="sprint.value">{{ sprint.key }}</option>
           </select>
         </div>
-        <div>
-          <label for="sprint" class="form-label">What sidebar/top bar do you want to show on the website</label>
-          <select required class="form-select selecBox" v-model="sidebarValue">
-            <option value="">Select Sidebar Type</option>
-            <option v-for="(sprint, index) in sidbar" :key="index" :value="sprint.value">{{ sprint.key }}</option>
-          </select>
-        </div>
 
       </div>
-
     </div>
+
+    <div class="popup-container" v-if="showPopup">
+      <div class="popup">
+    <span class="close-btn" @click="closePopup">&times;</span>
+
+    <div class="row">
+      <div class="">
+        <label for="projectName" class="form-label">Header Description</label>
+        <QuillEditor required v-model="popupData.header" :modules="modules" theme="snow" toolbar="full" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="">
+        <label for="projectName" class="form-label">Body Description</label>
+        <QuillEditor required v-model="popupData.body" :modules="modules" theme="snow" toolbar="full" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="">
+        <label for="projectName" class="form-label">Footer Description</label>
+        <QuillEditor required v-model="popupData.footer" :modules="modules" theme="snow" toolbar="full" />
+      </div>
+    </div>
+    <div> <button @click="storeAndClearData">Store Data </button></div>
+
+  </div>
+    </div>
+
     <div>
 
       <div>
@@ -100,27 +123,32 @@
           <label>Roles</label>
           <div class="roleBaseAccess" v-for="(role, index) in selecteRole" :key="index">
             {{ role }}
-      
+
             <label class="" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
               <input type="checkbox" v-model="selectedRoleBasedAccess" :value="module.value">
               {{ module }}
             </label>
-         
+
           </div>
         </div>
       </div>
     </div>
-
   </div>
-
 </template>
 
 <script>
 import jsPDF from 'jspdf';
-
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
   data() {
     return {
+      popupData: {
+        header: '',
+        body: '',
+        footer: ''
+      },
+      showPopup: false,
 
       dataItems: [{ key: '', value: '' }],
       mainfilled: [{
@@ -186,8 +214,6 @@ export default {
         key: "Both Sidebar",
         value: "Both Sidebar"
       }
-
-
       ],
       authenticationTypes: ['Username/Password', 'OAuth', 'Two-Factor Authentication', 'Social Login authentication', 'Biometric authentication', "Client Certification"],
       roles: ["Super Admin", "Admin", "Manager", "Employee", "Customer", "Viewer"],
@@ -199,11 +225,12 @@ export default {
       customAuthType: '',
       selectedModule: [],
       sidebarValue: '',
+      selectedSubModules: [],
       customRole: '',
       newSubModuleName: {},
       subModulesArray: [],
       newCustomModuleLabel: '',
-
+      allData: [],
       subModules: {
         "Sales Entery": [{
           key: "Sales Module",
@@ -842,11 +869,75 @@ export default {
 
     }
   },
-
+  components: {
+    QuillEditor
+  },
   computed: {
 
   },
   methods: {
+    storeAndClearData(popupData ) {
+console.log(popupData);
+    // this.allData.forEach(category => {
+    //   for (const key in category) {
+    //     if (Object.prototype.hasOwnProperty.call(category, key)) {
+    //       const submodule = category[key];
+    //       submodule.forEach(item => {
+    //         if (item.key === popupData[0].key) {
+              
+    //           this.$set(item, 'popupData', popupData[0]);
+    //           return;
+    //         }
+    //       });
+    //     }
+    //   }
+    // });
+
+    // for (const key in formData) {
+    //   if (Object.prototype.hasOwnProperty.call(formData, key)) {
+    //     this.$set(formData, key, ''); 
+    //   }
+    // }
+  },
+
+    shouldShowPopupButton(subModule, subModuleval) {
+      subModule = subModule?.key
+
+
+      return this.allData.some(data =>
+        Object.keys(data).includes(subModuleval) &&
+        data[subModuleval].some(sub => sub.value === subModule)
+      );
+    }
+    ,
+    subModuleclick(subModuleval, value) {
+      const index = this.allData.findIndex(item => Object.keys(item)[0] === subModuleval);
+      if (index === -1) {
+        // If not present, add it
+        this.allData.push({ [subModuleval]: [{ key: value, value: value }] });
+      } else {
+        // If present, remove it if it exists, otherwise add it
+        const existingIndex = this.allData[index][subModuleval].findIndex(item => item.key === value);
+        if (existingIndex !== -1) {
+          // Value exists, remove it
+          this.allData[index][subModuleval].splice(existingIndex, 1);
+        } else {
+          // Value doesn't exist, add it
+          this.allData[index][subModuleval].push({ key: value, value: value });
+        }
+      }
+      console.log("allData:", this.allData);
+    }
+
+    ,
+    openPopup() {
+
+      this.showPopup = true;
+    },
+    closePopup() {
+
+      this.showPopup = false;
+    },
     updateSubModules() {
       this.selectedSubModule = '';
     },
@@ -913,23 +1004,47 @@ export default {
     },
     addInputFields() {
       this.dataItems.push({ key: '', value: '' });
-    }
+    },
+    addSubModuleData() {
+
+
+    },
+
   },
   mounted() {
-    console.log(this.selectedSubModules)
-    console.log(this.modelValue);
+
   },
   watch: {
     selectedSubModule: {
       handler() {
-        console.log(this.selectedSubModules)
       }
     }
   },
 }
 </script>
 
-<style>
+<style scoped>
+::v-deep .ql-container {
+  max-height: 135px;
+  display: block;
+}
+
+::v-deep .ql-editor img {
+  width: 150px;
+  height: auto;
+  margin: 5px;
+  border-radius: 8px;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}
+
+::v-deep .ql-editor {
+  height: auto;
+  max-height: 135px;
+  overflow-y: auto;
+  color: black;
+  height: 135px;
+}
+
 .checkbox-label {
   display: block;
   margin-bottom: 5px;
@@ -961,7 +1076,6 @@ export default {
   gap: 8px;
   width: fit-content;
   border-radius: 5px;
-
   border: 1px solid gray;
 }
 
@@ -969,7 +1083,6 @@ export default {
   widows: 100%;
   border: none;
   outline: none;
-
 }
 
 .btn_form {
@@ -994,19 +1107,49 @@ export default {
 
 .module {
   display: flex;
-
   width: "100%";
   gap: 10px;
   flex-direction: row;
   flex-wrap: wrap;
-
 }
 
 .selecBox {
   max-width: 300px;
-
   min-width: 300px;
 }
 
-/* Add your styles here if needed */
+.popup-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 5px;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup {
+  background-color: #fff;
+  height: 85vh;
+  width: 90%;
+  padding: 10px;
+  overflow: auto;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #888;
+}
 </style>
