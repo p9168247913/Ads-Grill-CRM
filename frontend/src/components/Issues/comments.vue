@@ -1,4 +1,5 @@
 <template>
+
     <head>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
@@ -43,11 +44,12 @@
                                         style="height: 40px; resize: none; max-height: auto;"
                                         placeholder=" Add Comments..." type="text" class="form-control"
                                         required></textarea>
-                                        <div class="col-md-4">
-                                    <ul v-if="showEmailSelector" name="emailSelector" id="emailSelector">
-                                        <li @click="selectEmail(item.email)" v-for="item in devUsers" :key="item.id" :value="item.email">{{ item.email }}</li>
-                                    </ul>
-                                </div>
+                                    <div class="col-md-4">
+                                        <ul v-if="showEmailSelector" name="emailSelector" id="emailSelector">
+                                            <li @click="selectEmail(item.email)" v-for="item in devUsers" :key="item.id"
+                                                :value="item.email">{{ item.email }}</li>
+                                        </ul>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-2 mb-1">
@@ -57,7 +59,8 @@
                                     <label for="fileInput1"
                                         class="text-xs rounded border border-1 border-dark font-weight-bold cursor-pointer"
                                         title="Attach" style="padding:11px;">Attach</label>
-                                    <p v-if="this.postselectedFiles.length>0" class="text-xs" style="margin-left: 5px;">{{ `${this.postselectedFiles.length} file selected` }}</p>
+                                    <p v-if="this.postselectedFiles.length > 0" class="text-xs" style="margin-left: 5px;">
+                                        {{ `${this.postselectedFiles.length} file selected` }}</p>
                                 </div>
                                 <!-- <div v-if="!isCommentFocused" style="margin-top: -8px;">
                                     <p class="text-xs"><span class="font-weight-bold text-dark">Pro tip:</span> Press
@@ -110,7 +113,8 @@
                                             <label for="fileInput2"
                                                 class="text-xs rounded border border-1 border-dark font-weight-bold me-2"
                                                 title="Add files" style="padding:11px">Add Files</label>
-                                    <p v-if="this.editselectedFiles.length>0" class="text-xs">{{ `${this.editselectedFiles.length} file selected` }}</p>
+                                            <p v-if="this.editselectedFiles.length > 0" class="text-xs">{{
+                                                `${this.editselectedFiles.length} file selected` }}</p>
                                         </div>
                                         <div v-if="comment.editMode" class="d-flex flex-row gap-4">
                                             <p @click="editComment(comment)"
@@ -157,7 +161,7 @@ export default {
             editselectedFiles: [],
             showModal: false,
             devUsers: [],
-            showEmailSelector:false
+            showEmailSelector: false
         }
     },
     computed: {
@@ -184,7 +188,7 @@ export default {
             this.sprintID = sprintID
             this.issueID = issueID
         },
-        getDevUsersFromIssuePage(devUsers){
+        getDevUsersFromIssuePage(devUsers) {
             this.devUsers = devUsers
         },
         // handleKeyDown(e) {
@@ -195,18 +199,16 @@ export default {
         // },
         handlePostFileChange(e) {
             this.postselectedFiles = e.target.files
-            console.log("post",this.postselectedFiles);
         },
         handleEditFileChange(e) {
             this.editselectedFiles = e.target.files
-            console.log("edit",this.editselectedFiles);
         },
         async postComment() {
             if (!this.commentDesc) {
                 new Noty({
                     type: 'error',
                     text: "Comment input field is required!!",
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 return
             }
@@ -234,7 +236,6 @@ export default {
                 });
                 if (response.status === 201) {
                     this.resetValues()
-                    // this.$refs.closeModal.click()
                     Swal.fire({
                         title: response.data.message,
                         icon: 'success',
@@ -246,7 +247,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -278,7 +279,7 @@ export default {
                     new Noty({
                         type: 'warning',
                         text: "No comments found!!",
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                     this.$store.commit('hideLoader');
                 }
@@ -287,7 +288,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -323,7 +324,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -348,7 +349,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -392,7 +393,7 @@ export default {
                 new Noty({
                     type: "error",
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show();
             }
         },
@@ -404,9 +405,9 @@ export default {
             this.postselectedFiles = []
             this.editselectedFiles = []
             this.commentDesc = ''
-            this.showEmailSelector=false
+            this.showEmailSelector = false
         },
-        async getDevUsers(){
+        async getDevUsers() {
             try {
                 const response = await axios.get(`${BASE_URL}api/users/?role=development`, {
                     headers: {
@@ -416,31 +417,30 @@ export default {
                 if (response && response.status === 200 && response.data) {
                     this.devUsers = response.data.users
                 }
-                console.log("allUsers", this.devUsers)
             } catch (error) {
                 new Noty({
                     type: "error",
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show();
             }
         },
         checkMail() {
-        let value = this.commentDesc;
-        if (value.slice(-1) == '@') { 
-          this.showEmailSelector = true;
+            let value = this.commentDesc;
+            if (value.slice(-1) == '@') {
+                this.showEmailSelector = true;
+            }
+            else {
+                this.showEmailSelector = false;
+            }
+        },
+        selectEmail(email) {
+            let content = this.commentDesc
+            content = content.slice(0, -1) + ' ' + email + " "
+            this.commentDesc = content
+            this.showEmailSelector = false
+            this.$refs.doComment.focus()
         }
-        else{
-          this.showEmailSelector =false;
-        }
-      },
-      selectEmail(email) {
-        let content = this.commentDesc
-        content =content.slice(0, -1)+' '+email+" "
-        this.commentDesc=content
-        this.showEmailSelector = false
-        this.$refs.doComment.focus()
- }
     },
     mounted() {
         document.addEventListener('keydown', this.handleKeyDown)

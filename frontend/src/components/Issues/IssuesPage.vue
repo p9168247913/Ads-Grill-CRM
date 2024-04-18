@@ -101,7 +101,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="team lead" class="form-label">Team Lead</label>
-                                            <select :required="this.authUser.designation === 'project_manager'" class="form-select" v-model="issueData.team_lead_id">
+                                            <select required class="form-select" v-model="issueData.team_lead_id">
                                                 <option value="">Select Team Lead</option>
                                                 <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
                                                     {{
@@ -117,7 +117,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="Assignee" class="form-label">Assignee</label>
-                                            <select :required="this.authUser.designation === 'team_lead'" class="form-select" v-model="issueData.assignee_id">
+                                            <select class="form-select" v-model="issueData.assignee_id" required>
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
@@ -233,7 +233,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="Assignee" class="form-label">Assignee</label>
-                                            <select :required="this.authUser.designation === 'team_lead'" class="form-select" v-model="editIssueData.assignee_id" >
+                                            <select class="form-select" v-model="editIssueData.assignee_id" required>
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
@@ -570,6 +570,11 @@
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
+                                                <h6 class="mb-0 text-sm">{{ issue.team_lead.name ? issue.team_lead.name : 'N/A' }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 25px;">
+                                            <div class="d-flex flex-column justify-content-left">
                                                 <h6 class="mb-0 text-sm">{{ formatDuration(issue.exp_duration) }}</h6>
                                             </div>
                                         </td>
@@ -651,7 +656,7 @@ export default {
         return {
             editModalOpened: false,
             isEditIssueModalVisible: false,
-            headers: ['S.No.', 'Title',  'Assignee', 'Type', 'Status', 'Sprint', 'Reporting Manager',  'Task duration', 'Actual duration', 'Files'],
+            headers: ['S.No.', 'Title',  'Assignee', 'Type', 'Status', 'Sprint', 'Reporting Manager', 'Team Lead',  'Task duration', 'Actual duration', 'Files'],
             allIssues: [],
             selectedSprintId: '',
             selectedEditSprintId: '',
@@ -803,27 +808,21 @@ export default {
             if (!matches) {
                 return '';
             }
-
             const [, days, hours, minutes, seconds] = matches;
 
             const formattedParts = [];
-
             if (days) {
                 formattedParts.push(`${parseInt(days, 10)}d`);
             }
-
             if (hours) {
                 formattedParts.push(`${parseInt(hours, 10)}h`);
             }
-
             if (minutes) {
                 formattedParts.push(`${parseInt(minutes, 10)}m`);
             }
-
             if (seconds) {
                 formattedParts.push(`${parseInt(seconds, 10)}s`);
             }
-
             return formattedParts.join(' ');
         },
         nextPage() {
@@ -872,7 +871,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show();
             }
         },
@@ -1115,14 +1114,14 @@ export default {
                     new Noty({
                         type: 'error',
                         text: 'rootHTML method is not available',
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                 }
             } else {
                 new Noty({
                     type: 'error',
                     text: 'Quill editor reference not found',
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -1144,7 +1143,7 @@ export default {
                     new Noty({
                         type: 'error',
                         text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                     this.$store.commit('hideLoader');
                 }
@@ -1287,7 +1286,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1407,7 +1406,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1426,7 +1425,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1448,7 +1447,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -1469,7 +1468,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }

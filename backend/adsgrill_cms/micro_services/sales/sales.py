@@ -87,6 +87,21 @@ class SalesView(CsrfExemptMixin, APIView):
                 
             if client_name is not None and contact_no is not None:
                 allSales = allSales.filter(Q(lead__client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
+            
+            all_sales_contact_no = [obj.lead.contact_no for obj in allSales]
+            related_users = Users.objects.filter(contact_no__in=all_sales_contact_no)
+            model2_dict = {}
+            for obj in related_users:
+                if obj.contact_no not in model2_dict:
+                    model2_dict[obj.contact_no] = []
+                model2_dict[obj.contact_no].append(obj)
+
+            for obj in allSales:
+                contact_no = obj.lead.contact_no
+                if contact_no in model2_dict:
+                    obj.related_users = model2_dict[contact_no]
+                else:
+                    obj.related_users = []
             noOfRecords = 15
             p = Paginator(allSales, noOfRecords)
             page_obj = p.get_page(pageNo)
@@ -97,7 +112,10 @@ class SalesView(CsrfExemptMixin, APIView):
                 page_obj = p.page(1)
             except EmptyPage:
                 page_obj = p.page(p.num_pages)
-            sale_data = [{
+            
+            new_data = []
+            for sale in page_obj:
+                model1_data = {
                 'id':sale.pk,
                 'name':sale.lead.client_name,
                 'email':sale.lead.email,
@@ -110,10 +128,23 @@ class SalesView(CsrfExemptMixin, APIView):
                 'follow_date':datetime.strftime(sale.follow_date,"%Y-%m-%dT%H:%M") if sale.follow_date else "",
                 'status':sale.sale_status,
                 'remark':sale.remark,
+                'temp_data':sale.temp_data,
                 'created_at':sale.created_at
+                }
 
-            }for sale in page_obj]
-
+                for related_obj in sale.related_users:
+                    related_user_data = {
+                        'id':related_obj.pk,
+                        'name':related_obj.name,
+                        'email':related_obj.email,
+                        'contact_no':related_obj.contact_no,
+                        'pincode':related_obj.pincode,
+                        'role': related_obj.role.name,
+                        'designation': related_obj.designation,
+                    }
+                    model1_data['related_users'] = related_user_data
+                new_data.append(model1_data)
+            sale_data = new_data
             sales_count = Sale.objects.all().count()
             follow_count=Sale.objects.filter(follow_date__isnull=False).count()
             
@@ -158,7 +189,6 @@ class SalesView(CsrfExemptMixin, APIView):
         
     def delete(self, request):
         id = request.GET.get('id')
-        print(id, '-----------------------')
         if not id:
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
@@ -190,4 +220,22 @@ class getAllSaleEmployees(CsrfExemptMixin, APIView):
         except Exception as e:
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'employee_data':employee_data},status=status.HTTP_200_OK)
+    
+class clientTemplateView(CsrfExemptMixin,APIView):
+    authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    def put(self,request):
+        try:
+            data=request.data.get("data")
+            sale_instance=Sale.objects.get(lead__email=request.user)
+            
+            with transaction.atomic():
+                sale_instance.temp_data=data
+                sale_instance.save()
+            
+        except Sale.DoesNotExist:
+            return JsonResponse({"message":"Sale with this user does not exist"},status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message":"Requirements Submitted"},status=status.HTTP_200_OK)
         

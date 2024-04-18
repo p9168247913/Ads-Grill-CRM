@@ -1,4 +1,12 @@
 <template>
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Webkit | Responsive Bootstrap 4 Admin Dashboard Template</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+    </head>
     <div class="wrapper" style="margin-bottom: 80px; padding: 0; ">
         <div class="content-page">
             <!-- <h1>Dashboard Lead</h1> -->
@@ -36,75 +44,75 @@
                         </div>
 
                         <!-- <div class="row mt-4">
-                <div class="col-lg-7 mb-lg-0 mb-4">
-                    <div class="card">
-                        <div class="p-3 pb-0 card-header">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="mb-2">Sales by Country</h6>
+                            <div class="col-lg-7 mb-lg-0 mb-4">
+                                <div class="card">
+                                    <div class="p-3 pb-0 card-header">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-2">Sales by Country</h6>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table align-items-center">
+                                            <tbody>
+                                                <tr v-for="(sale, index) in sales" :key="index">
+                                                    <td class="w-30">
+                                                        <div class="px-2 py-1 d-flex align-items-center">
+                                                            <div>
+                                                                <img :src="sale.flag" alt="Country flag" />
+                                                            </div>
+                                                            <div class="ms-4">
+                                                                <p class="mb-0 text-xs font-weight-bold">Country:</p>
+                                                                <h6 class="mb-0 text-sm">{{ sale.country }}</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-center">
+                                                            <p class="mb-0 text-xs font-weight-bold">Sales:</p>
+                                                            <h6 class="mb-0 text-sm">{{ sale.sales }}</h6>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-center">
+                                                            <p class="mb-0 text-xs font-weight-bold">Value:</p>
+                                                            <h6 class="mb-0 text-sm">{{ sale.value }}</h6>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-sm align-middle">
+                                                        <div class="text-center col">
+                                                            <p class="mb-0 text-xs font-weight-bold">Bounce:</p>
+                                                            <h6 class="mb-0 text-sm">{{ sale.bounce }}</h6>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table align-items-center">
-                                <tbody>
-                                    <tr v-for="(sale, index) in sales" :key="index">
-                                        <td class="w-30">
-                                            <div class="px-2 py-1 d-flex align-items-center">
-                                                <div>
-                                                    <img :src="sale.flag" alt="Country flag" />
-                                                </div>
-                                                <div class="ms-4">
-                                                    <p class="mb-0 text-xs font-weight-bold">Country:</p>
-                                                    <h6 class="mb-0 text-sm">{{ sale.country }}</h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="text-center">
-                                                <p class="mb-0 text-xs font-weight-bold">Sales:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.sales }}</h6>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="text-center">
-                                                <p class="mb-0 text-xs font-weight-bold">Value:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.value }}</h6>
-                                            </div>
-                                        </td>
-                                        <td class="text-sm align-middle">
-                                            <div class="text-center col">
-                                                <p class="mb-0 text-xs font-weight-bold">Bounce:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.bounce }}</h6>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-5">
-                    <categories-card />
-                </div>
-            </div> -->
+                            <div class="col-lg-5">
+                                <categories-card />
+                            </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="card" style="background-color: white; border-radius: 10px; padding: 10px;">
                     <h5>MANAGERS</h5>
                     <div class="row">
-                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" style="width:auto;" v-for="(manager, index) in managers" :key="index">
-                            <div class="card p-1"
-                                style="height: 140px; display: flex; flex-direction: row; gap: 5px;">
+                        <div class="col-lg-3 col-md-6 col-sm-12 mb-2" style="width:auto;"
+                            v-for="(manager, index) in managers" :key="index">
+                            <div class="card p-1" style="height: 140px; display: flex; flex-direction: row; gap: 5px;">
                                 <img :src="getProfilePic(manager)" alt="Manager Image"
                                     style="width: 130px; height: 130px; border-radius: 5px;">
                                 <div class="card-body" style="padding-bottom: 0; padding-top: 1">
                                     <p class="card-title" style="font-weight: bold; font-size: 15px">{{ manager.name }}
                                     </p>
                                     <p class="card-text" style="font-size: 13px">{{ manager.designation ===
-                                'project_manager' ? "Project Manager" : manager.designation === 'sales_manager'
-                                ?
-                                "Sales Manager" : manager.designation === 'leads_manager'
-                                    ?
-                                    "Lead Manager" : manager.designation }}</p>
+                                        'project_manager' ? "Project Manager" : manager.designation === 'sales_manager'
+                                        ?
+                                        "Sales Manager" : manager.designation === 'leads_manager'
+                                            ?
+                                            "Lead Manager" : manager.designation }}</p>
                                 </div>
                             </div>
                         </div>
@@ -128,7 +136,7 @@ import axios from 'axios';
 import { BASE_URL } from '../../config/apiConfig';
 import { mapState } from 'vuex';
 import router from "@/router";
-
+import defaultProfilePic from '../../assets/img/User_Image.png';
 export default {
     data() {
         return {
@@ -212,10 +220,10 @@ export default {
     },
     methods: {
         redirect(parameter) {
-            parameter === 'deve' ? router.push('/employees/development') : parameter === 'pro' ? router.push('/projects') : parameter === 'lead' ? router.push('/leads') : router.push('/dashboard')
+            parameter === 'deve' ? router.push('/employees/hrms') : parameter === 'pro' ? router.push('/projects') : parameter === 'lead' ? router.push('/leads') : router.push('/dashboard')
         },
         getProfilePic(manager) {
-            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "https://www.kindpng.com/picc/m/78-786678_avatar-hd-png-download.png";
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : defaultProfilePic;
         },
         async getLeads() {
             let queryParams = {
@@ -233,14 +241,13 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
         async getProjects() {
             try {
-
                 const response = await axios.get(`${BASE_URL}api/development/projects?key=development`, {
                     headers: {
                         'Content-Type': "multipart/form-data",
@@ -256,7 +263,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -274,12 +281,12 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
-        async getEmployees() {
+        async getEmployees() {  
             try {
                 const response = await axios.get(`${BASE_URL}api/users/?role=client`, {
                     headers: {
@@ -292,8 +299,8 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },

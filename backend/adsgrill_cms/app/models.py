@@ -93,6 +93,8 @@ class Sale(models.Model):
     status = models.ForeignKey(LeadStatus, on_delete=models.PROTECT, null=True, blank=False, related_name="LeadStatus")
     remark=models.CharField(null=True,blank=True)
     sale_status=models.CharField(null=True,blank=False,max_length=30)
+    temp_data=models.TextField(null=True,blank=True)
+    quot_data = models.TextField(null=True, blank=True)
     follow_date = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
