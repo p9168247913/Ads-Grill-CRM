@@ -329,7 +329,7 @@
                                             <div class="d-flex">
                                                 <div>
                                                     <img :src="getProfilePic(user)"
-                                                        class="avatar avatar-sm me-3 rounded-circle" />
+                                                    alt='dummy_image' class="avatar avatar-sm me-3 rounded-circle" />
                                                 </div>
                                             </div>
                                         </td>
@@ -403,6 +403,7 @@ import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import { BASE_URL } from '../config/apiConfig';
+import defaultProfilePic from '../assets/img/User_Image.png';
 
 export default {
     components: {
@@ -467,7 +468,7 @@ export default {
     },
     methods: {
         getProfilePic(manager) {
-            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "https://www.kindpng.com/picc/m/78-786678_avatar-hd-png-download.png";
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : defaultProfilePic;
         },
         extractFilename(response) {
             const contentDisposition = response.headers['content-disposition'];
@@ -587,7 +588,6 @@ export default {
             this.selectedDesgination = ''
         },
         removeUnderScores(value) {
-            // return value.replace(/_/g, ' ')
             let result = ''
             for (let i = 0; i < value.length; i++) {
                 if (value[i] == '_') {
@@ -775,7 +775,6 @@ export default {
                     headers: { token: this.authToken },
                 },
                 )
-                console.log(response);
                 if (response.status == 200) {
                     this.users = response.data.users
                 }

@@ -52,5 +52,4 @@ export default {
 </script>
 
 <style>
-/* Add your custom styling for the pagination component here */
 </style>

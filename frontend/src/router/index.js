@@ -101,7 +101,7 @@ const routes = [
   },
   {
     path: "/employees/:val",
-    name: 'Employees/',
+    name: 'Employees',
     component: GetEmployee,
   },
   {

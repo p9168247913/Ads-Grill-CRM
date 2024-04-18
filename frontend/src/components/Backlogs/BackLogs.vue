@@ -479,8 +479,6 @@ export default {
 
         if (!this.projectKey) {
             this.showSweetAlert();
-        } else {
-            // this.loadActiveSprints();
         }
     },
     methods: {
@@ -491,7 +489,7 @@ export default {
             new Noty({
                 type: 'error',
                 text: "❌ Access denied!! ",
-                timeout: 500,
+                timeout: 1000,
             }).show()
         },
         async startSprint(e, sprint) {
@@ -542,7 +540,7 @@ export default {
                     new Noty({
                         type: 'error',
                         text: response.data.message,
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                 }
                 this.$store.commit('hideLoader');
@@ -551,7 +549,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             } finally {
                 this.startedSprintKey = null;
@@ -576,7 +574,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -610,7 +608,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -671,7 +669,7 @@ export default {
                     new Noty({
                         type: 'error',
                         text: response.data.message,
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                 }
                 this.$store.commit('hideLoader');
@@ -680,7 +678,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             }
         },
@@ -698,7 +696,7 @@ export default {
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
                 this.$store.commit('hideLoader');
             }
@@ -714,14 +712,14 @@ export default {
                     new Noty({
                         type: 'error',
                         text: 'rootHTML method is not available',
-                        timeout: 500,
+                        timeout: 1000,
                     }).show()
                 }
             } else {
                 new Noty({
                     type: 'error',
                     text: 'Quill editor reference not found',
-                    timeout: 500,
+                    timeout: 1000,
                 }).show()
             }
         },

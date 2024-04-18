@@ -15,9 +15,10 @@
                         :detail="stats.users.detail" directionReverse></card>
                 </div>
                 <div class="col-lg-4 col-md-6 col-12">
-                    <card :title="stats.clients.title" :value="stats.clients.value" :percentage="stats.clients.percentage"
-                        :iconClass="stats.clients.iconClass" :iconBackground="stats.clients.iconBackground"
-                        :percentageColor="stats.clients.percentageColor" :detail="stats.clients.detail" directionReverse>
+                    <card :title="stats.clients.title" :value="stats.clients.value"
+                        :percentage="stats.clients.percentage" :iconClass="stats.clients.iconClass"
+                        :iconBackground="stats.clients.iconBackground" :percentageColor="stats.clients.percentageColor"
+                        :detail="stats.clients.detail" directionReverse>
                     </card>
                 </div>
                 <!-- <div class="col-lg-3 col-md-6 col-12">
@@ -26,7 +27,7 @@
                         :detail="stats.sales.detail" directionReverse></card>
                 </div> -->
             </div>
-            
+
             <!-- <div class="row mt-4">
                 <div class="col-lg-7 mb-lg-0 mb-4">
                     <div class="card">
@@ -83,9 +84,6 @@
 </template>
 <script>
 import Card from "@/examples/Cards/Card.vue";
-// import GradientLineChart from "@/examples/Charts/GradientLineChart.vue";
-// import Carousel from "../components/Carousel.vue";
-// import CategoriesCard from "../components/CategoriesCard.vue";
 import Noty from 'noty';
 import US from "@/assets/img/icons/flags/US.png";
 import DE from "@/assets/img/icons/flags/DE.png";
@@ -163,19 +161,16 @@ export default {
                     flag: BR,
                 },
             },
-            currentPage:1,
+            currentPage: 1,
         }
     },
     components: {
         Card,
-        // GradientLineChart,
-        // Carousel,
-        // CategoriesCard,
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
     },
-    methods:{
+    methods: {
         async getLeads() {
             let queryParams = {
                 page_no: this.currentPage ? this.currentPage : 1,
@@ -186,25 +181,21 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log(response)
                 if (response.status === 200) {
                     this.stats.money.value = response?.data?.lead_data?.total_leads
                     this.stats.users.value = response?.data?.lead_data?.assigned_leads
                     this.stats.clients.value = response?.data?.lead_data?.unassigned_leads
-                    // this.totalPages = response?.data?.lead_data?.total_pages
-                    // this.leads = response?.data?.lead_data?.leads
                 }
-                // console.log(this.leads);
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error,
-                    timeout: 500,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
+                    timeout: 1000,
                 }).show()
             }
         },
     },
-    mounted(){
+    mounted() {
         this.getLeads()
     }
 }

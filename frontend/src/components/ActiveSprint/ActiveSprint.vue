@@ -22,7 +22,7 @@
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
                             <p class="card-head">TO DO</p>
-                            <div v-if="sprintData.issues && sprintData.issues.to_do.length > 0">
+                            <div @click="redirectIssue" v-if="sprintData.issues && sprintData.issues.to_do.length > 0">
                                 <div class="issue-card" v-for="(issue, index) in sprintData.issues.to_do" :key="index">
                                     <div class="row p-2 align-items-center">
                                         <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
@@ -71,7 +71,7 @@
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div" style="">
                             <p class="card-head">IN PROGRESS</p>
-                            <div v-if="sprintData.issues && sprintData.issues.in_progress.length > 0">
+                            <div @click="redirectIssue" v-if="sprintData.issues && sprintData.issues.in_progress.length > 0">
                                 <div class="issue-card" v-for="(issue, index) in sprintData.issues.in_progress"
                                     :key="index">
                                     <div class="row p-2 align-items-center">
@@ -122,7 +122,7 @@
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
                             <p class="card-head">DONE</p>
-                            <div v-if="sprintData.issues && sprintData.issues.done.length > 0">
+                            <div @click="redirectIssue" v-if="sprintData.issues && sprintData.issues.done.length > 0">
                                 <div class="issue-card" v-for="(issue, index) in sprintData.issues.done" :key="index">
                                     <div class="row p-2 align-items-center">
                                         <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
@@ -339,14 +339,16 @@ export default {
         }
     },
     methods: {
+        redirectIssue(){
+            router.push("/issues")
+        },
         notAllowed() {
             new Noty({
                 type: 'error',
                 text: "❌ Access denied!! ",
-                timeout: 500,
+                timeout: 1000,
             }).show()
         },
-        resetValues() { },
         currentDateTime() {
             const now = new Date();
             const formattedDateTime = now.toISOString().slice(0, 16);
@@ -356,7 +358,6 @@ export default {
             router.push("/issues")
         },
         createSprints() { },
-        editIssue() { },
         saveContent(e) {
             e.preventDefault()
             if (this.$refs.editor) {

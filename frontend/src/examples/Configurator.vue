@@ -8,18 +8,11 @@
     </a> -->
     <div class="shadow-lg card">
       <div class="pt-3 pb-0 bg-transparent card-header">
-        <div
-          class=""
-          :class="this.$store.state.isRTL ? 'float-end' : 'float-start'"
-        >
+        <div class="" :class="this.$store.state.isRTL ? 'float-end' : 'float-start'">
           <h5 class="mt-3 mb-0">AdsGrill Configurator</h5>
           <p>See our dashboard options.</p>
         </div>
-        <div
-          class="mt-4"
-          @click="toggle"
-          :class="this.$store.state.isRTL ? 'float-start' : 'float-end'"
-        >
+        <div class="mt-4" @click="toggle" :class="this.$store.state.isRTL ? 'float-start' : 'float-end'">
           <button class="p-0 btn btn-link text-dark fixed-plugin-close-button">
             <i class="fa fa-close"></i>
           </button>
@@ -33,40 +26,14 @@
           <h6 class="mb-0">Sidebar Colors</h6>
         </div>
         <a href="#" class="switch-trigger background-color">
-          <div
-            class="my-2 badge-colors"
-            :class="this.$store.state.isRTL ? 'text-end' : ' text-start'"
-          >
-            <span
-              class="badge filter bg-gradient-primary active"
-              data-color="primary"
-              @click="sidebarColor('primary')"
-            ></span>
-            <span
-              class="badge filter bg-gradient-dark"
-              data-color="dark"
-              @click="sidebarColor('dark')"
-            ></span>
-            <span
-              class="badge filter bg-gradient-info"
-              data-color="info"
-              @click="sidebarColor('info')"
-            ></span>
-            <span
-              class="badge filter bg-gradient-success"
-              data-color="success"
-              @click="sidebarColor('success')"
-            ></span>
-            <span
-              class="badge filter bg-gradient-warning"
-              data-color="warning"
-              @click="sidebarColor('warning')"
-            ></span>
-            <span
-              class="badge filter bg-gradient-danger"
-              data-color="danger"
-              @click="sidebarColor('danger')"
-            ></span>
+          <div class="my-2 badge-colors" :class="this.$store.state.isRTL ? 'text-end' : ' text-start'">
+            <span class="badge filter bg-gradient-primary active" data-color="primary"
+              @click="sidebarColor('primary')"></span>
+            <span class="badge filter bg-gradient-dark" data-color="dark" @click="sidebarColor('dark')"></span>
+            <span class="badge filter bg-gradient-info" data-color="info" @click="sidebarColor('info')"></span>
+            <span class="badge filter bg-gradient-success" data-color="success" @click="sidebarColor('success')"></span>
+            <span class="badge filter bg-gradient-warning" data-color="warning" @click="sidebarColor('warning')"></span>
+            <span class="badge filter bg-gradient-danger" data-color="danger" @click="sidebarColor('danger')"></span>
           </div>
         </a>
         <!-- Sidenav Type -->
@@ -75,28 +42,16 @@
           <p class="text-sm">Choose between 2 different sidenav types.</p>
         </div>
         <div class="d-flex gap-2">
-          <button
-            id="btn-white"
-            class="btn w-100 px-3 mb-2"
-            :class="
-              this.$store.state.sidebarType === 'bg-white'
-                ? 'bg-gradient-success'
-                : 'btn-outline-success'
-            "
-            @click="sidebarType('bg-white')"
-          >
+          <button id="btn-white" class="btn w-100 px-3 mb-2" :class="this.$store.state.sidebarType === 'bg-white'
+              ? 'bg-gradient-success'
+              : 'btn-outline-success'
+            " @click="sidebarType('bg-white')">
             White
           </button>
-          <button
-            id="btn-dark"
-            class="btn w-100 px-3 mb-2"
-            :class="
-              this.$store.state.sidebarType === 'bg-default'
-                ? 'bg-gradient-success'
-                : 'btn-outline-success'
-            "
-            @click="sidebarType('bg-default')"
-          >
+          <button id="btn-dark" class="btn w-100 px-3 mb-2" :class="this.$store.state.sidebarType === 'bg-default'
+              ? 'bg-gradient-success'
+              : 'btn-outline-success'
+            " @click="sidebarType('bg-default')">
             Dark
           </button>
         </div>
@@ -108,16 +63,8 @@
         <div class="mt-3 d-flex">
           <h6 class="mb-0">Navbar Fixed</h6>
           <div class="form-check form-switch ps-0 ms-auto my-auto">
-            <input
-              class="mt-1 form-check-input"
-              :class="
-                this.$store.state.isRTL ? 'float-end  me-auto' : ' ms-auto'
-              "
-              type="checkbox"
-              id="navbarFixed"
-              :checked="this.$store.state.isNavFixed"
-              @click="setNavbarFixed"
-            />
+            <input class="mt-1 form-check-input" :class="this.$store.state.isRTL ? 'float-end  me-auto' : ' ms-auto'
+              " type="checkbox" id="navbarFixed" :checked="this.$store.state.isNavFixed" @click="setNavbarFixed" />
           </div>
         </div>
 
@@ -127,12 +74,8 @@
             Light / Dark
           </h6>
           <div class="form-check form-switch ps-0 ms-auto my-auto">
-            <input
-              class="form-check-input mt-1 ms-auto"
-              type="checkbox"
-              :checked="this.$store.state.darkMode"
-              @click="setDarkMode"
-            />
+            <input class="form-check-input mt-1 ms-auto" type="checkbox" :checked="this.$store.state.darkMode"
+              @click="setDarkMode" />
           </div>
         </div>
         <!-- <a
