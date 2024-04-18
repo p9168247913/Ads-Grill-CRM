@@ -97,7 +97,6 @@ class WorklogView(CsrfExemptMixin, APIView):
                 upd_logged_time = convert_to_duration(logged_time)
 
             remaining_time = issue_instance.exp_duration-(saved_logged_time+upd_logged_time)
-            print("remaining time",saved_logged_time+upd_logged_time)
             if remaining_time <= timedelta(0):
                 remaining_time = timedelta(0)
             
@@ -147,9 +146,10 @@ class WorklogView(CsrfExemptMixin, APIView):
                 
                 if remaining_time < timedelta(days=1) and remaining_time > timedelta(hours=16,minutes=30):
                     remaining_time -= timedelta(hours=16, minutes=30)
-                    
-                if saved_logged_time < timedelta(days=1) and saved_logged_time > timedelta(hours=16,minutes=30):
-                    saved_logged_time -= timedelta(hours=16, minutes=30)
+                
+                if issue_instance.exp_duration >= timedelta(days=1):
+                    if saved_logged_time < timedelta(days=1) or saved_logged_time > timedelta(hours=16,minutes=30):
+                        saved_logged_time -= timedelta(hours=16, minutes=30)
                                 
                 if remaining_time < timedelta(0):
                     remaining_time = timedelta(0)

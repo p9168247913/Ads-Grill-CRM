@@ -13,6 +13,7 @@ from braces.views import CsrfExemptMixin
 from django.contrib.auth.hashers import make_password
 from django.db.utils import IntegrityError
 import os
+from django.db.models import Q
 import base64
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
@@ -34,7 +35,10 @@ class UsersView(CsrfExemptMixin, APIView):
             try:
                 user_data = []
                 role = request.GET.get('role')
-                requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
+                if role == 'hrms':
+                    requestedUsers = Users.objects.filter(is_deleted=False).exclude(Q(role__name='admin') | Q(role__name='super-admin') | Q(role__name='client')).order_by('-created_at')
+                else:
+                    requestedUsers = Users.objects.filter(role__name=role, is_deleted=False).order_by('-created_at')
                 for user in requestedUsers:
                     imageData = None
                     if user.profile_pic is not None and user.profile_pic !='' and user.profile_pic.name:
@@ -44,7 +48,7 @@ class UsersView(CsrfExemptMixin, APIView):
                                 imageData = base64.b64encode(f.read()).decode('utf-8')
                     
                     User = {
-                    'id':user.pk,
+                    'id':user.pk,   
                     'name': user.name,
                     'email': user.email,
                     'designation': user.designation,

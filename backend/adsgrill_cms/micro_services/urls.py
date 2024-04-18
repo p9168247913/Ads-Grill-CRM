@@ -13,6 +13,7 @@ urlpatterns = [
     path("leadinfo/", leads.LeadInfo.as_view()),
     path("leadExcelFormat/", leads.LeadExcelDownload.as_view()),
     path("sales/", sales.SalesView.as_view()),
+    path("templateView/",sales.clientTemplateView.as_view()),
     path("sales/getAllEmployees",sales.getAllSaleEmployees.as_view()),
     path("client/", projects.GetAllClients.as_view()),
     path("client/login/", client.ClientLogin.as_view()),
