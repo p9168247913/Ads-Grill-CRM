@@ -21,8 +21,7 @@
           <div class="row gx-4">
             <div class="col-auto">
               <div class="avatar avatar-xl position-relative">
-                <img
-                  :src="userData.profile_pic ? 'data:image/jpeg;base64,' + userData.profile_pic : '/img/User_Image.f332022c.png'"
+                <img :src="getProfilePic(userData)"
                   alt="profile_image" class="shadow-sm w-100 border-radius-lg" />
               </div>
             </div>
@@ -134,6 +133,7 @@ import Swal from 'sweetalert2';
 import Noty from "noty";
 import router from "@/router";
 import { BASE_URL } from "../config/apiConfig";
+import defaultProfilePic from "../assets/img/User_Image.png"
 
 const body = document.getElementsByTagName("body")[0];
 
@@ -177,6 +177,9 @@ export default {
   },
   methods: {
     ...mapActions(["logout"]),
+    getProfilePic(manager) {
+      return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : defaultProfilePic;
+    },
     toggleShowClass() {
       this.isshowActivated = !this.isshowActivated;
     },

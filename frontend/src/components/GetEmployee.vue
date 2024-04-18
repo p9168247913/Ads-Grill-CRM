@@ -403,6 +403,7 @@ import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import { BASE_URL } from '../config/apiConfig';
+import defaultProfilePic from '../assets/img/User_Image.png';
 
 export default {
     components: {
@@ -467,7 +468,7 @@ export default {
     },
     methods: {
         getProfilePic(manager) {
-            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "/img/User_Image.f332022c.png";
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : defaultProfilePic;
         },
         extractFilename(response) {
             const contentDisposition = response.headers['content-disposition'];

@@ -44,56 +44,56 @@
                         </div>
 
                         <!-- <div class="row mt-4">
-                <div class="col-lg-7 mb-lg-0 mb-4">
-                    <div class="card">
-                        <div class="p-3 pb-0 card-header">
-                            <div class="d-flex justify-content-between">
-                                <h6 class="mb-2">Sales by Country</h6>
+                            <div class="col-lg-7 mb-lg-0 mb-4">
+                                <div class="card">
+                                    <div class="p-3 pb-0 card-header">
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="mb-2">Sales by Country</h6>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table align-items-center">
+                                            <tbody>
+                                                <tr v-for="(sale, index) in sales" :key="index">
+                                                    <td class="w-30">
+                                                        <div class="px-2 py-1 d-flex align-items-center">
+                                                            <div>
+                                                                <img :src="sale.flag" alt="Country flag" />
+                                                            </div>
+                                                            <div class="ms-4">
+                                                                <p class="mb-0 text-xs font-weight-bold">Country:</p>
+                                                                <h6 class="mb-0 text-sm">{{ sale.country }}</h6>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-center">
+                                                            <p class="mb-0 text-xs font-weight-bold">Sales:</p>
+                                                            <h6 class="mb-0 text-sm">{{ sale.sales }}</h6>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="text-center">
+                                                            <p class="mb-0 text-xs font-weight-bold">Value:</p>
+                                                            <h6 class="mb-0 text-sm">{{ sale.value }}</h6>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-sm align-middle">
+                                                        <div class="text-center col">
+                                                            <p class="mb-0 text-xs font-weight-bold">Bounce:</p>
+                                                            <h6 class="mb-0 text-sm">{{ sale.bounce }}</h6>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table align-items-center">
-                                <tbody>
-                                    <tr v-for="(sale, index) in sales" :key="index">
-                                        <td class="w-30">
-                                            <div class="px-2 py-1 d-flex align-items-center">
-                                                <div>
-                                                    <img :src="sale.flag" alt="Country flag" />
-                                                </div>
-                                                <div class="ms-4">
-                                                    <p class="mb-0 text-xs font-weight-bold">Country:</p>
-                                                    <h6 class="mb-0 text-sm">{{ sale.country }}</h6>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="text-center">
-                                                <p class="mb-0 text-xs font-weight-bold">Sales:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.sales }}</h6>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="text-center">
-                                                <p class="mb-0 text-xs font-weight-bold">Value:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.value }}</h6>
-                                            </div>
-                                        </td>
-                                        <td class="text-sm align-middle">
-                                            <div class="text-center col">
-                                                <p class="mb-0 text-xs font-weight-bold">Bounce:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.bounce }}</h6>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-5">
-                    <categories-card />
-                </div>
-            </div> -->
+                            <div class="col-lg-5">
+                                <categories-card />
+                            </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="card" style="background-color: white; border-radius: 10px; padding: 10px;">
@@ -136,7 +136,7 @@ import axios from 'axios';
 import { BASE_URL } from '../../config/apiConfig';
 import { mapState } from 'vuex';
 import router from "@/router";
-
+import defaultProfilePic from '../../assets/img/User_Image.png';
 export default {
     data() {
         return {
@@ -220,10 +220,10 @@ export default {
     },
     methods: {
         redirect(parameter) {
-            parameter === 'deve' ? router.push('/employees/development') : parameter === 'pro' ? router.push('/projects') : parameter === 'lead' ? router.push('/leads') : router.push('/dashboard')
+            parameter === 'deve' ? router.push('/employees/hrms') : parameter === 'pro' ? router.push('/projects') : parameter === 'lead' ? router.push('/leads') : router.push('/dashboard')
         },
         getProfilePic(manager) {
-            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : "/img/User_Image.f332022c.png";
+            return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : defaultProfilePic;
         },
         async getLeads() {
             let queryParams = {
@@ -286,7 +286,7 @@ export default {
                 }).show()
             }
         },
-        async getEmployees() {
+        async getEmployees() {  
             try {
                 const response = await axios.get(`${BASE_URL}api/users/?role=client`, {
                     headers: {
@@ -297,7 +297,6 @@ export default {
                     this.stats.clients.value = response.data.employee_count;
                 }
             } catch (error) {
-                console.log("err", error);
                 new Noty({
                     type: 'error',
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,

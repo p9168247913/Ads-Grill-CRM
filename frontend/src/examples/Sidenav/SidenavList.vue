@@ -22,9 +22,21 @@
             <i class="fas fa-users text-primary text-sm opacity-10"></i>
           </template>
         </sidenav-item>
+
         <ul v-if="isEmploymentDropdownOpen" @click.stop
           class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled"
           :class="{ 'show': isCollapseShow }" data-parent="#iq-sidebar-toggle">
+          <li class=" "
+            v-if="authUser.role !== 'development' && authUser.role !== 'leads' && authUser.role !== 'sales'">
+            <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="{ 'active': getRoute() === 'hrms' }"
+              :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
+
+              <template v-slot:icon>
+                <i class="fas fa-clipboard-list text-info text-sm opacity-10"></i>
+              </template>
+              <router-link :to="getRoutePath('hrms')"></router-link>
+            </sidenav-item>
+          </li>
           <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales'">
             <sidenav-item class="emp-li" :url="getRoutePath('development')"
               :class="{ 'active': getRoute() === 'development' }"
@@ -54,18 +66,6 @@
                 <i class="fas fa-user-friends text-success text-sm opacity-10"></i>
               </template>
               <router-link :to="getRoutePath('leads')"></router-link>
-            </sidenav-item>
-          </li>
-
-          <li class=" "
-            v-if="authUser.role !== 'development' && authUser.role !== 'leads' && authUser.role !== 'sales'">
-            <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="{ 'active': getRoute() === 'hrms' }"
-              :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
-
-              <template v-slot:icon>
-                <i class="fas fa-clipboard-list text-info text-sm opacity-10"></i>
-              </template>
-              <router-link :to="getRoutePath('hrms')"></router-link>
             </sidenav-item>
           </li>
         </ul>
@@ -162,7 +162,7 @@
       <!-- Templates -->
       <li class="nav-item">
         <sidenav-item url="/templates" :class="getRoute() === 'templates' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Templates'
-      ">
+          ">
 
           <template v-slot:icon>
             <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
