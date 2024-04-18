@@ -132,15 +132,17 @@ class SalesView(CsrfExemptMixin, APIView):
                 'created_at':sale.created_at
                 }
 
-                related_users_data = []
                 for related_obj in sale.related_users:
                     related_user_data = {
+                        'id':related_obj.pk,
+                        'name':related_obj.name,
+                        'email':related_obj.email,
+                        'contact_no':related_obj.contact_no,
+                        'pincode':related_obj.pincode,
                         'role': related_obj.role.name,
                         'designation': related_obj.designation,
                     }
-                    related_users_data.append(related_user_data)
-
-                model1_data['related_users'] = related_users_data
+                    model1_data['related_users'] = related_user_data
                 new_data.append(model1_data)
             sale_data = new_data
             sales_count = Sale.objects.all().count()
