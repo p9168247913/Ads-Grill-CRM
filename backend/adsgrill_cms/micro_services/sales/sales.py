@@ -87,6 +87,21 @@ class SalesView(CsrfExemptMixin, APIView):
                 
             if client_name is not None and contact_no is not None:
                 allSales = allSales.filter(Q(lead__client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
+            
+            all_sales_contact_no = [obj.lead.contact_no for obj in allSales]
+            related_users = Users.objects.filter(contact_no__in=all_sales_contact_no)
+            model2_dict = {}
+            for obj in related_users:
+                if obj.contact_no not in model2_dict:
+                    model2_dict[obj.contact_no] = []
+                model2_dict[obj.contact_no].append(obj)
+
+            for obj in allSales:
+                contact_no = obj.lead.contact_no
+                if contact_no in model2_dict:
+                    obj.related_users = model2_dict[contact_no]
+                else:
+                    obj.related_users = []
             noOfRecords = 15
             p = Paginator(allSales, noOfRecords)
             page_obj = p.get_page(pageNo)
@@ -97,7 +112,10 @@ class SalesView(CsrfExemptMixin, APIView):
                 page_obj = p.page(1)
             except EmptyPage:
                 page_obj = p.page(p.num_pages)
-            sale_data = [{
+            
+            new_data = []
+            for sale in page_obj:
+                model1_data = {
                 'id':sale.pk,
                 'name':sale.lead.client_name,
                 'email':sale.lead.email,
@@ -111,9 +129,19 @@ class SalesView(CsrfExemptMixin, APIView):
                 'status':sale.sale_status,
                 'remark':sale.remark,
                 'created_at':sale.created_at
+                }
 
-            }for sale in page_obj]
+                related_users_data = []
+                for related_obj in sale.related_users:
+                    related_user_data = {
+                        'role': related_obj.role.name,
+                        'designation': related_obj.designation,
+                    }
+                    related_users_data.append(related_user_data)
 
+                model1_data['related_users'] = related_users_data
+                new_data.append(model1_data)
+            sale_data = new_data
             sales_count = Sale.objects.all().count()
             follow_count=Sale.objects.filter(follow_date__isnull=False).count()
             
