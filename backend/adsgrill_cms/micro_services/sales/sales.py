@@ -128,6 +128,7 @@ class SalesView(CsrfExemptMixin, APIView):
                 'follow_date':datetime.strftime(sale.follow_date,"%Y-%m-%dT%H:%M") if sale.follow_date else "",
                 'status':sale.sale_status,
                 'remark':sale.remark,
+                'temp_data':sale.temp_data,
                 'created_at':sale.created_at
                 }
 
@@ -235,11 +236,4 @@ class clientTemplateView(CsrfExemptMixin,APIView):
         except Exception as e:
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({"message":"Requirements Submitted"},status=status.HTTP_200_OK)
-    
-    def delete(self,request):
-        try:
-            pass
-        except Exception as e:
-            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
-        return JsonResponse({"message":"Lead deleted succesfully"},status=status.HTTP_200_OK)
         
