@@ -135,7 +135,7 @@
     </div>
 
     <div>
-      <button @click="convertDataToHTML">Save</button>
+      <button @click="generatePDF">Save</button>
     </div>
 
   </div>
@@ -161,8 +161,8 @@
       <p style="font-weight: bold; font-size: small;">Modules</p>
       <li style="font-size:smaller" v-for="item in selectedModule" :key="item">{{ item }}</li>
     </div>
-    <div v-if="subModulesArray.length">
-      <p style="font-weight: bold; font-size: small;">Modules</p>
+    <div v-if="subModules.length">
+      <p style="font-weight: bold; font-size: small;">Sub modules</p>
       <li style="font-size:smaller" v-for="item in subModulesArray" :key="item">{{ item }}</li>
     </div>
   </div>
@@ -170,6 +170,7 @@
 
 <script>
 // import jsPDF from 'jspdf';
+import html2pdf from 'html2pdf.js'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
@@ -1003,24 +1004,24 @@ console.log(popupData);
         this.newCustomModuleLabel = '';
       }
     },
-    // generatePDF() {
-    //   console.log(html2pdf)
-    //   var opt = {
-    //     margin: 0.1,
-    //     fileName: 'new.pdf',
-    //     image: {
-    //       type: 'jpeg',
-    //       quality: 0.99
-    //     },
-    //     html2canvas: { scale: 2 },
-    //     jsPDF: {
-    //       unit: 'in',
-    //       format: 'a4',
-    //       orientation: 'portrait'
-    //     }
-    //   };
-    //   html2pdf().from(this.$refs.temp1.outerHTML).set(opt).save();
-    // },
+    generatePDF() {
+      console.log(html2pdf)
+      var opt = {
+        margin: 0.1,
+        fileName: 'new.pdf',
+        image: {
+          type: 'jpeg',
+          quality: 0.99
+        },
+        html2canvas: { scale: 2 },
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+      html2pdf().from(this.$refs.temp1.outerHTML).set(opt).save();
+    },
     addCustomAuthType() {
       if (this.customAuthType.trim() !== '') {
         this.authenticationTypes.push(this.customAuthType.trim());
