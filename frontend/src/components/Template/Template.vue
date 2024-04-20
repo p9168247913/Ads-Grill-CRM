@@ -33,9 +33,7 @@
       </div>
     </div>
 
-    <div class="module">
 
-    </div>
     <div>
       <label for="module" class="form-label">Modules</label>
       <div>
@@ -61,7 +59,8 @@
             <input type="checkbox" @click="subModuleclick(subModuleval, subModule.value)" v-model="selectedSubModules"
               :value="subModule.value" :checked="shouldShowPopupButton(subModule, subModuleval)">
             {{ subModule.key }}
-            <button v-if="shouldShowPopupButton(subModule, subModuleval)" @click="openPopup(subModule)">Open
+            <button v-if="shouldShowPopupButton(subModule, subModuleval)"
+              @click="openPopup(subModuleval, subModule)">Open
               Popup</button>
           </label>
 
@@ -88,31 +87,31 @@
 
     <div class="popup-container" v-if="showPopup">
       <div class="popup">
-    <span class="close-btn" @click="closePopup">&times;</span>
+        <span class="close-btn" @click="closePopup">&times;</span>
 
-    <div class="row">
-      <div class="">
-        <label for="projectName" class="form-label">Header Description</label>
-        <QuillEditor required v-model="popupData.header" :modules="modules" theme="snow" toolbar="full" />
+        <div class="row">
+          <div class="">
+            <label for="projectName" class="form-label">Header Description</label>
+            <QuillEditor required ref="headerDesc" theme="snow" toolbar="full" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="">
+            <label for="projectName" class="form-label">Body Description</label>
+            <QuillEditor required ref="bodyDesc" theme="snow" toolbar="full" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="">
+            <label for="projectName" class="form-label">Footer Description</label>
+            <QuillEditor required ref="footerDesc" theme="snow" toolbar="full" />
+          </div>
+        </div>
+        <div> <button @click="storeAndClearData()">Store Data </button></div>
+
       </div>
-    </div>
-
-    <div class="row">
-      <div class="">
-        <label for="projectName" class="form-label">Body Description</label>
-        <QuillEditor required v-model="popupData.body" :modules="modules" theme="snow" toolbar="full" />
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="">
-        <label for="projectName" class="form-label">Footer Description</label>
-        <QuillEditor required v-model="popupData.footer" :modules="modules" theme="snow" toolbar="full" />
-      </div>
-    </div>
-    <div> <button @click="storeAndClearData">Store Data </button></div>
-
-  </div>
     </div>
 
     <div>
@@ -143,19 +142,19 @@
   <div style="display: flex; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
     <div>
       <p style="font-weight: bold; font-size: small;">Project Type</p>
-        <p style="font-size: smaller;">{{ projectTypeValue }}</p>
+      <p style="font-size: smaller;">{{ projectTypeValue }}</p>
     </div>
     <div v-if="selectedAuthTypes.length">
       <p style="font-weight: bold; font-size: small;">Authentication Types</p>
-        <ul>
-          <li style="font-size:smaller" v-for="item in selectedAuthTypes" :key="item">{{ item }}</li>
-        </ul>
+      <ul>
+        <li style="font-size:smaller" v-for="item in selectedAuthTypes" :key="item">{{ item }}</li>
+      </ul>
     </div>
     <div v-if="selectedRole.length">
       <p style="font-weight: bold; font-size: small;">Roles & Departments</p>
-    <ul>
-      <li style="font-size:smaller" v-for="item in selectedRole" :key="item">{{ item }}</li>
-    </ul>
+      <ul>
+        <li style="font-size:smaller" v-for="item in selectedRole" :key="item">{{ item }}</li>
+      </ul>
     </div>
     <div v-if="selectedModule.length">
       <p style="font-weight: bold; font-size: small;">Modules</p>
@@ -234,6 +233,7 @@ export default {
       }
       ],
 
+      footer: "",
       sidbar: [{
         key: "Top Sidebar",
         value: "Top Sidebar"
@@ -898,7 +898,8 @@ export default {
         },
 
       ],
-
+      currentModule: "",
+      currentSubModule: ""
     }
   },
   components: {
@@ -907,31 +908,63 @@ export default {
   computed: {
 
   },
+  
   methods: {
-    storeAndClearData(popupData ) {
-console.log(popupData);
-    // this.allData.forEach(category => {
-    //   for (const key in category) {
-    //     if (Object.prototype.hasOwnProperty.call(category, key)) {
-    //       const submodule = category[key];
-    //       submodule.forEach(item => {
-    //         if (item.key === popupData[0].key) {
-              
-    //           this.$set(item, 'popupData', popupData[0]);
-    //           return;
-    //         }
-    //       });
-    //     }
-    //   }
-    // });
+    storeAndClearData() {
+    const footerData = this.$refs.footerDesc;
+    if (footerData) {
+        const htmlContent = footerData.getHTML();
+        this.popupData.footer = htmlContent;
+    }
+    const bodyData = this.$refs.bodyDesc;
+    if (bodyData) {
+        const htmlContent = bodyData.getHTML();
+        this.popupData.body = htmlContent;
+    }
+    const headerData = this.$refs.headerDesc;
+    if (headerData) {
+        const htmlContent = headerData.getHTML();
+        this.popupData.header = htmlContent;
+    }
+    console.log(this.popupData);
+    console.log(this.footer);
+    
+    const mainModuleIndex = this.allData.findIndex(item => Object.keys(item)[0] === this.currentModule);
+    let currentModuleData = null;
 
-    // for (const key in formData) {
-    //   if (Object.prototype.hasOwnProperty.call(formData, key)) {
-    //     this.$set(formData, key, ''); 
-    //   }
-    // }
-  },
+    if (mainModuleIndex !== -1) {
+        currentModuleData = this.allData[mainModuleIndex][this.currentModule];
+    }
 
+    if (currentModuleData) {
+      
+        const existingSubmoduleIndex = currentModuleData.findIndex(item => item.key === this.currentSubModule);
+        if (existingSubmoduleIndex !== -1) {
+       
+            currentModuleData[existingSubmoduleIndex].otherData = this.popupData;
+        } else {
+            currentModuleData.push({
+                "key": this.currentSubModule,
+                "value": this.currentSubModule,
+                "otherData": this.popupData
+            });
+        }
+    } else {
+      
+        this.allData.push({
+            [this.currentModule]: [
+                {
+                    "key": this.currentSubModule,
+                    "value": this.currentSubModule,
+                    "otherData": this.popupData
+                }
+            ]
+        });
+    }
+
+    this.closePopup();
+}
+,
     shouldShowPopupButton(subModule, subModuleval) {
       subModule = subModule?.key
 
@@ -945,16 +978,16 @@ console.log(popupData);
     subModuleclick(subModuleval, value) {
       const index = this.allData.findIndex(item => Object.keys(item)[0] === subModuleval);
       if (index === -1) {
-        // If not present, add it
+     
         this.allData.push({ [subModuleval]: [{ key: value, value: value }] });
       } else {
-        // If present, remove it if it exists, otherwise add it
+        
         const existingIndex = this.allData[index][subModuleval].findIndex(item => item.key === value);
         if (existingIndex !== -1) {
-          // Value exists, remove it
+        
           this.allData[index][subModuleval].splice(existingIndex, 1);
         } else {
-          // Value doesn't exist, add it
+          
           this.allData[index][subModuleval].push({ key: value, value: value });
         }
       }
@@ -962,12 +995,15 @@ console.log(popupData);
     }
 
     ,
-    openPopup() {
-
+    openPopup(a, b) {
+      this.currentModule = a;
+      this.currentSubModule = b.key;
       this.showPopup = true;
+     
     },
     closePopup() {
-
+      this.currentModule = "";
+      this.currentSubModule = "";
       this.showPopup = false;
     },
     updateSubModules() {
