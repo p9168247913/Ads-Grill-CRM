@@ -794,8 +794,8 @@ export default {
 
             let duration = diffInMilliseconds;
 
-            const months = Math.floor(duration / (millisecondsInDay * 30));
-            duration -= months * (millisecondsInDay * 30);
+            // const months = Math.floor(duration / (millisecondsInDay * 30));
+            // duration -= months * (millisecondsInDay * 30);
 
             const days = Math.floor(duration / millisecondsInDay);
             duration -= days * millisecondsInDay;
@@ -807,9 +807,9 @@ export default {
 
             let formattedDuration = '';
 
-            if (months > 0) {
-                formattedDuration += `${months}m `;
-            }
+            // if (months > 0) {
+            //     formattedDuration += `${months}m `;
+            // }
             if (days > 0) {
                 formattedDuration += `${days}d `;
             }
@@ -840,8 +840,8 @@ export default {
 
             let duration = diffInMilliseconds;
 
-            const months = Math.floor(duration / (millisecondsInDay * 30));
-            duration -= months * (millisecondsInDay * 30);
+            // const months = Math.floor(duration / (millisecondsInDay * 30));
+            // duration -= months * (millisecondsInDay * 30);
 
             const days = Math.floor(duration / millisecondsInDay);
             duration -= days * millisecondsInDay;
@@ -853,9 +853,9 @@ export default {
 
             let formattedDuration = '';
 
-            if (months > 0) {
-                formattedDuration += `${months}m `;
-            }
+            // if (months > 0) {
+            //     formattedDuration += `${months}m `;
+            // }
             if (days > 0) {
                 formattedDuration += `${days}d `;
             }
