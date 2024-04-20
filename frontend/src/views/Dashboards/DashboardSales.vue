@@ -180,7 +180,6 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log(response);
                 if (response.status === 200) {
                     this.stats.money.value = response?.data?.data?.total_sales
                     this.stats.users.value = response?.data?.data?.follow_count

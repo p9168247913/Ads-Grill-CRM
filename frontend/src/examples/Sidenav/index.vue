@@ -59,7 +59,6 @@ export default {
       this.navbarMinimize();
     },
     home() {
-      console.log(this.authUser.role);
       if (this.authUser.role === 'development') {
         router.push('/projects')
       } else {
