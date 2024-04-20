@@ -193,7 +193,7 @@ class SalesView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             user_instance=request.user
-            if user_instance.role.name == "admin" or user_instance.role.name == "sales":
+            if user_instance.role.name == "admin" or  user_instance.role.name == "sales":
                 with transaction.atomic():
                     deleteSale = Sale.objects.get(pk=id)
                     deleteSale.lead.is_assigned=False
@@ -239,3 +239,22 @@ class clientTemplateView(CsrfExemptMixin,APIView):
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({"message":"Requirements Submitted"},status=status.HTTP_200_OK)
         
+    def get(self, request):
+     sale_id = request.GET.get('sale_id')
+     try:
+         sale_instance = Sale.objects.get(pk=sale_id)
+         data = {
+             "client_name": str(sale_instance.lead.client_name),
+             "contact_no": str(sale_instance.lead.contact_no),
+             "email": str(sale_instance.lead.email),
+             "country": str(sale_instance.lead.country),
+             "city": str(sale_instance.lead.city),
+             "assignee": sale_instance.assignee.name,
+             "status": sale_instance.status,
+             "temp_data": sale_instance.temp_data
+         }
+     except Sale.DoesNotExist:
+         return JsonResponse({"message": "Requested sale does not exist"}, status=status.HTTP_404_NOT_FOUND)
+     except Exception as e:
+         return JsonResponse({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+     return JsonResponse({"temp_data": data}, status=status.HTTP_200_OK)
