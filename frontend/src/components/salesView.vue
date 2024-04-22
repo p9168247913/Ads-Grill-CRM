@@ -133,11 +133,13 @@
                                                 <h6 class="mb-0 text-sm">{{ formatDate(lead.created_at) }}</h6>
                                             </div>
                                         </td>
-                                        <td class="align-middle"  style="margin-left: 15px !important;">
+                                        <td class="align-middle" style="margin-left: 15px !important;">
                                             <div class="d-flex flex-row justify-content-center gap-4">
-                                                <i title="Create Contact" @click="createContact(lead)"
-                                                    class="fas fa-user-plus mt-2"></i>
-                                                <i title="Create Client" class="fas fa-users mt-2"></i>
+                                                <i v-if="!lead?.related_users" title="Create Contact"
+                                                    @click="createContact(lead)" class="fas fa-user-plus mt-2"></i>
+                                                <i v-if="lead?.related_users?.designation !== 'client'" title="Create Client"
+                                                    @click="createClient(lead.related_users)"
+                                                    class="fas fa-users mt-2"></i>
                                                 <i title="Create Contact" class="fas fa-download mt-2"></i>
                                             </div>
                                         </td>
@@ -198,6 +200,10 @@ export default {
                 remark: '',
             },
             contact_role: {
+                id: '',
+                name: ""
+            },
+            client_role: {
                 id: '',
                 name: ""
             },
@@ -273,7 +279,6 @@ export default {
                         token: this.authToken,
                     }
                 })
-                console.log(response)
                 if (response.status === 200) {
                     this.totalLeads = response?.data?.data?.total_leads
                     this.totalPages = response?.data?.data?.total_pages
@@ -350,14 +355,19 @@ export default {
                 this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/roles/`);
                 if (response.status === 200) {
-                    this.userRole = response.data.roles
-                    console.log(this.userRole)
-                    let admin = this.userRole.find((item) => {
-                        return item.name == 'admin'
-                    })
-                    this.contact_role.id = admin.id
-                    this.contact_role.name = admin.name
-                    console.log(this.contact_role)
+                    this.userRole = response?.data?.roles;
+                    let admin = this.userRole.find((item) => item.name === 'contact');
+                    let clients = this.userRole.find((item) => item.name === 'client');
+
+                    this.contact_role = {
+                        id: admin.id,
+                        name: admin.name
+                    };
+
+                    this.client_role = {
+                        id: clients.id,
+                        name: clients.name
+                    };
                 }
                 this.$store.commit('hideLoader')
             } catch (error) {
@@ -381,7 +391,7 @@ export default {
         async createContact(data) {
             Swal.fire({
                 title: 'Are you sure?',
-                text: 'You won\'t to create contact for this lead!',
+                text: 'You want to create contact for this lead!',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -397,7 +407,6 @@ export default {
                         role: this.contact_role.id,
                         designation: this.contact_role.name
                     }
-                    console.log(requestData, "---");
                     try {
                         const response = await axios.post(`${BASE_URL}api/create/user/`, requestData, {
                             headers: {
@@ -408,7 +417,37 @@ export default {
                         this.getLeads();
                         Swal.fire('Contact created!', response.data.message, 'success');
                     } catch (error) {
-                        console.log(error);
+                        Swal.fire('Error', error.response.data.message ? error.response.data.message : error.response.data.detail, 'error');
+                    }
+                }
+            });
+        },
+        async createClient(data) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'You want to create client for this lead!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, create!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const requestData = {
+                        userID: data.id,
+                        name: data.name,
+                        email: data.email,
+                        contact_no: data.contact_no,
+                        role: this.client_role.id,
+                        designation: this.client_role.name
+                    }
+                    try {
+                        const response = await axios.put(`${BASE_URL}api/users/`, requestData, {
+                            headers: { token: this.authToken },
+                        },)
+                        this.getLeads();
+                        Swal.fire('Contact created!', response.data.message, 'success');
+                    } catch (error) {
                         Swal.fire('Error', error.response.data.message ? error.response.data.message : error.response.data.detail, 'error');
                     }
                 }
