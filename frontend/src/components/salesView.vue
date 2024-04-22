@@ -137,10 +137,11 @@
                                             <div class="d-flex flex-row justify-content-center gap-4">
                                                 <i v-if="!lead?.related_users" title="Create Contact"
                                                     @click="createContact(lead)" class="fas fa-user-plus mt-2"></i>
-                                                <i v-if="lead?.related_users?.designation !== 'client'" title="Create Client"
-                                                    @click="createClient(lead.related_users)"
+                                                <i v-if="lead?.related_users?.designation !== 'client'"
+                                                    title="Create Client" @click="createClient(lead.related_users)"
                                                     class="fas fa-users mt-2"></i>
-                                                <i title="Create Contact" class="fas fa-download mt-2"></i>
+                                                <i @click="downloadReq(lead.temp_data)" v-if="lead.temp_data"
+                                                    title="Download requirement" class="fas fa-download mt-2"></i>
                                             </div>
                                         </td>
                                         <td class="align-middle" style="margin-left: 15px !important;">
@@ -175,6 +176,7 @@ import axios from 'axios';
 import Noty from 'noty';
 import { mapState } from 'vuex';
 import Swal from 'sweetalert2';
+import html2pdf from 'html2pdf.js'
 import PaginationComponent from './Paginator/PaginatorComponent.vue';
 import { BASE_URL } from '../config/apiConfig';
 
@@ -452,6 +454,25 @@ export default {
                     }
                 }
             });
+        },
+        downloadReq(data) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data, "text/html");
+            var opt = {
+                margin: 0.1,
+                fileName: 'new.pdf',
+                image: {
+                    type: 'jpeg',
+                    quality: 0.99
+                },
+                html2canvas: { scale: 2 },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+            html2pdf().from(doc.body).set(opt).save();
         }
     },
     watch: {
