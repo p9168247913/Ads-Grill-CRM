@@ -278,7 +278,6 @@ export default {
                         token: this.authToken,
                     }
                 });
-                console.log("resp", response);
                 if (response.status === 200) {
                     this.allProjects = response.data.projects
                 }

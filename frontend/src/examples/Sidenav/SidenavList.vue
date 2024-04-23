@@ -1,9 +1,9 @@
 <template>
   <div class="collapse navbar-collapse w-auto h-auto h-100" id="sidenav-collapse-main">
-    <ul class="navbar-nav" v-if="authUser.role !== 'client'">
+    <ul class="navbar-nav" v-if="authUser.role !== 'client' || authUser.role!=='contact'">
 
       <!--Dashboard-->
-      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'client'">
+      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'contact'">
         <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
           <template v-slot:icon>
@@ -13,7 +13,7 @@
       </li>
 
       <!-- Employee -->
-      <li @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item"
+      <li v-if="authUser.role!== 'contact'" @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item"
         :class="{ 'active': isEmployeeActive }">
         <sidenav-item url="" :class="{ 'collapsed': isCollapseShow }"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Employees'" data-toggle="collapse"
@@ -27,7 +27,7 @@
           class="iq-submenu collapse list-unstyled iq-submenu collapse list-unstyled"
           :class="{ 'show': isCollapseShow }" data-parent="#iq-sidebar-toggle">
           <li class=" "
-            v-if="authUser.role !== 'development' && authUser.role !== 'leads' && authUser.role !== 'sales'">
+            v-if="authUser.role !== 'development' && authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact'">
             <sidenav-item class="emp-li" :url="getRoutePath('hrms')" :class="{ 'active': getRoute() === 'hrms' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'HRMS'" data-toggle="collapse" aria-expanded="false">
 
@@ -37,7 +37,7 @@
               <router-link :to="getRoutePath('hrms')"></router-link>
             </sidenav-item>
           </li>
-          <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales'">
+          <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact'">
             <sidenav-item class="emp-li" :url="getRoutePath('development')"
               :class="{ 'active': getRoute() === 'development' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Development'" data-toggle="collapse"
@@ -48,7 +48,7 @@
               <router-link :to="getRoutePath('development')"> <span class="ml-0">Development</span></router-link>
             </sidenav-item>
           </li>
-          <li class=" " v-if="authUser.role !== 'development'">
+          <li class=" " v-if="authUser.role !== 'development' && authUser.role !== 'contact'">
             <sidenav-item class="emp-li" :url="getRoutePath('sales')" :class="{ 'active': getRoute() === 'sales' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Sales'" data-toggle="collapse"
               aria-expanded="false">
@@ -58,7 +58,7 @@
               <router-link :to="getRoutePath('sales')"></router-link>
             </sidenav-item>
           </li>
-          <li class="" v-if="authUser.role !== 'development'">
+          <li class="" v-if="authUser.role !== 'development' && authUser.role !== 'contact'">
             <sidenav-item class="emp-li" :url="getRoutePath('leads')" :class="{ 'active': getRoute() === 'leads' }"
               :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Leads'" data-toggle="collapse"
               aria-expanded="false">
@@ -72,7 +72,7 @@
       </li>
 
       <!-- Projects -->
-      <li v-if="authUser.role !== 'leads' && authUser.role !== 'sales'" class="nav-item">
+      <li v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact'" class="nav-item">
         <sidenav-item url="/projects" :class="getRoute() === 'projects' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع' : 'Projects'">
           <template v-slot:icon>
@@ -83,7 +83,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales'">
+      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact'">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
           <template v-slot:icon>
@@ -94,7 +94,7 @@
       </li>
 
       <!--Backlogs-->
-      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'client' && authUser.role !== 'sales'">
+      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'client' && authUser.role !== 'sales' && authUser.role !== 'contact'">
         <sidenav-item url="/backlogs" :class="getRoute() === 'backlogs' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Backlogs'">
           <template v-slot:icon>
@@ -105,7 +105,7 @@
       </li>
 
       <!--Issues-->
-      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'client' && authUser.role !== 'sales'">
+      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'client' && authUser.role !== 'sales' && authUser.role !== 'contact'">
         <sidenav-item url="/issues" :class="getRoute() === 'issues' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Issues'">
           <template v-slot:icon>
@@ -116,8 +116,8 @@
       </li>
 
       <!--Investment-->
-      <li
-        v-if="authUser.role !== 'admin' && authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales'"
+      <!-- <li
+        v-if="authUser.role !== 'admin' && authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales' && authUser.role !== 'contact'"
         class="nav-item">
         <sidenav-item url="/investment" :class="getRoute() === 'tables' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الجداول' : 'Investment'">
@@ -125,10 +125,10 @@
             <i class="fa fa-inr text-primary text-sm opacity-10"></i>
           </template>
         </sidenav-item>
-      </li>
+      </li> -->
 
       <!-- Sales -->
-      <li v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client'"
+      <li v-if="authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'contact'"
         class="nav-item">
         <sidenav-item url="/sales" :class="getRoute() === 'billing' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'الفواتیر' : 'Sales'">
@@ -140,7 +140,7 @@
 
       <!--Leads-->
       <li class="nav-item"
-        v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales'">
+        v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales' && authUser.role !== 'contact'">
         <sidenav-item url="/leads" :class="getRoute() === 'virtual-reality' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Leads'
           ">
           <template v-slot:icon>
@@ -150,17 +150,19 @@
       </li>
 
       <!-- Profit-->
-      <li class="nav-item"
-        v-if="authUser.role !== 'admin' && authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales'">
+      <!-- <li class="nav-item"
+        v-if="authUser.role !== 'admin' && authUser.role !== 'leads' && authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'sales' && authUser.role !== 'contact'">
         <sidenav-item url="/profit" :class="getRoute() === 'profit' ? 'active' : ''" navText="Profit">
           <template v-slot:icon>
             <i class="fas fa-chart-line text-success text-sm opacity-10"></i>
           </template>
         </sidenav-item>
-      </li>
+      </li> -->
 
       <!-- Templates -->
-      <li class="nav-item">
+      <li class="nav-item"
+      v-if="authUser.role == 'contact' && authUser.designation == 'contact'"
+      >
         <sidenav-item url="/templates" :class="getRoute() === 'templates' ? 'active' : ''" :navText="this.$store.state.isRTL ? 'الواقع الافتراضي' : 'Templates'
           ">
 

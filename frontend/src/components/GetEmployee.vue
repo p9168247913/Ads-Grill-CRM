@@ -474,7 +474,6 @@ export default {
             const contentDisposition = response.headers['content-disposition'];
             if (contentDisposition) {
                 const filenameMatch = contentDisposition.match(/filename=([^;]+)/);
-                console.log("nmae", filenameMatch);
                 return filenameMatch ? filenameMatch[1] : 'download.zip';
             } else {
                 return 'download.zip';
