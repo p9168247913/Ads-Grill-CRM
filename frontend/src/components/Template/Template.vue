@@ -9,31 +9,36 @@
           <option v-for="(sprint, index) in projectType" :key="index" :value="sprint.value">{{ sprint.key }}</option>
         </select>
       </div>
-      <div>
-        <label class="form-label">Authentication Types</label>
+    </div>
+    <hr />
+    <div>
+      <label class="form-label">Authentication Types</label>
+      <div class="flexContainer">
         <div class="selecBox" v-for="(authType, index) in authenticationTypes" :key="index">
-          <input type="checkbox" :id="'authType' + index" :value="authType" v-model="selectedAuthTypes">
-          <label :for="'authType' + index">{{ authType }}</label>
+          <div class="module_box">
+            <input type="checkbox" :id="'authType' + index" :value="authType" v-model="selectedAuthTypes">
+            <div :for="'authType' + index">{{ authType }}</div>
+          </div>
+
         </div>
-        <div class="belowTag">
-          <input type="text" class="input_form" v-model="customAuthType" placeholder="Enter custom authentication type">
+      </div>
+      <div class="belowTag module_box2">
+          <input type="text" class="input_form" v-model="customAuthType" placeholder="Enter custom auth type">
           <button class="btn_form" @click="addCustomAuthType">Add</button>
         </div>
-      </div>
-      <div>
-        <label class="form-label">Roles </label>
-        <div class="selecBox" v-for="(role, index) in roles" :key="index">
-          <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
-          <label :for="'role' + index">{{ role }}</label>
-        </div>
-        <div class="belowTag">
-          <input type="text" class="input_form" v-model="customRole" placeholder="Enter custom authentication type">
-          <button class="btn_form" @click="addCustomRole">Add</button>
-        </div>
-      </div>
     </div>
 
-
+    <div>
+      <label class="form-label">Roles </label>
+      <div class="selecBox" v-for="(role, index) in roles" :key="index">
+        <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
+        <label :for="'role' + index">{{ role }}</label>
+      </div>
+      <div class="belowTag module_box">
+        <input type="text" class="input_form" v-model="customRole" placeholder="Enter custom authentication type">
+        <button class="btn_form" @click="addCustomRole">Add</button>
+      </div>
+    </div>
     <div>
       <label for="module" class="form-label">Modules</label>
       <div>
@@ -183,16 +188,12 @@ export default {
 
       dataItems: [{ key: '', value: '' }],
       mainfilled: [{
-        key: 'Sales Entery',
-        value: 'Sales Entery'
+        key: 'Sales Entery & POS Module ',
+        value: 'Sales Entery & POS Module'
       },
       {
         key: 'Accounts Module',
         value: 'Accounts Module'
-      },
-      {
-        key: 'POS Module',
-        value: 'POS Module'
       },
 
       {
@@ -264,7 +265,7 @@ export default {
       newCustomModuleLabel: '',
       allData: [],
       subModules: {
-        "Sales Entery": [{
+        "Sales Entery & POS Module": [{
           key: "Sales Module",
           value: "Sales Module"
         },
@@ -908,63 +909,64 @@ export default {
   computed: {
 
   },
-  
+
   methods: {
+
     storeAndClearData() {
-    const footerData = this.$refs.footerDesc;
-    if (footerData) {
+      const footerData = this.$refs.footerDesc;
+      if (footerData) {
         const htmlContent = footerData.getHTML();
         this.popupData.footer = htmlContent;
-    }
-    const bodyData = this.$refs.bodyDesc;
-    if (bodyData) {
+      }
+      const bodyData = this.$refs.bodyDesc;
+      if (bodyData) {
         const htmlContent = bodyData.getHTML();
         this.popupData.body = htmlContent;
-    }
-    const headerData = this.$refs.headerDesc;
-    if (headerData) {
+      }
+      const headerData = this.$refs.headerDesc;
+      if (headerData) {
         const htmlContent = headerData.getHTML();
         this.popupData.header = htmlContent;
-    }
-    console.log(this.popupData);
-    console.log(this.footer);
-    
-    const mainModuleIndex = this.allData.findIndex(item => Object.keys(item)[0] === this.currentModule);
-    let currentModuleData = null;
+      }
+      console.log(this.popupData);
+      console.log(this.footer);
 
-    if (mainModuleIndex !== -1) {
+      const mainModuleIndex = this.allData.findIndex(item => Object.keys(item)[0] === this.currentModule);
+      let currentModuleData = null;
+
+      if (mainModuleIndex !== -1) {
         currentModuleData = this.allData[mainModuleIndex][this.currentModule];
-    }
+      }
 
-    if (currentModuleData) {
-      
+      if (currentModuleData) {
+
         const existingSubmoduleIndex = currentModuleData.findIndex(item => item.key === this.currentSubModule);
         if (existingSubmoduleIndex !== -1) {
-       
-            currentModuleData[existingSubmoduleIndex].otherData = this.popupData;
-        } else {
-            currentModuleData.push({
-                "key": this.currentSubModule,
-                "value": this.currentSubModule,
-                "otherData": this.popupData
-            });
-        }
-    } else {
-      
-        this.allData.push({
-            [this.currentModule]: [
-                {
-                    "key": this.currentSubModule,
-                    "value": this.currentSubModule,
-                    "otherData": this.popupData
-                }
-            ]
-        });
-    }
 
-    this.closePopup();
-}
-,
+          currentModuleData[existingSubmoduleIndex].otherData = this.popupData;
+        } else {
+          currentModuleData.push({
+            "key": this.currentSubModule,
+            "value": this.currentSubModule,
+            "otherData": this.popupData
+          });
+        }
+      } else {
+
+        this.allData.push({
+          [this.currentModule]: [
+            {
+              "key": this.currentSubModule,
+              "value": this.currentSubModule,
+              "otherData": this.popupData
+            }
+          ]
+        });
+      }
+
+      this.closePopup();
+    }
+    ,
     shouldShowPopupButton(subModule, subModuleval) {
       subModule = subModule?.key
 
@@ -978,16 +980,16 @@ export default {
     subModuleclick(subModuleval, value) {
       const index = this.allData.findIndex(item => Object.keys(item)[0] === subModuleval);
       if (index === -1) {
-     
+
         this.allData.push({ [subModuleval]: [{ key: value, value: value }] });
       } else {
-        
+
         const existingIndex = this.allData[index][subModuleval].findIndex(item => item.key === value);
         if (existingIndex !== -1) {
-        
+
           this.allData[index][subModuleval].splice(existingIndex, 1);
         } else {
-          
+
           this.allData[index][subModuleval].push({ key: value, value: value });
         }
       }
@@ -999,7 +1001,7 @@ export default {
       this.currentModule = a;
       this.currentSubModule = b.key;
       this.showPopup = true;
-     
+
     },
     closePopup() {
       this.currentModule = "";
@@ -1122,16 +1124,40 @@ export default {
 
 }
 
+.flexContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  align-items: center;
+}
+
 .roleBaseAccess {
   display: flex;
 }
 
 .module_box {
   margin-left: 5px;
-  padding: 10px;
+  height: 40px;
+  display: flex;
   align-items: center;
+  gap: 5px;
+  padding: 5px 15px 5px 15px;
   border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+.module_box2 {
+
+  align-items: center;
+
   box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.module_box2>div {
+  margin: 25px;
 }
 
 .main_body {
@@ -1159,21 +1185,30 @@ export default {
 .btn_form {
   border: none;
   outline: none;
-
+  border-radius: 0px 5px 5px 0px;
   padding-left: 3px;
+  height: 35px;
   color: white !important;
+  padding: 0px 6px 0px 6px;
   background-color: #6EB4D1;
 }
 
 .belowTag {
   display: flex;
   gap: 8px;
-  width: 79%;
+  max-width: fit-content;
   border-radius: 5px;
+  margin-top: 5px;
+  height: 35px;
   align-items: center;
   justify-content: center;
   text-align: center;
-  border: 1px solid gray;
+
+}
+
+.belowTag>input {
+  padding: 0px 5px 0px 5px;
+  font-size: 15px;
 }
 
 .module {
@@ -1185,8 +1220,10 @@ export default {
 }
 
 .selecBox {
-  max-width: 300px;
-  min-width: 300px;
+  display: flex;
+  align-items: center;
+
+
 }
 
 .popup-container {
@@ -1220,6 +1257,7 @@ export default {
   top: 10px;
   right: 10px;
   cursor: pointer;
+  font-size: 12px;
   font-size: 20px;
   color: #888;
 }
