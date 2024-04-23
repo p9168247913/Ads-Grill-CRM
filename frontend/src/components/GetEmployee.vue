@@ -59,11 +59,10 @@
                         <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createRoleModalLabel">Create Role</h5>
-                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
+                                <button ref="closeBTNN" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody"
-                                style="padding-bottom: 0; height:22vh;">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:22vh;">
                                 <form @submit="createRole($event)">
                                     <div class="mb-3">
                                         <label for="roleName" class="form-label">Role Name</label>
@@ -74,7 +73,7 @@
                                         style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                                             @click="roleName = ''">Close</button>
-                                        <button type="button" class="btn btn-primary">Add</button>
+                                        <button type="submit" class="btn btn-primary">Add</button>
                                     </div>
                                 </form>
                             </div>
@@ -89,11 +88,10 @@
                         <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="createadminLabel">Create Admin</h5>
-                                <button type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                                <button ref="createAdmin" type="button" class="btn-close bg-dark text-xs"
+                                    data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody"
-                                style="padding-bottom: 0; height:52vh; ">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:52vh; ">
                                 <form @submit="createUser($event), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -102,7 +100,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="email" class="form-label">Designation</label>
-                                            <input type="text" class="form-control" v-model="designation" required>
+                                            <input type="text" class="form-control" value="admin" required disabled>
                                         </div>
                                     </div>
                                     <!-- Second Row -->
@@ -176,7 +174,7 @@
                                                 <option value="" disabled selected>Select Role</option>
                                                 <option v-for="(item, index) in userRole" :key="index"
                                                     :value="`${item.id},${item.name}`"> {{
-                                    item.name }}</option>
+                                                    item.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
@@ -186,7 +184,7 @@
                                                 <option value="" disabled selected>Select Designation</option>
                                                 <option v-for="(item, index) in filteredDesignations" :key="index"
                                                     :value="item"> {{
-                                    item }}</option>
+                                                    item }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -328,8 +326,8 @@
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex">
                                                 <div>
-                                                    <img :src="getProfilePic(user)"
-                                                    alt='dummy_image' class="avatar avatar-sm me-3 rounded-circle" />
+                                                    <img :src="getProfilePic(user)" alt='dummy_image'
+                                                        class="avatar avatar-sm me-3 rounded-circle" />
                                                 </div>
                                             </div>
                                         </td>
@@ -568,7 +566,12 @@ export default {
         async getUserRole() {
             try {
                 this.$store.commit('showLoader')
-                const response = await axios.get(`${BASE_URL}api/roles/`);
+                const response = await axios.get(`${BASE_URL}api/roles/`, {
+                    headers: {
+                        token: this.authToken,
+                        'Content-Type': "multipart/form-data",
+                    }
+                });
                 if (response.status === 200) {
                     this.userRole = response.data.roles
                 }
@@ -622,13 +625,19 @@ export default {
             else {
                 try {
                     this.$store.commit('showLoader')
-                    const response = await axios.post(`${BASE_URL}api/roles/?role=${this.roleName}`)
+                    const response = await axios.post(`${BASE_URL}api/roles/?role=${this.roleName}`, {
+                        headers: {
+                            token: this.authToken,
+                            'Content-Type': "multipart/form-data",
+                        }
+                    })
                     if (response.status == 201) {
                         Swal.fire({
                             title: response.data.message,
                             icon: 'success',
                         })
                         this.roleName = ''
+                        this.$refs.closeBTNN.click();
                     }
                     this.$store.commit('hideLoader')
                 } catch (error) {
@@ -733,6 +742,7 @@ export default {
                     return item.name == 'admin'
                 })
                 requestData.role = admin.id
+                requestData.designation = admin.name
             }
 
             try {
@@ -749,7 +759,8 @@ export default {
                         icon: 'success',
                     })
                     this.getUsers(this.$route.params.val);
-                    this.$refs.modalAddCloseBtn.click()
+                    this.$refs.createAdmin.click();
+                    this.$refs.modalAddCloseBtn.click();
                     this.resetValues()
                 }
                 this.$store.commit('hideLoader')
@@ -799,7 +810,9 @@ export default {
     created() {
         this.getUsers(this.$route.params.val)
     },
-
+    mounted() {
+        this.getUserRole();
+    }
 }
 </script>
 
