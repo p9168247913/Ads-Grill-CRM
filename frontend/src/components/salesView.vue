@@ -355,11 +355,18 @@ export default {
         async getUserRole() {
             try {
                 this.$store.commit('showLoader')
-                const response = await axios.get(`${BASE_URL}api/roles/`);
+                const response = await axios.get(`${BASE_URL}api/roles/`, {
+                    headers:{
+                        token: this.authToken
+                    }
+                });
                 if (response.status === 200) {
-                    this.userRole = response?.data?.roles;
+                    this.userRole = response.data.roles;
+                    console.log('------------USERROLES-------', this.userRole)
                     let admin = this.userRole.find((item) => item.name === 'contact');
                     let clients = this.userRole.find((item) => item.name === 'client');
+
+                    console.log(admin, clients, '----------------')
 
                     this.contact_role = {
                         id: admin.id,

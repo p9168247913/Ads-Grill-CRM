@@ -62,7 +62,7 @@
                                 <button ref="closeBTNN" type="button" class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:22vh;">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:200px;">
                                 <form @submit="createRole($event)">
                                     <div class="mb-3">
                                         <label for="roleName" class="form-label">Role Name</label>
@@ -566,10 +566,9 @@ export default {
         async getUserRole() {
             try {
                 this.$store.commit('showLoader')
-                const response = await axios.get(`${BASE_URL}api/roles/`, {
+                const response = await axios.get(`${BASE_URL}api/roles/`,{
                     headers: {
                         token: this.authToken,
-                        'Content-Type': "multipart/form-data",
                     }
                 });
                 if (response.status === 200) {
@@ -625,10 +624,9 @@ export default {
             else {
                 try {
                     this.$store.commit('showLoader')
-                    const response = await axios.post(`${BASE_URL}api/roles/?role=${this.roleName}`, {
+                    const response = await axios.post(`${BASE_URL}api/roles/?role=${this.roleName}`,{},{
                         headers: {
                             token: this.authToken,
-                            'Content-Type': "multipart/form-data",
                         }
                     })
                     if (response.status == 201) {
