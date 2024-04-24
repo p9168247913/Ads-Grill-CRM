@@ -624,7 +624,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="filteredIssues.length >= 10" :currentPage="currentPage"
+                    <PaginationComponent v-if="filteredIssues.length > itemsPerPage" :currentPage="currentPage"
                         :itemsPerPage="itemsPerPage" :filteredUsers="filteredIssues" :prevPage="prevPage"
                         :nextPage="nextPage" :goToPage="goToPage" />
                 </div>

@@ -67,7 +67,7 @@
                                 <button ref="createLeadBtn" type="button" class="btn-close bg-dark text-xs"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:45vh">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:26rem">
                                 <form @submit="createLeads($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
@@ -125,7 +125,7 @@
                                 <button ref="editModalBtn" type="button" class="btn-close bg-dark text-xs"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBody" style="padding-bottom: 0; height:45vh">
+                            <div class="modal-body modalBody" style="padding-bottom: 0; height:26rem">
                                 <form @submit="updateLead($event, updateLeadData.id), resetValues()">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
