@@ -624,7 +624,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="filteredIssues.length >= 10" :currentPage="currentPage"
+                    <PaginationComponent v-if="allIssues.length > itemsPerPage" :currentPage="currentPage"
                         :itemsPerPage="itemsPerPage" :filteredUsers="filteredIssues" :prevPage="prevPage"
                         :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
@@ -834,7 +834,7 @@ export default {
             return formattedParts.join(' ');
         },
         nextPage() {
-            if (this.currentPage * this.itemsPerPage < this.filteredUsers.length) {
+            if (this.currentPage * this.itemsPerPage < this.filteredIssues.length) {
                 this.currentPage++;
             }
         },
@@ -847,7 +847,7 @@ export default {
             this.currentPage = page;
             const startIndex = (page - 1) * this.itemsPerPage;
             const endIndex = startIndex + this.itemsPerPage;
-            this.displayedUsers = this.filteredUsers.slice(startIndex, endIndex);
+            this.displayedUsers = this.filteredIssues.slice(startIndex, endIndex);
         },
         async getAttachmentUrl(e, id) {
             e.preventDefault();

@@ -235,7 +235,7 @@ class IssueView(CsrfExemptMixin, APIView):
                 "attachments": issue.attachments,
                 "exp_duration": issue.exp_duration,
                 "org_duration": issue.org_duration,
-                "created_at": issue.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                "created_at": issue.created_at.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%d %H:%M:%S'),
                 "assignee": {
                     "id":issue.assignee.pk,
                     "name":issue.assignee.name
