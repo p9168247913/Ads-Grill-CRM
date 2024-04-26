@@ -283,25 +283,30 @@
 
                         <h6>{{ $route.params.val.toUpperCase() }}</h6>
 
-                        <div class="col-md-3 col-lg-4 col-sm-6 mb-3 d-flex">
+                        <div v-if="$route.params.val=='development'" class="col-md-3 col-lg-4 col-sm-6 mb-3 d-flex">
                             <input class="form-control" v-model="start_date" type="date" placeholder="Start date" />
                             <span class="mt-2">&nbsp;to&nbsp;</span>
                             <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
                                 type="date" placeholder="End date" />
                         </div>
-                        <div class="col-md-3 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
+                        <div 
+                        class="col-md-3 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
+                        <div v-if="$route.params.val==='development' && (this.authUser.designation === 'project_manager' || this.authUser.designation === 'admin' || this.authUser.designation === 'super-admin')">
                             <select
-                                v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'admin' || this.authUser.designation === 'super-admin'"
                                 v-model="selectedEmployee" class="form-select">
                                 <option value="" selected>Select Employee</option>
                                 <option v-for="(item, index) in users" :key="index" :value="item.id"> {{
                                     item.name }}</option>
                             </select>
-                            <select v-else v-model="selectedEmployee" class="form-select">
+                        </div>
+                            <div v-if="$route.params.val==='development' && (this.authUser.role==='development' && (this.authUser.designation.includes('developer') || this.authUser.designation.includes('lead')))">
+                                <select style="width:150px" class="form-select" v-model="selectedEmployee">
+                                <option value="" selected>Select Employee</option>
                                 <option :value="this.authUser.id" selected>{{ this.authUser.name }}</option>
                                 <!-- <option v-for="(item, index) in users" :key="index" :value="item.id"> {{
                                     item.name }}</option> -->
                             </select>
+                            </div>
                             <button @click="downloadReport($event)" type="button"
                                 v-if="this.selectedEmployee && this.start_date && this.end_date"
                                 style="width: auto; height: 40px !important;"

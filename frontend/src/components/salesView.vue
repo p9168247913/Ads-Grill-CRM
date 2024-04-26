@@ -89,12 +89,30 @@
                             <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
                                 type="date" placeholder="End date" />
                         </div>
+                        <div class="col-md-4 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
+                            <select v-model="selectedAssignee" class="form-select">
+                                <option value="">Sales Assignee</option>
+                                <option v-for="(item, index) in allAssignee" :key="index" :value="item.id"> {{
+                                    item.name }}</option>
+                            </select>
+                            <button
+                                v-if="this.selectedSales.length > 0 && this.selectedAssignee" type="button"
+                                style="width: auto; height: 40px !important;"
+                                class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
+                                <i class="bi bi-person-plus"></i>
+                                <span class="d-none d-md-inline">&nbsp; &nbsp;Assign</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body px-0 pt-0">
                         <div class="table-responsive p-0">
                             <table class="table align-items-center mb-0">
                                 <thead style="background-color: white; position: sticky; top: 0;">
                                     <tr>
+                                        <th style="color: #344767 !important;">
+                                            <input style="width: 15px; height: 15px;" type="checkbox"
+                                                v-model="selectAll" @change="selectAllSales">
+                                        </th>
                                         <th style="color: #344767 !important;"
                                             class="text-uppercase text-secondary text-xs font-weight-bolder font-weight-bold"
                                             v-for="(head) in headers" :key="head">{{ head }}</th>
@@ -102,6 +120,10 @@
                                 </thead>
                                 <tbody v-for="(lead, index) in leads" :key="index">
                                     <tr>
+                                        <td style="padding-left: 24px;">
+                                            <input :disabled="lead.is_assigned" style="width: 15px; height: 15px;"
+                                                type="checkbox" v-model="selectedSales" :value="lead.id">
+                                        </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ index + 1
@@ -215,6 +237,10 @@ export default {
             itemsPerPage: 5,
             totalPages: null,
             totalLeads: null,
+            selectAll: false,
+            selectedSales:[],
+            selectedAssignee: '',
+            allAssignee:[]
         };
     },
     computed: {
@@ -461,7 +487,14 @@ export default {
         },
         downloadReq(data) {
             const parser = new DOMParser();
-            const doc = parser.parseFromString(data, "text/html");
+            let doc = parser.parseFromString(data, "text/html");
+
+            let firstDiv = doc.querySelector('div')
+            if (firstDiv){
+                firstDiv.style.display = 'flex';
+            }
+            
+            console.log(doc)
             var opt = {
                 margin: 0.1,
                 fileName: 'new.pdf',
@@ -477,7 +510,36 @@ export default {
                 }
             };
             html2pdf().from(doc.body).set(opt).save();
-        }
+        },
+        selectAllSales(){
+            if (this.selectAll) {
+                this.selectedSales = this.leads.map(lead => lead.id);
+            } else {
+                this.selectedSales = [];
+            }
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.selectAll;
+            });
+        },
+        async getSalesEmployee() {
+            try {
+                const response = await axios.get(`${BASE_URL}api/sales/getAllEmployees`, {
+                    headers: {
+                        token: this.authToken
+                    }
+                })
+                if (response.status === 200) {
+                    this.allAssignee = response.data.employee_data;
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    timeout: 1000,
+                }).show()
+            }
+        },
     },
     watch: {
         clientNameFilter(newValue, oldValue) {
