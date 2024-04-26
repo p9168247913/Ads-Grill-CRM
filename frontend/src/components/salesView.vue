@@ -96,6 +96,7 @@
                                     item.name }}</option>
                             </select>
                             <button
+                            @click="assignSales"
                                 v-if="this.selectedSales.length > 0 && this.selectedAssignee" type="button"
                                 style="width: auto; height: 40px !important;"
                                 class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
@@ -494,7 +495,6 @@ export default {
                 firstDiv.style.display = 'flex';
             }
             
-            console.log(doc)
             var opt = {
                 margin: 0.1,
                 fileName: 'new.pdf',
@@ -540,6 +540,38 @@ export default {
                 }).show()
             }
         },
+        async assignSales(e) {
+            e.preventDefault();
+            let data = {}
+            if (this.selectedSales.length > 0 && this.selectedAssignee) {
+                data = {
+                    salesIds: [...this.selectedSales],
+                    saleAssignee: this.selectedAssignee
+                }
+            }
+            try {
+                const response = await axios.patch(`${BASE_URL}api/sales/`, data, {
+                    headers: {
+                        token: this.authToken
+                    }
+                })
+                if (response.status === 200) {
+                    this.selectedData = [];
+                    this.selectedAssignee = '';
+                    this.getLeads();
+                    Swal.fire({
+                        title: `${response.data.message}`,
+                        icon: 'success',
+                    })
+                }
+            } catch (error) {
+                new Noty({
+                    type: 'error',
+                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    timeout: 1000,
+                }).show()
+            }
+        },
     },
     watch: {
         clientNameFilter(newValue, oldValue) {
@@ -567,6 +599,7 @@ export default {
     mounted() {
         this.getLeads();
         this.getUserRole();
+        this.getSalesEmployee()
     },
 };
 </script>

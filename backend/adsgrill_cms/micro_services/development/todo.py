@@ -57,6 +57,7 @@ class TodoView(CsrfExemptMixin, APIView):
                         'id':todo.pk,
                         'author': todo.author.name,
                         'status': todo.status,
+                        'desc':todo.description,
                         'created_at': todo.created_at
                         }
                 for todo in to_dos]
