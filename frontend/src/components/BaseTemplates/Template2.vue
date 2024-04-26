@@ -1,4 +1,8 @@
 <template>
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+  </head>
     <div class="main_body">
       <h2>Custom Templates</h2>
       <div class="module">
@@ -157,7 +161,7 @@
   
       <div class="lastBody">
         <div>
-          <button> Save </button>
+          <button @click="sendHTMLToDB"> Save </button>
         </div>
   
       </div>
@@ -165,35 +169,60 @@
     </div>
   
     <div style="display: flex; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
-      <div>
-        <p style="font-weight: bold; font-size: small;">Project Type</p>
-        <p style="font-size: smaller;">{{ projectTypeValue }}</p>
-      </div>
-      <div v-if="selectedAuthTypes.length">
-        <p style="font-weight: bold; font-size: small;">Authentication Types</p>
-        <ul>
-          <li style="font-size:smaller" v-for="item in selectedAuthTypes" :key="item">{{ item }}</li>
-        </ul>
-      </div>
-      <div v-if="selectedRole.length">
-        <p style="font-weight: bold; font-size: small;">Roles & Departments</p>
-        <ul>
-          <li style="font-size:smaller" v-for="item in selectedRole" :key="item">{{ item }}</li>
-        </ul>
-      </div>
-      <div v-if="selectedModule.length">
-        <p style="font-weight: bold; font-size: small;">Modules</p>
-        <li style="font-size:smaller" v-for="item in selectedModule" :key="item">{{ item }}</li>
-      </div>
-      <div v-if="subModulesArray.length">
-        <p style="font-weight: bold; font-size: small;">Modules</p>
-        <li style="font-size:smaller" v-for="item in subModulesArray" :key="item">{{ item }}</li>
-      </div>
+    <div v-if="projectTypeValue">
+      <p style="font-weight: bold; font-size: small;">Project Type</p>
+      <p style="font-size: smaller;">{{ projectTypeValue }}</p>
     </div>
+    <div v-if="selectedAuthTypes.length">
+      <p style="font-weight: bold; font-size: small;">Authentication Types</p>
+      <ul>
+        <li style="font-size:smaller" v-for="item in selectedAuthTypes" :key="item">{{ item }}</li>
+      </ul>
+    </div>
+    <div v-if="selectedRole.length">
+      <p style="font-weight: bold; font-size: small;">Roles & Departments</p>
+      <ul>
+        <li style="font-size:smaller" v-for="item in selectedRole" :key="item">{{ item }}</li>
+      </ul>
+    </div>
+    <div v-if="allData.length">
+      <p style="font-weight: bold; font-size: small;">Modules & SubModules</p>
+      <ol>
+      <li style="font-size:smaller" v-for="item, ind in allData" :key="ind">{{Object.keys(item)[0] }}
+        <ul>
+          <li v-for="(subModule, ind) in Object.values(item)[0]" :key="ind">{{ subModule.key }}
+          <p style="font-size: 13px; margin-top:5px">-- Header Description: {{ subModule.otherData? subModule.otherData.header : "No description found" }}</p>
+          <p style="font-size: 13px;">-- Body Description: {{ subModule.otherData? subModule.otherData.body : "No description found" }}</p>
+          <p style="font-size: 13px;">-- Footer Description: {{ subModule.otherData? subModule.otherData.footer : "No description found" }}</p>
+          </li>
+        </ul>
+      </li>
+    </ol>
+    </div>
+    <div v-if="sidebarValue">
+      <p style="font-weight: bold; font-size: small;">Sidebar Position</p>
+      <p style="font-size: smaller;">{{ sidebarValue }}</p>
+    </div>
+    <div v-if="Object.values(selectedRoleBasedAccess).some(val=>val.length)">
+      <p style="font-weight: bold; font-size: small;">Role Based Modules Access</p>
+      <ol>
+        <li style="font-size:smaller" v-for=" value, key in selectedRoleBasedAccess" :key="key">{{key}}
+        <ul v-if="value.length > 0">
+          <li v-for="(item, ind) in value" :key="ind">{{ item }}
+          </li>
+        </ul>
+      </li>
+      </ol>
+    </div>
+  </div>
   </template>
   
   <script>
   // import jsPDF from 'jspdf';
+  import axios from 'axios';
+import Noty from 'noty';
+import { BASE_URL } from '../../config/apiConfig';
+import { mapState } from 'vuex';
   import { QuillEditor } from '@vueup/vue-quill'
   import '@vueup/vue-quill/dist/vue-quill.snow.css';
   export default {
@@ -430,15 +459,15 @@
       QuillEditor
     },
     computed: {
-  
+      ...mapState(['authToken', 'authUser']),
     },
   
     methods: {
       abcdCall(){
-        console.log("abcdCall", this.selectedRoleBasedAccess)
+        // console.log("abcdCall", this.selectedRoleBasedAccess)
       },
       isChecked(role, value) {
-        console.log("isChecked",role,value)
+        // console.log("isChecked",role,value)
       return this.abcdCall[role] && this.selectedRoleBasedAccess[role].includes(value);
     },
     updateRoleBasedAccess(role, value) {
@@ -533,7 +562,7 @@
             this.allData[index][subModuleval].push({ key: value, value: value });
           }
         }
-        console.log("allData:", this.allData);
+        // console.log("allData:", this.allData);
       }
   
       ,
@@ -616,10 +645,35 @@
       addInputFields() {
         this.dataItems.push({ key: '', value: '' });
       },
-      addSubModuleData() {
-  
-  
-      },
+      async sendHTMLToDB(){
+      this.$store.commit('showLoader')
+      try{
+        const response = await axios.put(`${BASE_URL}api/templateView/`,
+        {
+        data:this.$refs.temp1.outerHTML
+      }, {
+        headers:{
+            token:this.authToken
+          },
+      })
+      if (response.data.message === "Requirements Submitted"){
+        new Noty({
+          type:'success',
+          text:response.data.message,
+          timeout: 1000,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+      } catch(error){
+        new Noty({
+          type:'error',
+          text:error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 1000,
+        }).show()
+      }
+      this.$store.commit('hideLoader')
+
+    },
   
     },
     mounted() {

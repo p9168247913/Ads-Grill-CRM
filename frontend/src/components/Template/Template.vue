@@ -156,14 +156,16 @@
         </div>
       </div>
 
-    <div>
+    <div class="lastBody">
+      <div>
       <button @click="sendHTMLToDB">Save</button>
     </div>
-
+  </div>
+    </div>
   </div>
 
-  <div style="display: flex; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
-    <div>
+  <div style="display: none; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
+    <div v-if="projectTypeValue">
       <p style="font-weight: bold; font-size: small;">Project Type</p>
       <p style="font-size: smaller;">{{ projectTypeValue }}</p>
     </div>
@@ -193,6 +195,21 @@
       </li>
     </ol>
     </div>
+    <div v-if="sidebarValue">
+      <p style="font-weight: bold; font-size: small;">Sidebar Position</p>
+      <p style="font-size: smaller;">{{ sidebarValue }}</p>
+    </div>
+    <div v-if="Object.values(selectedRoleBasedAccess).some(val=>val.length)">
+      <p style="font-weight: bold; font-size: small;">Role Based Modules Access</p>
+      <ol>
+        <li style="font-size:smaller" v-for=" value, key in selectedRoleBasedAccess" :key="key">{{key}}
+        <ul v-if="value.length > 0">
+          <li v-for="(item, ind) in value" :key="ind">{{ item }}
+          </li>
+        </ul>
+      </li>
+      </ol>
+    </div>
   </div>
 </template>
 
@@ -202,7 +219,6 @@ import Noty from 'noty';
 import { BASE_URL } from '../../config/apiConfig';
 import { mapState } from 'vuex';
 // import Swal from 'sweetalert2';
-import html2pdf from 'html2pdf.js'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
@@ -943,10 +959,10 @@ export default {
 
   methods: {
     abcdCall(){
-      console.log("abcdCall", this.selectedRoleBasedAccess)
+      // console.log("abcdCall", this.selectedRoleBasedAccess)
     },
     isChecked(role, value) {
-      console.log("isChecked",role,value)
+      // console.log("isChecked",role,value)
     return this.abcdCall[role] && this.selectedRoleBasedAccess[role].includes(value);
   },
   updateRoleBasedAccess(role, value) {
@@ -1041,7 +1057,7 @@ export default {
           this.allData[index][subModuleval].push({ key: value, value: value });
         }
       }
-      console.log("allData:", this.allData);
+      // console.log("allData:", this.allData);
     }
 
     ,
@@ -1145,25 +1161,23 @@ export default {
       this.$store.commit('hideLoader')
 
     },
-    generatePDF() {
-      //console.log(html2pdf)
-      console.log("----------", this.allData, "------------")
-      var opt = {
-        margin: 0.1,
-        fileName: 'new.pdf',
-        image: {
-          type: 'jpeg',
-          quality: 0.99
-        },
-        html2canvas: { scale: 2 },
-        jsPDF: {
-          unit: 'in',
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      };
-      html2pdf().from(this.$refs.temp1).set(opt).save();
-    },
+    // generatePDF() {
+    //   var opt = {
+    //     margin: 0.1,
+    //     fileName: 'new.pdf',
+    //     image: {
+    //       type: 'jpeg',
+    //       quality: 0.99
+    //     },
+    //     html2canvas: { scale: 2 },
+    //     jsPDF: {
+    //       unit: 'in',
+    //       format: 'a4',
+    //       orientation: 'portrait'
+    //     }
+    //   };
+    //   html2pdf().from(this.$refs.temp1).set(opt).save();
+    // },
     addCustomAuthType() {
       if (this.customAuthType.trim() !== '') {
         this.authenticationTypes.push(this.customAuthType.trim());
