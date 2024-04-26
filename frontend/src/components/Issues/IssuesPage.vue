@@ -1145,7 +1145,6 @@ export default {
                     })
                     if (response.status === 200) {
                         this.allIssues = response.data.issues
-                        console.log(this.allIssues);
                     }
                     this.$store.commit('hideLoader');
                 } catch (error) {

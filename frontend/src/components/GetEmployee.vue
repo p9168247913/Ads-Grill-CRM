@@ -514,7 +514,7 @@ export default {
                         icon: 'success',
                     });
                     this.start_date = "";
-                    this.end_date = "";
+                    this.end_date = ""; 
                     this.$store.commit('hideLoader');
                     this.selectedEmployee = "";
                 }

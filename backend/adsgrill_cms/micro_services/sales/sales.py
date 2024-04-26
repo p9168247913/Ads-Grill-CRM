@@ -63,6 +63,7 @@ class SalesView(CsrfExemptMixin, APIView):
     
     def get(self, request):
         try:
+            currentUserEmail = request.user.email
             pageNo = request.GET.get("page_no")
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
@@ -76,6 +77,9 @@ class SalesView(CsrfExemptMixin, APIView):
                 end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
 
             allSales = Sale.objects.all().order_by('-created_at')
+            if request.user.role.name == 'sales':
+                allSales = allSales.filter(assignee__email=currentUserEmail)
+
             if client_name is not None:
                 allSales = allSales.filter(lead__client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
 
@@ -185,6 +189,26 @@ class SalesView(CsrfExemptMixin, APIView):
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
         
         return JsonResponse({"message":"Sale Updated Successfully"},status=status.HTTP_200_OK)
+    
+    def patch(self, request):
+        try:
+            requestData = json.loads(request.body)
+            print(requestData)
+            salesIds = requestData.get('salesIds', [])
+            saleAssignee = Users.objects.get(pk=requestData.get('saleAssignee'))
+            if salesIds:
+                updateSales = Sale.objects.filter(pk__in=salesIds).order_by('-created_at')
+                for sale in updateSales:
+                    sale.assignee = saleAssignee
+                    sale.save()
+
+        except IntegrityError as i:
+            return JsonResponse({"message":str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+        except Exception as e:
+            return JsonResponse({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return JsonResponse({"message":f"Leads Assigned successfully to {saleAssignee.name}"}, status=status.HTTP_200_OK)
         
         
     def delete(self, request):
@@ -210,12 +234,21 @@ class getAllSaleEmployees(CsrfExemptMixin, APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request):
         try:
-            user_instance=Users.objects.filter(role__name="sales",is_deleted=False).order_by('name')
-            employee_data=[
-                {
-                    'id':user.pk,
-                    'name':user.name
-                } for user in user_instance ]
+            user_instance = []
+            if request.user.role.name == 'admin' or request.user.role.name == 'leads':
+                user_instance=Users.objects.filter(role__name="sales",designation='sales_manager',is_deleted=False).order_by('name')
+            
+            if request.user.role.name == 'sales' and request.user.designation == 'sales_manager':
+                user_instance=Users.objects.filter(role__name="sales",designation='sales_associate',is_deleted=False).order_by('name')
+
+            if user_instance:
+                employee_data=[
+                    {
+                        'id':user.pk,
+                        'name':user.name
+                    } for user in user_instance ]
+            else:
+                employee_data = []
                 
         except Exception as e:
             return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)

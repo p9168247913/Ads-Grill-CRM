@@ -13,44 +13,58 @@
           <option v-for="(sprint, index) in projectType" :key="index" :value="sprint.value">{{ sprint.key }}</option>
         </select>
       </div>
-      <div>
-        <label class="form-label">Authentication Types</label>
+    </div>
+    <hr />
+    <div>
+      <label class="form-label">Authentication Types</label>
+      <div class="flexContainer">
         <div class="selecBox" v-for="(authType, index) in authenticationTypes" :key="index">
-          <input type="checkbox" :id="'authType' + index" :value="authType" v-model="selectedAuthTypes">
-          <label :for="'authType' + index">{{ authType }}</label>
-        </div>
-        <div class="belowTag">
-          <input type="text" class="input_form" v-model="customAuthType" placeholder="Enter custom authentication type">
-          <button class="btn_form" @click="addCustomAuthType">Add</button>
+          <div class="module_box">
+            <input type="checkbox" :id="'authType' + index" :value="authType" v-model="selectedAuthTypes">
+            <div :for="'authType' + index">{{ authType }}</div>
+          </div>
+
         </div>
       </div>
-      <div>
-        <label class="form-label">Roles </label>
-        <div class="selecBox" v-for="(role, index) in roles" :key="index">
-          <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
-          <label :for="'role' + index">{{ role }}</label>
-        </div>
-        <div class="belowTag">
-          <input type="text" class="input_form" v-model="customRole" placeholder="Enter custom authentication type">
-          <button class="btn_form" @click="addCustomRole">Add</button>
-        </div>
+      <div class="belowTag module_box2">
+        <input type="text" class="input_form" v-model="customAuthType" placeholder="Enter custom auth type">
+        <button class="btn_form" @click="addCustomAuthType">Add</button>
       </div>
     </div>
+    <hr />
+    <div>
+      <label class="form-label">Roles </label>
+      <div class="flexContainer">
+        <div class="selecBox" v-for="(role, index) in roles" :key="index">
+          <div class="module_box">
+            <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
+            <div :for="'role' + index">{{ role }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="belowTag module_box2">
+        <input type="text" class="input_form" v-model="customRole" placeholder="Enter custom role">
+        <button class="btn_form" @click="addCustomRole">Add</button>
+      </div>
 
-
+    </div>
+    <hr />
     <div>
       <label for="module" class="form-label">Modules</label>
       <div>
-        <label class="module_box" v-for="(module, index) in mainfilled" :key="index">
-          <input type="checkbox" v-model="selectedModule" :value="module.value">
-          {{ module.key }}
-        </label>
-        <div class="belowTag2">
-          <input class="input_form" type="text" v-model="newCustomModuleLabel">
-          <button class="btn_form" @click="addCustomModule">Add Module</button>
+        <div class="flexContainer">
+          <div class="module_box" v-for="(module, index) in mainfilled" :key="index">
+            <input type="checkbox" v-model="selectedModule" :value="module?.value">
+            {{ module.key }}
+          </div>
+        </div>
+        <div class="belowTag module_box2">
+          <input class="input_form" type="text" placeholder="Add Module" v-model="newCustomModuleLabel">
+          <button class="btn_form" @click="addCustomModule">Add </button>
         </div>
       </div>
     </div>
+    <hr />
     <label>
       Sub Modules
     </label>
@@ -58,27 +72,33 @@
       <div v-for="(subModuleval, index) in selectedModule" :key="index">
         <label class="form-label">{{ subModuleval }}</label>
         <div>
-          <label class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]"
-            :key="'sub_' + subIndex">
-            <input type="checkbox" @click="subModuleclick(subModuleval, subModule.value)" v-model="selectedSubModules"
-              :value="subModule.value" :checked="shouldShowPopupButton(subModule, subModuleval)">
-            {{ subModule.key }}
-            <button v-if="shouldShowPopupButton(subModule, subModuleval)"
-              @click="openPopup(subModuleval, subModule)">Open
-              Popup</button>
-          </label>
-
-          <div class="belowTag2">
-            <input class="input_form" type="text" v-model="newSubModuleName[subModuleval]">
-            <button class="btn_form" @click="addSubModule(subModuleval)">Add Submodule</button>
+          <div class="flexContainer">
+            <div class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]"
+              :key="'sub_' + subIndex">
+              <div class="module_box3">
+                <input type="checkbox" @click="subModuleclick(subModuleval, subModule.value)"
+                  v-model="selectedSubModules" :value="subModule.value"
+                  :checked="shouldShowPopupButton(subModule, subModuleval)">
+                {{ subModule.key }}
+                <button class="btn_form2" v-if="shouldShowPopupButton(subModule, subModuleval)"
+                  @click="openPopup(subModuleval, subModule)">Add Details</button>
+              </div>
+            </div>
           </div>
+          <div class="belowTag module_box2">
+            <input class="input_form" placeholder="Add Custom" type="text" v-model="newSubModuleName[subModuleval]">
+            <button class="btn_form" @click="addSubModule(subModuleval)">Add </button>
+          </div>
+
         </div>
 
       </div>
     </div>
+
+    <hr />
     <div>
       <div class="module">
-        <div>
+        <div class="selectSidebar">
           <label for="sprint" class="form-label">Select Sidebar</label>
           <select required class="form-select selecBox" v-model="sidebarValue">
             <option value="">Select Sidebar Type</option>
@@ -88,21 +108,21 @@
 
       </div>
     </div>
-
+    <hr />
     <div class="popup-container" v-if="showPopup">
       <div class="popup">
         <span class="close-btn" @click="closePopup">&times;</span>
 
         <div class="row">
           <div class="">
-            <label for="projectName" class="form-label">Header Description</label>
-            <QuillEditor required ref="headerDesc" theme="snow" toolbar="full" />
+            <label for="projectName" class="form-label"> Header Description </label>
+            <QuillEditor required ref="headerDesc"  theme="snow" toolbar="full" />
           </div>
         </div>
 
         <div class="row">
           <div class="">
-            <label for="projectName" class="form-label">Body Description</label>
+            <label for="projectName" class="form-label"> Body Description </label>
             <QuillEditor required ref="bodyDesc" theme="snow" toolbar="full" />
           </div>
         </div>
@@ -113,38 +133,39 @@
             <QuillEditor required ref="footerDesc" theme="snow" toolbar="full" />
           </div>
         </div>
-        <div> <button @click="storeAndClearData()">Store Data </button></div>
+        <div> <button class="form-btn" @click="storeAndClearData()">Submit</button></div>
 
       </div>
     </div>
 
     <div>
-
       <div>
-        <label>Select feature modules to be shown with each role</label>
-        <div>
-          <label>Roles</label>
-          <div class="roleBaseAccess" v-for="(role, index) in selectedRole" :key="index">
-            {{ role }}
+        <label>Roles</label>
 
-            <label class="" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
-              <input type="checkbox" v-model="selectedRoleBasedAccess" :value="module.value">
+        <div class="" v-for="(role, index) in selectedRole" :key="index">
+          {{ role }}
+          <br />
+
+          <div class="flexContainer">
+            <div class="module_box" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
+              <input type="checkbox" :checked="isChecked(role, module)"
+                @change="updateRoleBasedAccess(role, module)">
               {{ module }}
-            </label>
-
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div>
+    <div class="lastBody">
+      <div>
       <button @click="sendHTMLToDB">Save</button>
     </div>
-
+  </div>
+    </div>
   </div>
 
-  <div style="display: flex; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
-    <div>
+  <div style="display: none; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
+    <div v-if="projectTypeValue">
       <p style="font-weight: bold; font-size: small;">Project Type</p>
       <p style="font-size: smaller;">{{ projectTypeValue }}</p>
     </div>
@@ -174,6 +195,21 @@
       </li>
     </ol>
     </div>
+    <div v-if="sidebarValue">
+      <p style="font-weight: bold; font-size: small;">Sidebar Position</p>
+      <p style="font-size: smaller;">{{ sidebarValue }}</p>
+    </div>
+    <div v-if="Object.values(selectedRoleBasedAccess).some(val=>val.length)">
+      <p style="font-weight: bold; font-size: small;">Role Based Modules Access</p>
+      <ol>
+        <li style="font-size:smaller" v-for=" value, key in selectedRoleBasedAccess" :key="key">{{key}}
+        <ul v-if="value.length > 0">
+          <li v-for="(item, ind) in value" :key="ind">{{ item }}
+          </li>
+        </ul>
+      </li>
+      </ol>
+    </div>
   </div>
 </template>
 
@@ -183,12 +219,13 @@ import Noty from 'noty';
 import { BASE_URL } from '../../config/apiConfig';
 import { mapState } from 'vuex';
 // import Swal from 'sweetalert2';
-import html2pdf from 'html2pdf.js'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
+ 
   data() {
     return {
+      selectedRoleBasedAccess: {},
       popupData: {
         header: '',
         body: '',
@@ -198,16 +235,12 @@ export default {
 
       dataItems: [{ key: '', value: '' }],
       mainfilled: [{
-        key: 'Sales Entery',
-        value: 'Sales Entery'
+        key: 'Sales Entery & POS Module ',
+        value: 'Sales Entery & POS Module'
       },
       {
         key: 'Accounts Module',
         value: 'Accounts Module'
-      },
-      {
-        key: 'POS Module',
-        value: 'POS Module'
       },
 
       {
@@ -239,8 +272,8 @@ export default {
         value: "Order Module"
       },
       {
-        key: "Quatation module",
-        value: "Quatation module"
+        key: "Quatation Module",
+        value: "Quatation Module"
       },
       {
         key: "CRM Module",
@@ -279,7 +312,7 @@ export default {
       newCustomModuleLabel: '',
       allData: [],
       subModules: {
-        "Sales Entery": [{
+        "Sales Entery & POS Module": [{
           key: "Sales Module",
           value: "Sales Module"
         },
@@ -688,8 +721,8 @@ export default {
             value: "Sales Return Acc. Ledger"
           },
           {
-            key: "Purchase Return acc. Ledç",
-            value: "Purchase Return acc. Ledç"
+            key: "Purchase Return acc. Ledger",
+            value: "Purchase Return acc. Ledger"
           },
           {
             key: "Dutie & Tax Acc. Ledger",
@@ -923,63 +956,81 @@ export default {
   computed: {
     ...mapState(['authToken', 'authUser']),
   },
-  
+
   methods: {
+    abcdCall(){
+      // console.log("abcdCall", this.selectedRoleBasedAccess)
+    },
+    isChecked(role, value) {
+      // console.log("isChecked",role,value)
+    return this.abcdCall[role] && this.selectedRoleBasedAccess[role].includes(value);
+  },
+  updateRoleBasedAccess(role, value) {
+    if (!this.selectedRoleBasedAccess[role]) {
+      this.selectedRoleBasedAccess[role] = []; // Initialize if the role doesn't exist
+    }
+    const index = this.selectedRoleBasedAccess[role].indexOf(value);
+    if (index === -1) {
+      this.selectedRoleBasedAccess[role].push(value); // Add value if it's not already in the array
+    } else {
+      this.selectedRoleBasedAccess[role].splice(index, 1); // Remove value if it already exists
+    }
+  }
+,
     storeAndClearData() {
-    const footerData = this.$refs.footerDesc;
-    if (footerData) {
+      const footerData = this.$refs.footerDesc;
+      if (footerData) {
         const htmlContent = footerData.getHTML();
         this.popupData.footer = htmlContent;
-    }
-    const bodyData = this.$refs.bodyDesc;
-    if (bodyData) {
+      }
+      const bodyData = this.$refs.bodyDesc;
+      if (bodyData) {
         const htmlContent = bodyData.getHTML();
         this.popupData.body = htmlContent;
-    }
-    const headerData = this.$refs.headerDesc;
-    if (headerData) {
+      }
+      const headerData = this.$refs.headerDesc;
+      if (headerData) {
         const htmlContent = headerData.getHTML();
         this.popupData.header = htmlContent;
-    }
-    console.log(this.popupData);
-    console.log(this.footer);
+      }
     
-    const mainModuleIndex = this.allData.findIndex(item => Object.keys(item)[0] === this.currentModule);
-    let currentModuleData = null;
 
-    if (mainModuleIndex !== -1) {
+      const mainModuleIndex = this.allData.findIndex(item => Object.keys(item)[0] === this.currentModule);
+      let currentModuleData = null;
+
+      if (mainModuleIndex !== -1) {
         currentModuleData = this.allData[mainModuleIndex][this.currentModule];
-    }
+      }
 
-    if (currentModuleData) {
-      
+      if (currentModuleData) {
+
         const existingSubmoduleIndex = currentModuleData.findIndex(item => item.key === this.currentSubModule);
         if (existingSubmoduleIndex !== -1) {
-       
-            currentModuleData[existingSubmoduleIndex].otherData = this.popupData;
-        } else {
-            currentModuleData.push({
-                "key": this.currentSubModule,
-                "value": this.currentSubModule,
-                "otherData": this.popupData
-            });
-        }
-    } else {
-      
-        this.allData.push({
-            [this.currentModule]: [
-                {
-                    "key": this.currentSubModule,
-                    "value": this.currentSubModule,
-                    "otherData": this.popupData
-                }
-            ]
-        });
-    }
 
-    this.closePopup();
-}
-,
+          currentModuleData[existingSubmoduleIndex].otherData = this.popupData;
+        } else {
+          currentModuleData.push({
+            "key": this.currentSubModule,
+            "value": this.currentSubModule,
+            "otherData": this.popupData
+          });
+        }
+      } else {
+
+        this.allData.push({
+          [this.currentModule]: [
+            {
+              "key": this.currentSubModule,
+              "value": this.currentSubModule,
+              "otherData": this.popupData
+            }
+          ]
+        });
+      }
+
+      this.closePopup();
+    }
+    ,
     shouldShowPopupButton(subModule, subModuleval) {
       subModule = subModule?.key
 
@@ -993,28 +1044,55 @@ export default {
     subModuleclick(subModuleval, value) {
       const index = this.allData.findIndex(item => Object.keys(item)[0] === subModuleval);
       if (index === -1) {
-     
+
         this.allData.push({ [subModuleval]: [{ key: value, value: value }] });
       } else {
-        
+
         const existingIndex = this.allData[index][subModuleval].findIndex(item => item.key === value);
         if (existingIndex !== -1) {
-        
+
           this.allData[index][subModuleval].splice(existingIndex, 1);
         } else {
-          
+
           this.allData[index][subModuleval].push({ key: value, value: value });
         }
       }
-      console.log("allData:", this.allData);
+      // console.log("allData:", this.allData);
     }
 
     ,
-    openPopup(a, b) {
-      this.currentModule = a;
-      this.currentSubModule = b.key;
-      this.showPopup = true;
-     
+    openPopup(subModuleval, subModule) {
+      this.currentModule = subModuleval;
+      this.currentSubModule = subModule.key;
+    
+      const moduleIndex = this.allData.findIndex(item => Object.keys(item)[0] === subModule.key);
+  
+  if (moduleIndex !== -1) {
+    // Module exists, check if subModule exists
+    const submoduleIndex = this.allData[moduleIndex][subModule.key].findIndex(item => item.key === subModuleval);
+    
+    if (submoduleIndex !== -1) {
+      // Submodule exists, populate popup with existing data
+      const existingData = this.allData[moduleIndex][subModule.key][submoduleIndex].otherData;
+      this.popupData = { ...existingData };
+    } else {
+      // Submodule doesn't exist, open popup with empty fields
+      this.popupData = {
+        header: "",
+        body: "",
+        footer: ""
+      };
+    }
+  } else {
+    // Module doesn't exist, open popup with empty fields
+    this.popupData = {
+      header: "",
+      body: "",
+      footer: ""
+    };
+
+    this.showPopup = true;
+  }
     },
     closePopup() {
       this.currentModule = "";
@@ -1083,25 +1161,23 @@ export default {
       this.$store.commit('hideLoader')
 
     },
-    generatePDF() {
-      //console.log(html2pdf)
-      console.log("----------", this.allData, "------------")
-      var opt = {
-        margin: 0.1,
-        fileName: 'new.pdf',
-        image: {
-          type: 'jpeg',
-          quality: 0.99
-        },
-        html2canvas: { scale: 2 },
-        jsPDF: {
-          unit: 'in',
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      };
-      html2pdf().from(this.$refs.temp1).set(opt).save();
-    },
+    // generatePDF() {
+    //   var opt = {
+    //     margin: 0.1,
+    //     fileName: 'new.pdf',
+    //     image: {
+    //       type: 'jpeg',
+    //       quality: 0.99
+    //     },
+    //     html2canvas: { scale: 2 },
+    //     jsPDF: {
+    //       unit: 'in',
+    //       format: 'a4',
+    //       orientation: 'portrait'
+    //     }
+    //   };
+    //   html2pdf().from(this.$refs.temp1).set(opt).save();
+    // },
     addCustomAuthType() {
       if (this.customAuthType.trim() !== '') {
         this.authenticationTypes.push(this.customAuthType.trim());
@@ -1126,8 +1202,7 @@ export default {
 
   },
   mounted() {
-
-    //console.log(this.selectedSubModules)
+   //console.log(this.selectedSubModules)
     //console.log(this.modelValue);
   },
   watch: {
@@ -1167,16 +1242,83 @@ export default {
 
 }
 
+.lastBody {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  align-items: center;
+
+
+}
+.form-btn{
+  margin: auto;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+.lastBody>div {
+  width: 300px;
+  color: white;
+  margin: auto;
+}
+
+.lastBody>div>button {
+  width: 100%;
+  border: none;
+  color: white;
+  padding: 5px;
+  background-color: #6EB4D1;
+  border-radius: 5px;
+  margin: auto;
+}
+
+.flexContainer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  align-items: center;
+}
+
+.selectSidebar {
+  width: 375px;
+}
+
 .roleBaseAccess {
   display: flex;
 }
 
 .module_box {
   margin-left: 5px;
-  padding: 10px;
+  height: 40px;
+  display: flex;
   align-items: center;
+  gap: 5px;
+  padding: 5px 15px 5px 15px;
   border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+.module_box3 {
+  margin-left: 5px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 5px 5px 15px;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+.module_box2 {
+
+  align-items: center;
+
   box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+}
+
+.module_box2>div {
+  margin: 25px;
 }
 
 .main_body {
@@ -1184,6 +1326,7 @@ export default {
   padding: 15px;
   margin-left: 5px;
   margin-right: 5px;
+  color: black;
   border-radius: 10px;
 }
 
@@ -1192,7 +1335,7 @@ export default {
   gap: 8px;
   width: fit-content;
   border-radius: 5px;
-  border: 1px solid gray;
+
 }
 
 .input_form {
@@ -1204,21 +1347,40 @@ export default {
 .btn_form {
   border: none;
   outline: none;
-
+  border-radius: 0px 5px 5px 0px;
   padding-left: 3px;
+  height: 35px;
   color: white !important;
+  padding: 0px 6px 0px 6px;
+  background-color: #6EB4D1;
+}
+
+.btn_form2 {
+  border: none;
+  outline: none;
+  margin-left: 10px;
+  height: 35px;
+  color: white !important;
+  padding: 0px 6px 0px 6px;
   background-color: #6EB4D1;
 }
 
 .belowTag {
   display: flex;
   gap: 8px;
-  width: 79%;
+  max-width: fit-content;
   border-radius: 5px;
+  margin-top: 15px;
+  height: 35px;
   align-items: center;
   justify-content: center;
   text-align: center;
-  border: 1px solid gray;
+
+}
+
+.belowTag>input {
+  padding: 0px 5px 0px 5px;
+  font-size: 15px;
 }
 
 .module {
@@ -1230,8 +1392,10 @@ export default {
 }
 
 .selecBox {
-  max-width: 300px;
-  min-width: 300px;
+  display: flex;
+  align-items: center;
+
+
 }
 
 .popup-container {
@@ -1265,6 +1429,7 @@ export default {
   top: 10px;
   right: 10px;
   cursor: pointer;
+  font-size: 12px;
   font-size: 20px;
   color: #888;
 }

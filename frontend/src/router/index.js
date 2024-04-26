@@ -16,6 +16,7 @@ import Backlogs from '../components/Backlogs/BackLogs.vue'
 import ActiveSprint from '../components/ActiveSprint/ActiveSprint.vue'
 import ClientSignin from '.././views/ClientSignin.vue'
 import Template from '../components/Template/Template.vue'
+import Template2 from '../components/BaseTemplates/Template2.vue'
 
 const routes = [
   {
@@ -108,6 +109,11 @@ const routes = [
     path: "/templates",
     name: 'Templates',
     component: Template,
+  },
+  {
+    path: "/template2",
+    name: 'Template 2',
+    component: Template2,
   },
 ];
 

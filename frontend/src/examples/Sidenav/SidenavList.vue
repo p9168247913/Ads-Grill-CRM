@@ -171,6 +171,15 @@
           </template>
         </sidenav-item>
       </li>
+      <li class="nav-item"
+      v-if="authUser.role == 'contact' && authUser.designation == 'contact'">
+        <sidenav-item url="/template2" :class="getRoute() === 'template2' ? 'active' : ''" navText="Template2">
+          <template v-slot:icon>
+            <i class="fa fa-cogs text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
 
       <li class="mt-3 nav-item">
         <h6 v-if="this.$store.state.isRTL" class="text-xs ps-4 text-uppercase font-weight-bolder opacity-6"

@@ -2,7 +2,7 @@ from django.urls import path, re_path
 from micro_services.users_management import users, roles
 from micro_services.leads import leads
 from micro_services.sales import sales
-from micro_services.development import client, projects, sprints ,issues, comments,worklog
+from micro_services.development import client, projects, sprints ,issues, comments,worklog, todo
 
 
 urlpatterns = [
@@ -12,6 +12,7 @@ urlpatterns = [
     path("leads/", leads.LeadView.as_view()),
     path("leadinfo/", leads.LeadInfo.as_view()),
     path("leadExcelFormat/", leads.LeadExcelDownload.as_view()),
+    path("todo/", todo.TodoView.as_view()),
     path("sales/", sales.SalesView.as_view()),
     path("templateView/",sales.clientTemplateView.as_view()),
     path("sales/getAllEmployees",sales.getAllSaleEmployees.as_view()),

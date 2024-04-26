@@ -5,12 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Webkit | Responsive Bootstrap 4 Admin Dashboard Template</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-b  b eta-deprecated/lib/themes/mint.css">
     </head>
     <div class="wrapper" style="margin-bottom: 80px; padding: 0; ">
         <div class="content-page">
             <!-- <h1>Dashboard Lead</h1> -->
-            <div class="container-fluid">
+            <div class="container-fluid"> 
                 <div class="row">
                     <div class="col-lg-12">
                         <!-- <h1>Leads</h1> -->
