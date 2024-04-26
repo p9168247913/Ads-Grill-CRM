@@ -4,12 +4,12 @@
         <div class="col-lg-12">
             <!-- <h1>Leads</h1> -->
             <div class="row">
-                <div class="col-lg-4 col-md-6 col-12">
+                <div style="cursor: pointer;" class="col-lg-4 col-md-6 col-12" @click="showAllLeads">
                     <card :title="stats.money.title" :value="stats.money.value" :percentage="stats.money.percentage"
                         :iconClass="stats.money.iconClass" :iconBackground="stats.money.iconBackground"
                         :detail="stats.money.detail" directionReverse></card>
                 </div>
-                <div class="col-lg-4 col-md-6 col-12">
+                <div style="cursor: pointer;" class="col-lg-4 col-md-6 col-12" @click="showFollowUpLeads">
                     <card :title="stats.users.title" :value="stats.users.value" :percentage="stats.users.percentage"
                         :iconClass="stats.users.iconClass" :iconBackground="stats.users.iconBackground"
                         :detail="stats.users.detail" directionReverse></card>
@@ -26,46 +26,52 @@
                         :detail="stats.sales.detail" directionReverse></card>
                 </div> -->
             </div>
-            
-            <!-- <div class="row mt-4">
+
+            <div class="row mt-4">
                 <div class="col-lg-7 mb-lg-0 mb-4">
                     <div class="card">
                         <div class="p-3 pb-0 card-header">
                             <div class="d-flex justify-content-between">
-                                <h6 class="mb-2">Sales by Country</h6>
+                                <h6 class="mb-2">All Leads</h6>
                             </div>
                         </div>
                         <div class="table-responsive">
                             <table class="table align-items-center">
                                 <tbody>
-                                    <tr v-for="(sale, index) in sales" :key="index">
-                                        <td class="w-30">
-                                            <div class="px-2 py-1 d-flex align-items-center">
-                                                <div>
+                                    <tr v-for="(lead, index) in allLeads" :key="index">
+                                        <td >
+                                            <div class="text-center">
+                                                <!-- <div>
                                                     <img :src="sale.flag" alt="Country flag" />
-                                                </div>
-                                                <div class="ms-4">
-                                                    <p class="mb-0 text-xs font-weight-bold">Country:</p>
-                                                    <h6 class="mb-0 text-sm">{{ sale.country }}</h6>
-                                                </div>
+                                                </div> -->
+                                                <!-- <div class="ms-4"> -->
+                                                    <p class="mb-0 text-xs font-weight-bold">Contact name:</p>
+                                                    <h6 class="mb-0 text-sm">{{ lead.name }}</h6>
+                                                <!-- </div> -->
                                             </div>
                                         </td>
                                         <td>
                                             <div class="text-center">
-                                                <p class="mb-0 text-xs font-weight-bold">Sales:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.sales }}</h6>
+                                                <p class="mb-0 text-xs font-weight-bold">Contact number:</p>
+                                                <h6 class="mb-0 text-sm">{{ lead.conact_no }}</h6>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="text-center">
-                                                <p class="mb-0 text-xs font-weight-bold">Value:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.value }}</h6>
+                                                <p class="mb-0 text-xs font-weight-bold">Source:</p>
+                                                <h6 class="mb-0 text-sm">{{ lead.source.name }}</h6>
                                             </div>
                                         </td>
                                         <td class="text-sm align-middle">
                                             <div class="text-center col">
-                                                <p class="mb-0 text-xs font-weight-bold">Bounce:</p>
-                                                <h6 class="mb-0 text-sm">{{ sale.bounce }}</h6>
+                                                <p class="mb-0 text-xs font-weight-bold">Date:</p>
+                                                <h6 class="mb-0 text-sm">{{ formatDate(lead.created_at) }}</h6>
+                                            </div>
+                                        </td>
+                                        <td class="text-sm align-middle">
+                                            <div class="text-center col">
+                                                <p v-if="lead?.follow_date" class="mb-0 text-xs font-weight-bold">Follow up's date:</p>
+                                                <h6 class="mb-0 text-sm">{{ lead?.follow_date? formatDate(lead?.follow_date) :"No follow up's" }}</h6>
                                             </div>
                                         </td>
                                     </tr>
@@ -77,7 +83,7 @@
                 <div class="col-lg-5">
                     <categories-card />
                 </div>
-            </div> -->
+            </div>
         </div>
     </div>
 </template>
@@ -97,7 +103,7 @@ export default {
         return {
             stats: {
                 money: {
-                    title: "Total Sales",
+                    title: "Total Leads",
                     value: "",
                     percentage: "",
                     iconClass: "ni ni-money-coins",
@@ -160,7 +166,8 @@ export default {
                     flag: BR,
                 },
             },
-            currentPage:1,
+            currentPage: 1,
+            allLeads: [],
         }
     },
     components: {
@@ -169,7 +176,19 @@ export default {
     computed: {
         ...mapState(['authUser', 'authToken']),
     },
-    methods:{
+    methods: {
+        formatDate(inputDate) {
+            const date = new Date(inputDate);
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const formattedDate = date.toLocaleDateString('en-GB', options);
+            return formattedDate;
+        },
+        showFollowUpLeads() {
+            this.allLeads = this.allLeads.filter(lead => lead.follow_date);
+        },
+        showAllLeads(){
+            this.getLeads()
+        },
         async getLeads() {
             let queryParams = {
                 page_no: this.currentPage ? this.currentPage : 1,
@@ -181,6 +200,7 @@ export default {
                     }
                 })
                 if (response.status === 200) {
+                    this.allLeads = response?.data?.res_data
                     this.stats.money.value = response?.data?.data?.total_sales
                     this.stats.users.value = response?.data?.data?.follow_count
                     this.stats.clients.value = response?.data?.lead_data?.unassigned_leads
@@ -194,8 +214,8 @@ export default {
             }
         },
     },
-    mounted(){
+    mounted() {
         this.getLeads()
-    }
+    }  
 }
 </script>

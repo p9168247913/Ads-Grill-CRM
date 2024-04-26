@@ -362,11 +362,8 @@ export default {
                 });
                 if (response.status === 200) {
                     this.userRole = response.data.roles;
-                    console.log('------------USERROLES-------', this.userRole)
                     let admin = this.userRole.find((item) => item.name === 'contact');
                     let clients = this.userRole.find((item) => item.name === 'client');
-
-                    console.log(admin, clients, '----------------')
 
                     this.contact_role = {
                         id: admin.id,
