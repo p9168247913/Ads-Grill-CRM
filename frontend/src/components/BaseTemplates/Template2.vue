@@ -168,7 +168,7 @@
   
     </div>
   
-    <div style="display: flex; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
+    <div style="display: none; flex-direction: column; min-width: 500px; max-width: 500px;" ref="temp1">
     <div v-if="projectTypeValue">
       <p style="font-weight: bold; font-size: small;">Project Type</p>
       <p style="font-size: smaller;">{{ projectTypeValue }}</p>
