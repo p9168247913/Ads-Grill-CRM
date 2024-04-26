@@ -182,3 +182,10 @@ class Comment(models.Model):
     attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+class ToDo(models.Model):
+    description = models.TextField(null=False, blank=True)
+    status = models.CharField(null=False, blank=False, default='todo')
+    author = models.ForeignKey(Users, on_delete=models.PROTECT, null=False, blank=False, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
