@@ -544,6 +544,11 @@
                                         </td>
                                         <td style="padding: 25px;">
                                             <div class="d-flex flex-column justify-content-left">
+                                                <h6 class="mb-0 text-sm">{{ formatDate(issue.created_at) }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 25px;">
+                                            <div class="d-flex flex-column justify-content-left">
                                                 <h6 class="mb-0 text-sm">{{ issue.type === "story" ? "Story" :
                                     issue.type === "epic" ? "Epic" : issue.type === "task" ? "Task" :
                                         issue.type === "subtask" ? "Subtask" : issue.type === "bug" ? "Bug"
@@ -597,21 +602,17 @@
                                                 data-bs-toggle="modal" data-bs-target="#editIssue"
                                                 @click="editData(issue)"
                                                 style="color: dodgerblue !important; cursor: pointer;"></i>
-                                            
-
                                             <i v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'" title="Delete Issue" @click="deleteIssue(issue.id)"
                                                 class="fas fa-trash text-danger fa-md mx-3 icon"
                                                 style="cursor: pointer;"></i>
                                             <i v-else @click="notAllowed"
                                                 class="fas fa-trash text-danger fa-md mx-3 icon"
                                                 style="cursor: pointer;"></i>
-
                                             <!-- Comment Section Button -->
                                             <i title="Comments" class="fas fa-comment text-info fa-md mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#comments"
                                                 @click="sendDataToComments(issue.id, issue.sprint.id), getDevUsers()"
                                                 style="cursor: pointer;"></i>
-
                                             <!-- Worklog Section Button -->
                                             <i title="Worklog" class="fas fa-clock text-success fa-md mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#worklog"
@@ -623,7 +624,7 @@
                             </table>
                         </div>
                     </div>
-                    <PaginationComponent v-if="filteredIssues.length >= 10" :currentPage="currentPage"
+                    <PaginationComponent v-if="allIssues.length > itemsPerPage" :currentPage="currentPage"
                         :itemsPerPage="itemsPerPage" :filteredUsers="filteredIssues" :prevPage="prevPage"
                         :nextPage="nextPage" :goToPage="goToPage" />
                 </div>
@@ -656,7 +657,7 @@ export default {
         return {
             editModalOpened: false,
             isEditIssueModalVisible: false,
-            headers: ['S.No.', 'Title',  'Assignee', 'Type', 'Status', 'Sprint', 'Reporting Manager', 'Team Lead',  'Task duration', 'Actual duration', 'Files'],
+            headers: ['S.No.', 'Title',  'Assignee', 'Assigned On', 'Type', 'Status', 'Sprint', 'Reporting Manager', 'Team Lead',  'Task duration', 'Actual duration', 'Files'],
             allIssues: [],
             selectedSprintId: '',
             selectedEditSprintId: '',
@@ -713,7 +714,7 @@ export default {
     },
     components: {
         QuillEditor,
-        vSelect,
+        vSelect, 
         comments,
         worklog,
         PaginationComponent,
@@ -781,6 +782,13 @@ export default {
         }
     },
     methods: {
+        formatDate(dateTimeString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+            const formattedDate = new Date(dateTimeString).toLocaleDateString('en-US', options);
+            return formattedDate.replace(/(\d+)(st|nd|rd|th)/, (match, p1, p2) => {
+                return p1 + (p1 === "11" || p1 === "12" || p1 === "13" ? "th" : { "1": "st", "2": "nd", "3": "rd" }[p1 % 10] || "th") + " " + p2;
+            }).replace("at", "at ");
+        },        
         notAllowed() {
             new Noty({
                 type: 'error',
@@ -826,7 +834,7 @@ export default {
             return formattedParts.join(' ');
         },
         nextPage() {
-            if (this.currentPage * this.itemsPerPage < this.filteredUsers.length) {
+            if (this.currentPage * this.itemsPerPage < this.filteredIssues.length) {
                 this.currentPage++;
             }
         },
@@ -839,7 +847,7 @@ export default {
             this.currentPage = page;
             const startIndex = (page - 1) * this.itemsPerPage;
             const endIndex = startIndex + this.itemsPerPage;
-            this.displayedUsers = this.filteredUsers.slice(startIndex, endIndex);
+            this.displayedUsers = this.filteredIssues.slice(startIndex, endIndex);
         },
         async getAttachmentUrl(e, id) {
             e.preventDefault();
@@ -1137,6 +1145,7 @@ export default {
                     })
                     if (response.status === 200) {
                         this.allIssues = response.data.issues
+                        console.log(this.allIssues);
                     }
                     this.$store.commit('hideLoader');
                 } catch (error) {

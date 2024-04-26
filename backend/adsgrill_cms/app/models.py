@@ -10,7 +10,7 @@ class Roles(models.Model):
         return self.name
 class Users(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=40, null=True, blank=False)
-    email = models.EmailField(unique=True, null=False, blank=False)
+    email = models.EmailField(unique=True, null=False, blank=True)
     role = models.ForeignKey(Roles, on_delete=models.PROTECT)
     designation = models.CharField(max_length=30, null=True, blank=False)
     contact_no = models.CharField(max_length=15, null=True, blank=False )

@@ -1,4 +1,8 @@
 <template>
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/noty.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
+  </head>
   <div class="main_body">
     <h2>Templates</h2>
     <div class="module">
@@ -152,14 +156,8 @@
         </div>
       </div>
 
-
-    </div>
-
-    <div class="lastBody">
-      <div>
-        <button> Save </button>
-      </div>
-
+    <div>
+      <button @click="sendHTMLToDB">Save</button>
     </div>
 
   </div>
@@ -181,19 +179,30 @@
         <li style="font-size:smaller" v-for="item in selectedRole" :key="item">{{ item }}</li>
       </ul>
     </div>
-    <div v-if="selectedModule.length">
-      <p style="font-weight: bold; font-size: small;">Modules</p>
-      <li style="font-size:smaller" v-for="item in selectedModule" :key="item">{{ item }}</li>
-    </div>
-    <div v-if="subModulesArray.length">
-      <p style="font-weight: bold; font-size: small;">Modules</p>
-      <li style="font-size:smaller" v-for="item in subModulesArray" :key="item">{{ item }}</li>
+    <div v-if="allData.length">
+      <p style="font-weight: bold; font-size: small;">Modules & SubModules</p>
+      <ol>
+      <li style="font-size:smaller" v-for="item, ind in allData" :key="ind">{{Object.keys(item)[0] }}
+        <ul>
+          <li v-for="(subModule, ind) in Object.values(item)[0]" :key="ind">{{ subModule.key }}
+          <p style="font-size: 13px; margin-top:5px">-- Header Description: {{ subModule.otherData? subModule.otherData.header : "No description found" }}</p>
+          <p style="font-size: 13px;">-- Body Description: {{ subModule.otherData? subModule.otherData.body : "No description found" }}</p>
+          <p style="font-size: 13px;">-- Footer Description: {{ subModule.otherData? subModule.otherData.footer : "No description found" }}</p>
+          </li>
+        </ul>
+      </li>
+    </ol>
     </div>
   </div>
 </template>
 
 <script>
-// import jsPDF from 'jspdf';
+import axios from 'axios';
+import Noty from 'noty';
+import { BASE_URL } from '../../config/apiConfig';
+import { mapState } from 'vuex';
+// import Swal from 'sweetalert2';
+import html2pdf from 'html2pdf.js'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
@@ -929,7 +938,7 @@ export default {
     QuillEditor
   },
   computed: {
-
+    ...mapState(['authToken', 'authUser']),
   },
 
   methods: {
@@ -1107,24 +1116,54 @@ export default {
         this.newCustomModuleLabel = '';
       }
     },
-    // generatePDF() {
-    //   console.log(html2pdf)
-    //   var opt = {
-    //     margin: 0.1,
-    //     fileName: 'new.pdf',
-    //     image: {
-    //       type: 'jpeg',
-    //       quality: 0.99
-    //     },
-    //     html2canvas: { scale: 2 },
-    //     jsPDF: {
-    //       unit: 'in',
-    //       format: 'a4',
-    //       orientation: 'portrait'
-    //     }
-    //   };
-    //   html2pdf().from(this.$refs.temp1.outerHTML).set(opt).save();
-    // },
+    async sendHTMLToDB(){
+      this.$store.commit('showLoader')
+      try{
+        const response = await axios.put(`${BASE_URL}api/templateView/`,
+        {
+        data:this.$refs.temp1.outerHTML
+      }, {
+        headers:{
+            token:this.authToken
+          },
+      })
+      if (response.data.message === "Requirements Submitted"){
+        new Noty({
+          type:'success',
+          text:response.data.message,
+          timeout: 1000,
+        }).show()
+        this.$store.commit('hideLoader')
+      }
+      } catch(error){
+        new Noty({
+          type:'error',
+          text:error.response.data.message ? error.response.data.message : error.response.data.detail,
+          timeout: 1000,
+        }).show()
+      }
+      this.$store.commit('hideLoader')
+
+    },
+    generatePDF() {
+      //console.log(html2pdf)
+      console.log("----------", this.allData, "------------")
+      var opt = {
+        margin: 0.1,
+        fileName: 'new.pdf',
+        image: {
+          type: 'jpeg',
+          quality: 0.99
+        },
+        html2canvas: { scale: 2 },
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+      html2pdf().from(this.$refs.temp1).set(opt).save();
+    },
     addCustomAuthType() {
       if (this.customAuthType.trim() !== '') {
         this.authenticationTypes.push(this.customAuthType.trim());

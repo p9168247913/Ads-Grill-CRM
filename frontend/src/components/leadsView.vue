@@ -346,7 +346,6 @@ export default {
             checkboxes.forEach(checkbox => {
                 checkbox.checked = this.selectAll;
             });
-            console.log([...this.selectedData]);
         },
         updateSelectedData() {
             console.log([...this.selectedData]);

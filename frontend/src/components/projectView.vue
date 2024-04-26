@@ -535,7 +535,11 @@ export default {
     async getClientRole() {
       try {
         this.$store.commit('showLoader')
-        let response = await axios.get(`${BASE_URL}api/roles/`);
+        let response = await axios.get(`${BASE_URL}api/roles/`,{
+          headers: {
+            token: this.authToken
+          }
+        });
         let clientRole = response.data.roles.find((role) => {
           return role.name == 'client'
         })

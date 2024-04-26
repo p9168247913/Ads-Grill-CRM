@@ -17,7 +17,6 @@
                         &nbsp;Add Issue
                     </button>
                 </div>
-
                 <div style="margin-top: 3rem;" class="row">
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="border issue-div">
@@ -27,7 +26,7 @@
                                     <div class="row p-2 align-items-center">
                                         <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
                                         <div class="col text-end">
-                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                            <button @click.stop class="btn btn-link issue-card-btn dropdown-open" type="button"
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
@@ -77,7 +76,7 @@
                                     <div class="row p-2 align-items-center">
                                         <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
                                         <div class="col text-end">
-                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                            <button  @click.stop class="btn btn-link issue-card-btn dropdown-open" type="button"
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
@@ -127,7 +126,7 @@
                                     <div class="row p-2 align-items-center">
                                         <p style="font-size: 12px; font-weight: bold;" class="col">{{ issue.title }}</p>
                                         <div class="col text-end">
-                                            <button class="btn btn-link issue-card-btn dropdown-open" type="button"
+                                            <button  @click.stop class="btn btn-link issue-card-btn dropdown-open" type="button"
                                                 id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
