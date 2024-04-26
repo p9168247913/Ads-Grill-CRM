@@ -23,35 +23,44 @@
         </div>
       </div>
       <div class="belowTag module_box2">
-          <input type="text" class="input_form" v-model="customAuthType" placeholder="Enter custom auth type">
-          <button class="btn_form" @click="addCustomAuthType">Add</button>
-        </div>
+        <input type="text" class="input_form" v-model="customAuthType" placeholder="Enter custom auth type">
+        <button class="btn_form" @click="addCustomAuthType">Add</button>
+      </div>
     </div>
-
+    <hr />
     <div>
       <label class="form-label">Roles </label>
-      <div class="selecBox" v-for="(role, index) in roles" :key="index">
-        <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
-        <label :for="'role' + index">{{ role }}</label>
+      <div class="flexContainer">
+        <div class="selecBox" v-for="(role, index) in roles" :key="index">
+          <div class="module_box">
+            <input type="checkbox" :id="'role' + index" :value="role" v-model="selectedRole">
+            <div :for="'role' + index">{{ role }}</div>
+          </div>
+        </div>
       </div>
-      <div class="belowTag module_box">
-        <input type="text" class="input_form" v-model="customRole" placeholder="Enter custom authentication type">
+      <div class="belowTag module_box2">
+        <input type="text" class="input_form" v-model="customRole" placeholder="Enter custom role">
         <button class="btn_form" @click="addCustomRole">Add</button>
       </div>
+
     </div>
+    <hr />
     <div>
       <label for="module" class="form-label">Modules</label>
       <div>
-        <label class="module_box" v-for="(module, index) in mainfilled" :key="index">
-          <input type="checkbox" v-model="selectedModule" :value="module.value">
-          {{ module.key }}
-        </label>
-        <div class="belowTag2">
-          <input class="input_form" type="text" v-model="newCustomModuleLabel">
-          <button class="btn_form" @click="addCustomModule">Add Module</button>
+        <div class="flexContainer">
+          <div class="module_box" v-for="(module, index) in mainfilled" :key="index">
+            <input type="checkbox" v-model="selectedModule" :value="module?.value">
+            {{ module.key }}
+          </div>
+        </div>
+        <div class="belowTag module_box2">
+          <input class="input_form" type="text" placeholder="Add Module" v-model="newCustomModuleLabel">
+          <button class="btn_form" @click="addCustomModule">Add </button>
         </div>
       </div>
     </div>
+    <hr />
     <label>
       Sub Modules
     </label>
@@ -59,27 +68,33 @@
       <div v-for="(subModuleval, index) in selectedModule" :key="index">
         <label class="form-label">{{ subModuleval }}</label>
         <div>
-          <label class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]"
-            :key="'sub_' + subIndex">
-            <input type="checkbox" @click="subModuleclick(subModuleval, subModule.value)" v-model="selectedSubModules"
-              :value="subModule.value" :checked="shouldShowPopupButton(subModule, subModuleval)">
-            {{ subModule.key }}
-            <button v-if="shouldShowPopupButton(subModule, subModuleval)"
-              @click="openPopup(subModuleval, subModule)">Open
-              Popup</button>
-          </label>
-
-          <div class="belowTag2">
-            <input class="input_form" type="text" v-model="newSubModuleName[subModuleval]">
-            <button class="btn_form" @click="addSubModule(subModuleval)">Add Submodule</button>
+          <div class="flexContainer">
+            <div class="checkbox-label" v-for="(subModule, subIndex) in subModules[subModuleval]"
+              :key="'sub_' + subIndex">
+              <div class="module_box3">
+                <input type="checkbox" @click="subModuleclick(subModuleval, subModule.value)"
+                  v-model="selectedSubModules" :value="subModule.value"
+                  :checked="shouldShowPopupButton(subModule, subModuleval)">
+                {{ subModule.key }}
+                <button class="btn_form2" v-if="shouldShowPopupButton(subModule, subModuleval)"
+                  @click="openPopup(subModuleval, subModule)">Add Details</button>
+              </div>
+            </div>
           </div>
+          <div class="belowTag module_box2">
+            <input class="input_form" placeholder="Add Custom" type="text" v-model="newSubModuleName[subModuleval]">
+            <button class="btn_form" @click="addSubModule(subModuleval)">Add </button>
+          </div>
+
         </div>
 
       </div>
     </div>
+
+    <hr />
     <div>
       <div class="module">
-        <div>
+        <div class="selectSidebar">
           <label for="sprint" class="form-label">Select Sidebar</label>
           <select required class="form-select selecBox" v-model="sidebarValue">
             <option value="">Select Sidebar Type</option>
@@ -89,21 +104,21 @@
 
       </div>
     </div>
-
+    <hr />
     <div class="popup-container" v-if="showPopup">
       <div class="popup">
         <span class="close-btn" @click="closePopup">&times;</span>
 
         <div class="row">
           <div class="">
-            <label for="projectName" class="form-label">Header Description</label>
-            <QuillEditor required ref="headerDesc" theme="snow" toolbar="full" />
+            <label for="projectName" class="form-label"> Header Description </label>
+            <QuillEditor required ref="headerDesc"  theme="snow" toolbar="full" />
           </div>
         </div>
 
         <div class="row">
           <div class="">
-            <label for="projectName" class="form-label">Body Description</label>
+            <label for="projectName" class="form-label"> Body Description </label>
             <QuillEditor required ref="bodyDesc" theme="snow" toolbar="full" />
           </div>
         </div>
@@ -114,32 +129,37 @@
             <QuillEditor required ref="footerDesc" theme="snow" toolbar="full" />
           </div>
         </div>
-        <div> <button @click="storeAndClearData()">Store Data </button></div>
+        <div> <button class="form-btn" @click="storeAndClearData()">Submit</button></div>
 
       </div>
     </div>
 
     <div>
-
       <div>
-        <label>Select feature modules to be shown with each role</label>
-        <div>
-          <label>Roles</label>
-          <div class="roleBaseAccess" v-for="(role, index) in selectedRole" :key="index">
-            {{ role }}
+        <label>Roles</label>
 
-            <label class="" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
-              <input type="checkbox" v-model="selectedRoleBasedAccess" :value="module.value">
+        <div class="" v-for="(role, index) in selectedRole" :key="index">
+          {{ role }}
+          <br />
+
+          <div class="flexContainer">
+            <div class="module_box" v-for="(module, subIndex) in selectedModule" :key="'sub_' + subIndex">
+              <input type="checkbox" :checked="isChecked(role, module)"
+                @change="updateRoleBasedAccess(role, module)">
               {{ module }}
-            </label>
-
+            </div>
           </div>
         </div>
       </div>
+
+
     </div>
 
-    <div>
-      <button @click="convertDataToHTML">Save</button>
+    <div class="lastBody">
+      <div>
+        <button> Save </button>
+      </div>
+
     </div>
 
   </div>
@@ -177,8 +197,10 @@
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 export default {
+ 
   data() {
     return {
+      selectedRoleBasedAccess: {},
       popupData: {
         header: '',
         body: '',
@@ -225,8 +247,8 @@ export default {
         value: "Order Module"
       },
       {
-        key: "Quatation module",
-        value: "Quatation module"
+        key: "Quatation Module",
+        value: "Quatation Module"
       },
       {
         key: "CRM Module",
@@ -674,8 +696,8 @@ export default {
             value: "Sales Return Acc. Ledger"
           },
           {
-            key: "Purchase Return acc. Ledç",
-            value: "Purchase Return acc. Ledç"
+            key: "Purchase Return acc. Ledger",
+            value: "Purchase Return acc. Ledger"
           },
           {
             key: "Dutie & Tax Acc. Ledger",
@@ -911,7 +933,25 @@ export default {
   },
 
   methods: {
-
+    abcdCall(){
+      console.log("abcdCall", this.selectedRoleBasedAccess)
+    },
+    isChecked(role, value) {
+      console.log("isChecked",role,value)
+    return this.abcdCall[role] && this.selectedRoleBasedAccess[role].includes(value);
+  },
+  updateRoleBasedAccess(role, value) {
+    if (!this.selectedRoleBasedAccess[role]) {
+      this.selectedRoleBasedAccess[role] = []; // Initialize if the role doesn't exist
+    }
+    const index = this.selectedRoleBasedAccess[role].indexOf(value);
+    if (index === -1) {
+      this.selectedRoleBasedAccess[role].push(value); // Add value if it's not already in the array
+    } else {
+      this.selectedRoleBasedAccess[role].splice(index, 1); // Remove value if it already exists
+    }
+  }
+,
     storeAndClearData() {
       const footerData = this.$refs.footerDesc;
       if (footerData) {
@@ -928,8 +968,7 @@ export default {
         const htmlContent = headerData.getHTML();
         this.popupData.header = htmlContent;
       }
-      console.log(this.popupData);
-      console.log(this.footer);
+    
 
       const mainModuleIndex = this.allData.findIndex(item => Object.keys(item)[0] === this.currentModule);
       let currentModuleData = null;
@@ -997,11 +1036,38 @@ export default {
     }
 
     ,
-    openPopup(a, b) {
-      this.currentModule = a;
-      this.currentSubModule = b.key;
-      this.showPopup = true;
+    openPopup(subModuleval, subModule) {
+      this.currentModule = subModuleval;
+      this.currentSubModule = subModule.key;
+    
+      const moduleIndex = this.allData.findIndex(item => Object.keys(item)[0] === subModule.key);
+  
+  if (moduleIndex !== -1) {
+    // Module exists, check if subModule exists
+    const submoduleIndex = this.allData[moduleIndex][subModule.key].findIndex(item => item.key === subModuleval);
+    
+    if (submoduleIndex !== -1) {
+      // Submodule exists, populate popup with existing data
+      const existingData = this.allData[moduleIndex][subModule.key][submoduleIndex].otherData;
+      this.popupData = { ...existingData };
+    } else {
+      // Submodule doesn't exist, open popup with empty fields
+      this.popupData = {
+        header: "",
+        body: "",
+        footer: ""
+      };
+    }
+  } else {
+    // Module doesn't exist, open popup with empty fields
+    this.popupData = {
+      header: "",
+      body: "",
+      footer: ""
+    };
 
+    this.showPopup = true;
+  }
     },
     closePopup() {
       this.currentModule = "";
@@ -1083,8 +1149,7 @@ export default {
 
   },
   mounted() {
-
-    //console.log(this.selectedSubModules)
+   //console.log(this.selectedSubModules)
     //console.log(this.modelValue);
   },
   watch: {
@@ -1124,6 +1189,34 @@ export default {
 
 }
 
+.lastBody {
+  margin-bottom: 10px;
+  margin-top: 10px;
+  align-items: center;
+
+
+}
+.form-btn{
+  margin: auto;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+.lastBody>div {
+  width: 300px;
+  color: white;
+  margin: auto;
+}
+
+.lastBody>div>button {
+  width: 100%;
+  border: none;
+  color: white;
+  padding: 5px;
+  background-color: #6EB4D1;
+  border-radius: 5px;
+  margin: auto;
+}
+
 .flexContainer {
   display: flex;
   flex-direction: row;
@@ -1132,6 +1225,10 @@ export default {
   margin-top: 10px;
   font-size: 14px;
   align-items: center;
+}
+
+.selectSidebar {
+  width: 375px;
 }
 
 .roleBaseAccess {
@@ -1145,6 +1242,17 @@ export default {
   align-items: center;
   gap: 5px;
   padding: 5px 15px 5px 15px;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}
+
+.module_box3 {
+  margin-left: 5px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 5px 5px 15px;
   border-radius: 5px;
   box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
 }
@@ -1165,6 +1273,7 @@ export default {
   padding: 15px;
   margin-left: 5px;
   margin-right: 5px;
+  color: black;
   border-radius: 10px;
 }
 
@@ -1173,7 +1282,7 @@ export default {
   gap: 8px;
   width: fit-content;
   border-radius: 5px;
-  border: 1px solid gray;
+
 }
 
 .input_form {
@@ -1193,12 +1302,22 @@ export default {
   background-color: #6EB4D1;
 }
 
+.btn_form2 {
+  border: none;
+  outline: none;
+  margin-left: 10px;
+  height: 35px;
+  color: white !important;
+  padding: 0px 6px 0px 6px;
+  background-color: #6EB4D1;
+}
+
 .belowTag {
   display: flex;
   gap: 8px;
   max-width: fit-content;
   border-radius: 5px;
-  margin-top: 5px;
+  margin-top: 15px;
   height: 35px;
   align-items: center;
   justify-content: center;
