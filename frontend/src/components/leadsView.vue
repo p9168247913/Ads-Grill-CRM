@@ -369,16 +369,11 @@ export default {
         },
         resetValues() {
             this.leadData = {
+                key: "post",
                 client_name: '',
                 email: '',
                 contact_no: '',
-                country: '',
-                state: '',
-                city: '',
-                tag: '',
                 source: '',
-                status: '',
-                assignee: ''
             }
         },
         async getSalesEmployee() {
