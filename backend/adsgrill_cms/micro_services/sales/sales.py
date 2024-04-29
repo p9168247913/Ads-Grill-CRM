@@ -75,10 +75,17 @@ class SalesView(CsrfExemptMixin, APIView):
                 endDate_str = date_range['end_date']
                 start_datetime = datetime.strptime(startDate_str, "%Y-%m-%d").date()
                 end_datetime = datetime.strptime(endDate_str, "%Y-%m-%d").date()
+            sales_count = 0
+            follow_count = 0
 
             allSales = Sale.objects.all().order_by('-created_at')
             if request.user.role.name == 'sales':
                 allSales = allSales.filter(assignee__email=currentUserEmail)
+                sales_count = Sale.objects.filter(assignee__email=currentUserEmail).count()
+                follow_count=Sale.objects.filter(assignee__email=currentUserEmail, follow_date__isnull=False).count()
+            else:
+                sales_count = Sale.objects.all().count()
+                follow_count = Sale.objects.filter(follow_date__isnull=False).count()
 
             if client_name is not None:
                 allSales = allSales.filter(lead__client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
@@ -149,8 +156,6 @@ class SalesView(CsrfExemptMixin, APIView):
                     model1_data['related_users'] = related_user_data
                 new_data.append(model1_data)
             sale_data = new_data
-            sales_count = Sale.objects.all().count()
-            follow_count=Sale.objects.filter(follow_date__isnull=False).count()
             
             data = {
                 "total_sales":sales_count,

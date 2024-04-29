@@ -147,6 +147,7 @@ class LeadView(CsrfExemptMixin, APIView):
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
             date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
+            statusVal=request.GET.get('status') if request.GET.get('status') else None
             noOfRecords = 15
             
             if date_range is not None:
@@ -159,17 +160,21 @@ class LeadView(CsrfExemptMixin, APIView):
             with transaction.atomic():
                 allLeads = Lead.objects.filter(is_deleted=False).order_by('-created_at')
                 if client_name is not None:
-                    allLeads = allLeads.filter(client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
+                    allLeads = allLeads.filter(client_name__icontains=client_name,is_deleted=False)
 
                 if contact_no is not None:
-                    allLeads = allLeads.filter(contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at') 
+                    allLeads = allLeads.filter(contact_no__icontains=contact_no,is_deleted=False)
                    
                 if date_range is not None: 
-                    allLeads = allLeads.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False).order_by('-created_at') 
+                    allLeads = allLeads.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False)
                     
                 if client_name is not None and contact_no is not None:
-                    allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
+                    allLeads = allLeads.filter(Q(client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False)
 
+                if statusVal is not None:
+                    filteredSales = Sale.objects.filter(sale_status = statusVal)
+                    filteredLeads = Lead.objects.filter(sale__in=filteredSales, is_deleted=False)
+                    allLeads = filteredLeads
                 p = Paginator(allLeads, noOfRecords)
                 page_obj = p.get_page(pageNo)
                 
@@ -183,17 +188,25 @@ class LeadView(CsrfExemptMixin, APIView):
                 lead_count = allLeads.count()
                 assignedLeads = Sale.objects.all().count()
                 unassignedLeads = lead_count - assignedLeads
-                
-                leads_data = [{
-                    'id': lead.pk,
-                    'source': lead.source.name,
-                    'client_name': lead.client_name,
-                    'email': lead.email,
-                    'contact_no': lead.contact_no,
-                    'requirement': lead.requirement,
-                    'is_assigned':lead.is_assigned,
-                    'date': lead.created_at
-                } for lead in page_obj]
+                leads_data = []
+                for lead in page_obj:
+                    try:
+                        lead_sale = Sale.objects.get(lead=lead.pk)
+                        sale_status = lead_sale.sale_status
+                    except Sale.DoesNotExist:
+                        sale_status = None
+                    data = {
+                        'id': lead.pk,
+                        'source': lead.source.name,
+                        'status': sale_status,
+                        'client_name': lead.client_name,
+                        'email': lead.email,
+                        'contact_no': lead.contact_no,
+                        'requirement': lead.requirement,
+                        'is_assigned':lead.is_assigned,
+                        'date': lead.created_at
+                    }
+                    leads_data.append(data)
                 
                 data = {
                     'leads': leads_data,
@@ -206,6 +219,8 @@ class LeadView(CsrfExemptMixin, APIView):
         except IntegrityError as i:
             return JsonResponse({'message': str(i)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'message':str(e)},status=status.HTTP_400_BAD_REQUEST)
         
         return JsonResponse({'lead_data': data}, status=status.HTTP_200_OK)
