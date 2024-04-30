@@ -92,6 +92,7 @@ class Sale(models.Model):
     assignee = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False)
     status = models.ForeignKey(LeadStatus, on_delete=models.PROTECT, null=True, blank=False, related_name="LeadStatus")
     remark=models.CharField(null=True,blank=True)
+    row_color = models.CharField(null=True, blank=False)
     sale_status=models.CharField(null=True,blank=False,max_length=30)
     temp_data=models.TextField(null=True,blank=True)
     quot_data = models.TextField(null=True, blank=True)

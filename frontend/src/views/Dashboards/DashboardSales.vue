@@ -22,12 +22,29 @@
                         :iconClass="stats.users.iconClass" :iconBackground="stats.users.iconBackground"
                         :detail="stats.users.detail" directionReverse></card>
                 </div>
-                <!-- <div class="col-lg-4 col-md-6 col-12">
+                <div class="col-lg-4 col-md-6 col-12">
                     <card :title="stats.clients.title" :value="stats.clients.value" :percentage="stats.clients.percentage"
                         :iconClass="stats.clients.iconClass" :iconBackground="stats.clients.iconBackground"
                         :percentageColor="stats.clients.percentageColor" :detail="stats.clients.detail" directionReverse>
                     </card>
-                </div> -->
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <card :title="stats.sales.title" :value="stats.sales.value" :percentage="stats.clients.percentage"
+                        :iconClass="stats.clients.iconClass" :iconBackground="stats.clients.iconBackground"
+                        :percentageColor="stats.clients.percentageColor" :detail="stats.clients.detail" directionReverse>
+                    </card>
+                </div>
+                <div style="cursor: pointer;" class="col-lg-4 col-md-6 col-12" @click="showFollowUpLeads">
+                    <card :title="stats.proposal.title" :value="stats.proposal.value" :percentage="stats.users.percentage"
+                        :iconClass="stats.users.iconClass" :iconBackground="stats.users.iconBackground"
+                        :detail="stats.users.detail" directionReverse></card>
+                </div>
+                <div class="col-lg-4 col-md-6 col-12">
+                    <card :title="stats.invoice.title" :value="stats.invoice.value" :percentage="stats.clients.percentage"
+                        :iconClass="stats.clients.iconClass" :iconBackground="stats.clients.iconBackground"
+                        :percentageColor="stats.clients.percentageColor" :detail="stats.clients.detail" directionReverse>
+                    </card>
+                </div>
                 <!-- <div class="col-lg-3 col-md-6 col-12">
                     <card :title="stats.sales.title" :value="stats.sales.value" :percentage="stats.sales.percentage"
                         :iconClass="stats.sales.iconClass" :iconBackground="stats.sales.iconBackground"
@@ -46,7 +63,7 @@
                         <div class="table-responsive">
                             <table class="table align-items-center">
                                 <tbody>
-                                    <tr v-for="(lead, index) in allLeads" :key="index">
+                                    <tr v-for="(lead, index) in allLeads" :key="index" :style="{backgroundColor: `#${lead.row_color ? lead.row_color : ''}`}">
                                         <td>
                                             <div class="text-center">
                                                 <!-- <div>
@@ -88,7 +105,11 @@
                                 </tbody>
                             </table>
                         </div>
+                        <PaginationComponent v-if="this.totalPages > 1" :currentPage="currentPage" :totalPages="totalPages"
+                        :itemsPerPage="itemsPerPage" :prevPage="prevPage" :getLeads="getLeads" :nextPage="nextPage"
+                        :goToPage="goToPage" />
                     </div>
+                    
                 </div>
                 <div class="col-lg-5">
                     <div class="card">
@@ -129,6 +150,7 @@
                             </table>
                         </div>
                     </div>
+                    
                 </div>
                 <div data-bs-backdrop="static" class="modal fade" ref="createProject" id="createTodo" tabindex="-1"
                     aria-labelledby="createProjectLabel" aria-hidden="true" @hidden="createSprints">
@@ -140,7 +162,7 @@
                                     class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBodyCreate" style="padding-bottom: 0; height: 14rem;">
+                            <div class="modal-body modalBodyCreate" style="padding-bottom: 0; height: 14rem; overflow: auto;">
                                 <form @submit="createTodo($event)">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -170,7 +192,7 @@
                                     class="btn-close bg-dark text-xs" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
-                            <div class="modal-body modalBodyCreate" style="padding-bottom: 0; height: 20rem;">
+                            <div class="modal-body modalBodyCreate" style="padding-bottom: 0; height: 20rem; overflow: auto;">
                                 <form @submit="editTodos($event)">
                                     <div class="row">
                                         <div class="col-md-12 mb-3">
@@ -213,6 +235,8 @@ import BR from "@/assets/img/icons/flags/BR.png";
 import axios from 'axios';
 import { BASE_URL } from '../../config/apiConfig';
 import { mapState } from 'vuex';
+import PaginationComponent from '../../components/Paginator/PaginatorComponent.vue';
+
 
 export default {
     data() {
@@ -235,8 +259,8 @@ export default {
                     detail: "",
                 },
                 clients: {
-                    title: "Unassigned Leads",
-                    value: "",
+                    title: "Quotation",
+                    value: "200",
                     percentage: "",
                     iconClass: "ni ni-paper-diploma",
                     percentageColor: "text-danger",
@@ -244,8 +268,24 @@ export default {
                     detail: "",
                 },
                 sales: {
-                    title: "Sales",
-                    value: "$103,430",
+                    title: "Onboarded Leads",
+                    value: "10",
+                    percentage: "+5%",
+                    iconClass: "ni ni-cart",
+                    iconBackground: "bg-gradient-warning",
+                    detail: "than last month",
+                },
+                proposal: {
+                    title: "Proposals",
+                    value: "30",
+                    percentage: "+5%",
+                    iconClass: "ni ni-cart",
+                    iconBackground: "bg-gradient-warning",
+                    detail: "than last month",
+                },
+                invoice: {
+                    title: "Invoice",
+                    value: "40",
                     percentage: "+5%",
                     iconClass: "ni ni-cart",
                     iconBackground: "bg-gradient-warning",
@@ -294,10 +334,13 @@ export default {
             },
             allTodos: [],
             selectedStatus: "All",
+            itemsPerPage: 5,
+            totalPages: null,
         }
     },
     components: {
         Card,
+        PaginationComponent,
     },
     computed: {
         ...mapState(['authUser', 'authToken']),
@@ -310,6 +353,17 @@ export default {
         }
     },
     methods: {
+        nextPage() {
+            this.currentPage++;
+        },
+        prevPage() {
+            if (this.currentPage > 1) {
+                this.currentPage--;
+            }
+        },
+        goToPage(page) {
+            this.currentPage = page;
+        },
         formatDate(inputDate) {
             const date = new Date(inputDate);
             const options = { day: 'numeric', month: 'long', year: 'numeric' };
@@ -326,8 +380,22 @@ export default {
             let queryParams = {
                 page_no: this.currentPage ? this.currentPage : 1,
             };
+            if (this.clientNameFilter) {
+                queryParams = { ...queryParams, name: this.clientNameFilter };
+            }
+            if (this.contactNoFilter) {
+                queryParams = { ...queryParams, contact_no: this.contactNoFilter };
+            }
+            let date_range = {};
+
+            if (this.start_date && this.end_date) {
+                date_range = {
+                    start_date: (this.start_date).toString(),
+                    end_date: (this.end_date).toString(),
+                }
+            }
             try {
-                const response = await axios.get(`${BASE_URL}api/sales/?page_no=${queryParams.page_no}`, {
+                const response = await axios.get(`${BASE_URL}api/sales/?page_no=${queryParams.page_no}&client_name=${queryParams.name ? queryParams.name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}`, {
                     headers: {
                         token: this.authToken,
                     }
@@ -336,7 +404,8 @@ export default {
                     this.allLeads = response?.data?.res_data
                     this.stats.money.value = response?.data?.data?.total_sales
                     this.stats.users.value = response?.data?.data?.follow_count
-                    this.stats.clients.value = response?.data?.lead_data?.unassigned_leads
+                    // this.stats.clients.value = response?.data?.lead_data?.unassigned_leads
+                    this.totalPages = response?.data?.data?.total_pages
                 }
             } catch (error) {
                 new Noty({
@@ -366,7 +435,6 @@ export default {
         },
         async createTodo(e) {
             e.preventDefault();
-
             try {
                 const response = await axios.post(`${BASE_URL}api/todo/`, this.todo, {
                     headers: {
@@ -380,6 +448,7 @@ export default {
                         timeout: 1000,
                         layout: 'topCenter'
                     }).show()
+                    this.todo.desc="";
                     this.getTodos();
                     this.$refs.createTodo.click()
                 }

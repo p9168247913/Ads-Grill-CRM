@@ -56,6 +56,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-3 col-sm-6 mb-3">
+                                <select name="" id="" class="form-select" v-model="selectedStatus">
+                                <option value="" selected>All Leads</option>
+                                <option v-for="status in uniqueStatus" :key="status" :value="status">{{ status }}</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <!-- Modal for Create Lead -->
                 <div data-bs-backdrop="static" class="modal fade" ref="createLeadModal" id="createLead" tabindex="-1"
@@ -214,7 +222,7 @@
                                     </tr>
                                 </thead>
                                 <tbody v-for="(lead, index) in leads" :key="index">
-                                    <tr>
+                                    <tr :style="{backgroundColor:`#${lead.row_color}`}">
                                         <td style="padding-left: 24px;">
                                             <input :disabled="lead.is_assigned" style="width: 15px; height: 15px;"
                                                 type="checkbox" v-model="selectedData" :value="lead.id"
@@ -229,6 +237,11 @@
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ lead.client_name }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding-left: 25px;">
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ lead.status ? lead.status : 'N/A' }}</h6>
                                             </div>
                                         </td>
                                         <td style="padding-left: 25px;">
@@ -317,7 +330,7 @@ export default {
                 contact_no: '',
                 source: '',
             },
-            headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'Assigned', 'Actions'],
+            headers: ['S.No', 'Contact Name ', 'Status', 'Email', 'Mobile No.', 'Source', 'Date', 'Assigned', 'Actions'],
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,
@@ -330,6 +343,8 @@ export default {
             selectAll: false,
             allAssignee: [],
             selectedAssignee: '',
+            uniqueStatus:[],
+            selectedStatus: ''
         };
     },
     computed: {
@@ -369,16 +384,11 @@ export default {
         },
         resetValues() {
             this.leadData = {
+                key: "post",
                 client_name: '',
                 email: '',
                 contact_no: '',
-                country: '',
-                state: '',
-                city: '',
-                tag: '',
                 source: '',
-                status: '',
-                assignee: ''
             }
         },
         async getSalesEmployee() {
@@ -448,6 +458,9 @@ export default {
             if (this.contactNoFilter) {
                 queryParams = { ...queryParams, contact_no: this.contactNoFilter };
             }
+            if (this.selectedStatus){
+                queryParams = { ...queryParams, status:this.selectedStatus}
+            }
             let date_range = {};
 
             if (this.start_date && this.end_date) {
@@ -457,7 +470,7 @@ export default {
                 }
             }
             try {
-                const response = await axios.get(`${BASE_URL}api/leads/?page_no=${queryParams.page_no}&client_name=${queryParams.client_name ? queryParams.client_name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}`, {
+                const response = await axios.get(`${BASE_URL}api/leads/?page_no=${queryParams.page_no}&client_name=${queryParams.client_name ? queryParams.client_name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}&status=${queryParams.status ? queryParams.status : queryParams.status=""}`, {
                     headers: {
                         token: this.authToken,
                     }
@@ -466,6 +479,7 @@ export default {
                     this.totalLeads = response?.data?.lead_data?.total_leads
                     this.totalPages = response?.data?.lead_data?.total_pages
                     this.leads = response?.data?.lead_data?.leads
+                    this.getUniqueStatus()
                 }
             } catch (error) {
                 new Noty({
@@ -633,6 +647,17 @@ export default {
                 }
             });
         },
+        getUniqueStatus(){
+            if (this.leads){
+                const statusSet = new Set()
+                for (let i=0; i<this.leads.length; i++){
+                    if (this.leads[i].status){
+                        statusSet.add(this.leads[i].status)
+                    }
+                }
+                this.uniqueStatus = [...statusSet]
+            }
+        },
     },
     watch: {
         clientNameFilter(newValue, oldValue) {
@@ -641,6 +666,11 @@ export default {
             }
         },
         contactNoFilter(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.getLeads();
+            }
+        },
+        selectedStatus(newValue, oldValue) {
             if (newValue !== oldValue) {
                 this.getLeads();
             }

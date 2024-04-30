@@ -46,6 +46,7 @@ class TodoView(CsrfExemptMixin, APIView):
     
     def get(self, request):
         try:
+            to_dos = []
             if request.user.role.name == 'admin' or request.user.role.name == 'super-admin':
                 to_dos = ToDo.objects.all().order_by('-created_at')
             
