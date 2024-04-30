@@ -68,6 +68,7 @@ class SalesView(CsrfExemptMixin, APIView):
             client_name = request.GET.get('client_name') if request.GET.get('client_name') else None
             contact_no = request.GET.get('contact_no') if request.GET.get('contact_no') else None
             date_range=request.GET.get('date_range') if request.GET.get('date_range') else None
+            searchColor = request.GET.get('searchColor') if request.GET.get('searchColor') else None
 
             if date_range is not None:
                 date_range = json.loads(date_range)
@@ -88,16 +89,22 @@ class SalesView(CsrfExemptMixin, APIView):
                 follow_count = Sale.objects.filter(follow_date__isnull=False).count()
 
             if client_name is not None:
-                allSales = allSales.filter(lead__client_name__icontains=client_name,is_deleted=False).order_by('-created_at')
+                allSales = allSales.filter(lead__client_name__icontains=client_name,is_deleted=False)
 
             if contact_no is not None:
-                allSales = allSales.filter(lead__contact_no__icontains=contact_no,is_deleted=False).order_by('-created_at') 
+                allSales = allSales.filter(lead__contact_no__icontains=contact_no,is_deleted=False)
                 
             if date_range is not None: 
-                allSales = allSales.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False).order_by('-created_at') 
+                allSales = allSales.filter(created_at__date__gte=start_datetime,created_at__date__lte=end_datetime,is_deleted=False)
                 
             if client_name is not None and contact_no is not None:
-                allSales = allSales.filter(Q(lead__client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False).order_by('-created_at')
+                allSales = allSales.filter(Q(lead__client_name__icontains=client_name) | Q(contact_no__icontains=contact_no),is_deleted=False)
+
+            if searchColor is not None:
+                try:
+                    allSales = allSales.filter(row_color=searchColor)
+                except Sale.DoesNotExist:
+                    allSales = []
             
             all_sales_contact_no = [obj.lead.contact_no for obj in allSales]
             related_users = Users.objects.filter(contact_no__in=all_sales_contact_no)
@@ -139,6 +146,7 @@ class SalesView(CsrfExemptMixin, APIView):
                 'follow_date':datetime.strftime(sale.follow_date,"%Y-%m-%dT%H:%M") if sale.follow_date else "",
                 'status':sale.sale_status,
                 'remark':sale.remark,
+                'row_color': sale.row_color if sale.row_color else None,
                 'temp_data':sale.temp_data,
                 'created_at':sale.created_at
                 }
@@ -173,6 +181,7 @@ class SalesView(CsrfExemptMixin, APIView):
         try:
             sale_id=request.data.get('id')
             upd_sale=Sale.objects.get(pk=sale_id)
+            row_color = str(request.data.get('row_color'))
             follow_date_str = None
             follow_date = None
             
@@ -186,6 +195,7 @@ class SalesView(CsrfExemptMixin, APIView):
                     upd_sale.sale_status=request.data.get('status') if request.data.get('status') else None
                     upd_sale.remark=request.data.get('remark') if request.data.get('remark') else None
                     upd_sale.follow_date=follow_date
+                    upd_sale.row_color = row_color
                     upd_sale.save()         
             else:
                 return JsonResponse({"message":"Sorry! You can not edit the sale"},status=status.HTTP_401_UNAUTHORIZED)

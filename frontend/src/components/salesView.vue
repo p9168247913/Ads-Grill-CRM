@@ -31,6 +31,12 @@
                                     placeholder="Search by contact number..." />
                             </div>
                         </div>
+                        <div class="col-md-6 col-lg-3 col-sm-6 mb-3">
+                                <select v-model="searchColor" name="" id="" class="form-select">
+                                    <option value="">Find by color</option>
+                                    <option :value="color" v-for="color in colors" :key="color" :style="{ backgroundColor: `#${color}` }">{{`#${color}` }}</option>
+                                </select>
+                        </div>
                     </div>
                 </div>
 
@@ -66,10 +72,22 @@
                                                 required></textarea>
                                         </div>
                                     </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="choose color" class="form-label">Choose color</label>
+                                            <select v-model="updateLeadData.row_color" class="form-select" required>
+                                                <option value="" selected>Choose a color</option>
+                                                <option v-for="(color, index) in colors" :key="index" :value="color"
+                                                    :style="{ backgroundColor: `#${color}` }">{{ `#${color}` }}</option>
+                                            </select>
+                                            <!-- <div class="selected-color" :style="{ backgroundColor: selectedColor }">
+                                                Selected Color: {{ selectedColor }}</div> -->
+                                        </div>
+                                    </div>
                                     <div class="modal-footer"
                                         style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                            @click="resetValues()">Close</button>
+                                            @click="resetValues(), selectedColor=''">Close</button>
                                         <button type="submit" class="btn btn-primary">Save
                                             Changes</button>
                                     </div>
@@ -95,10 +113,8 @@
                                 <option v-for="(item, index) in allAssignee" :key="index" :value="item.id"> {{
                                     item.name }}</option>
                             </select>
-                            <button
-                            @click="assignSales"
-                                v-if="this.selectedSales.length > 0 && this.selectedAssignee" type="button"
-                                style="width: auto; height: 40px !important;"
+                            <button @click="assignSales" v-if="this.selectedSales.length > 0 && this.selectedAssignee"
+                                type="button" style="width: auto; height: 40px !important;"
                                 class="btn btn-sm btn-dark mb-0 px-2 py-1 mb-0 nav-link active ">
                                 <i class="bi bi-person-plus"></i>
                                 <span class="d-none d-md-inline">&nbsp; &nbsp;Assign</span>
@@ -120,7 +136,7 @@
                                     </tr>
                                 </thead>
                                 <tbody v-for="(lead, index) in leads" :key="index">
-                                    <tr>
+                                    <tr :style="{backgroundColor: `#${lead.row_color ? lead.row_color : ''}`}">
                                         <td style="padding-left: 24px;">
                                             <input :disabled="lead.is_assigned" style="width: 15px; height: 15px;"
                                                 type="checkbox" v-model="selectedSales" :value="lead.id">
@@ -223,6 +239,7 @@ export default {
                 follow_date: '',
                 status: '',
                 remark: '',
+                row_color:''
             },
             contact_role: {
                 id: '',
@@ -239,9 +256,12 @@ export default {
             totalPages: null,
             totalLeads: null,
             selectAll: false,
-            selectedSales:[],
+            selectedSales: [],
             selectedAssignee: '',
-            allAssignee:[]
+            allAssignee: [],
+            colors: ['00FF00', 'FFFF00', '0000FF', 'FFA500', 'FF0000'],
+            selectedColor: '',
+            searchColor: ''
         };
     },
     computed: {
@@ -294,6 +314,9 @@ export default {
             if (this.contactNoFilter) {
                 queryParams = { ...queryParams, contact_no: this.contactNoFilter };
             }
+            if(this.searchColor){
+                queryParams = { ...queryParams, searchColor: this.searchColor}
+            }
             let date_range = {};
 
             if (this.start_date && this.end_date) {
@@ -303,7 +326,7 @@ export default {
                 }
             }
             try {
-                const response = await axios.get(`${BASE_URL}api/sales/?page_no=${queryParams.page_no}&client_name=${queryParams.name ? queryParams.name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}`, {
+                const response = await axios.get(`${BASE_URL}api/sales/?page_no=${queryParams.page_no}&client_name=${queryParams.name ? queryParams.name : ""}&contact_no=${queryParams.contact_no ? queryParams.contact_no : ""}&date_range=${date_range.end_date ? JSON.stringify(date_range) : ''}&searchColor=${queryParams.searchColor?queryParams.searchColor:""}`, {
                     headers: {
                         token: this.authToken,
                     }
@@ -311,6 +334,7 @@ export default {
                 if (response.status === 200) {
                     this.totalLeads = response?.data?.data?.total_leads
                     this.totalPages = response?.data?.data?.total_pages
+                    this.leads = []
                     this.leads = response?.data?.res_data
                 }
             } catch (error) {
@@ -322,7 +346,9 @@ export default {
             }
         },
         editModal(lead) {
-            this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date };
+            console.log(lead, 'leadData')
+            this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date, row_color:lead.row_color};
+            console.log(this.updateLeadData, 'updatedLeaddata')
             this.isEditModalOpen = true;
         },
         async updateLead(e, id) {
@@ -338,6 +364,7 @@ export default {
                 })
                 this.resetValues()
                 if (response.status === 200) {
+                    this.selectedColor = ''
                     this.getLeads();
                     this.$refs.editModalBtn.click()
                     Swal.fire({
@@ -383,7 +410,7 @@ export default {
             try {
                 this.$store.commit('showLoader')
                 const response = await axios.get(`${BASE_URL}api/roles/`, {
-                    headers:{
+                    headers: {
                         token: this.authToken
                     }
                 });
@@ -491,10 +518,10 @@ export default {
             let doc = parser.parseFromString(data, "text/html");
 
             let firstDiv = doc.querySelector('div')
-            if (firstDiv){
+            if (firstDiv) {
                 firstDiv.style.display = 'flex';
             }
-            
+
             var opt = {
                 margin: 0.1,
                 fileName: 'new.pdf',
@@ -511,7 +538,7 @@ export default {
             };
             html2pdf().from(doc.body).set(opt).save();
         },
-        selectAllSales(){
+        selectAllSales() {
             if (this.selectAll) {
                 this.selectedSales = this.leads.map(lead => lead.id);
             } else {
@@ -535,7 +562,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 1000,
                 }).show()
             }
@@ -567,7 +594,7 @@ export default {
             } catch (error) {
                 new Noty({
                     type: 'error',
-                    text: error.response.data.message? error.response.data.message: error.response.data.detail,
+                    text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 1000,
                 }).show()
             }
@@ -580,6 +607,11 @@ export default {
             }
         },
         contactNoFilter(newValue, oldValue) {
+            if (newValue !== oldValue) {
+                this.getLeads();
+            }
+        },
+        searchColor(newValue, oldValue) {
             if (newValue !== oldValue) {
                 this.getLeads();
             }
