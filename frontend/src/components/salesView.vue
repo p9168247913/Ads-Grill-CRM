@@ -33,8 +33,8 @@
                         </div>
                         <div class="col-md-6 col-lg-3 col-sm-6 mb-3">
                                 <select v-model="searchColor" name="" id="" class="form-select">
-                                    <option value="">Find by color</option>
-                                    <option :value="color" v-for="color in colors" :key="color" :style="{ backgroundColor: `#${color}` }">{{`#${color}` }}</option>
+                                    <option value="" selected>Find by color</option>
+                                    <option :value="color" v-for="(color) in colors" :key="color" :style="{ backgroundColor: `#${color.split(':')[0]}` }">{{`#${color}` }}</option>
                                 </select>
                         </div>
                     </div>
@@ -77,17 +77,15 @@
                                             <label for="choose color" class="form-label">Choose color</label>
                                             <select v-model="updateLeadData.row_color" class="form-select" required>
                                                 <option value="" selected>Choose a color</option>
-                                                <option v-for="(color, index) in colors" :key="index" :value="color"
-                                                    :style="{ backgroundColor: `#${color}` }">{{ `#${color}` }}</option>
+                                                <option v-for="(color) in colors" :key="color" :value="color"
+                                                    :style="{ backgroundColor: `#${color.split(':')[0]}` }">{{ `#${color}` }}</option>
                                             </select>
-                                            <!-- <div class="selected-color" :style="{ backgroundColor: selectedColor }">
-                                                Selected Color: {{ selectedColor }}</div> -->
                                         </div>
                                     </div>
                                     <div class="modal-footer"
                                         style="z-index: 999; margin-top: 15px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                                            @click="resetValues(), selectedColor=''">Close</button>
+                                            @click="resetValues(), updateLeadData.row_color = ''">Close</button>
                                         <button type="submit" class="btn btn-primary">Save
                                             Changes</button>
                                     </div>
@@ -259,8 +257,7 @@ export default {
             selectedSales: [],
             selectedAssignee: '',
             allAssignee: [],
-            colors: ['00FF00', 'FFFF00', '0000FF', 'FFA500', 'FF0000'],
-            selectedColor: '',
+            colors: ['00FF00:Onboarded', 'FFFF00:Follow Up', 'FFA500:Pending', 'FF0000:Decline'],
             searchColor: ''
         };
     },
@@ -315,6 +312,7 @@ export default {
                 queryParams = { ...queryParams, contact_no: this.contactNoFilter };
             }
             if(this.searchColor){
+                this.searchColor = this.searchColor.split(":")[0]
                 queryParams = { ...queryParams, searchColor: this.searchColor}
             }
             let date_range = {};
@@ -355,6 +353,7 @@ export default {
             e.preventDefault()
             this.updateLeadData.id = id
             this.updateLeadData.follow_date = this.updateLeadData.follow_date.toString()
+            this.updateLeadData.row_color = this.updateLeadData.row_color.split(":")[0]
             try {
                 const response = await axios.put(`${BASE_URL}api/sales/`, this.updateLeadData, {
                     headers: {
@@ -364,7 +363,7 @@ export default {
                 })
                 this.resetValues()
                 if (response.status === 200) {
-                    this.selectedColor = ''
+                    this.updateLeadData.row_color = ''
                     this.getLeads();
                     this.$refs.editModalBtn.click()
                     Swal.fire({

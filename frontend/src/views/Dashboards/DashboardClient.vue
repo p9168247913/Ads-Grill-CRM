@@ -386,6 +386,7 @@ export default {
                 }
                 formData.append('desc', this.commentDesc)
                 formData.append('sprintID', this.sprintId)
+                formData.append('key', 'client')
                 const response = await axios.post(`${BASE_URL}api/development/comments`, formData, {
                     headers: {
                         'Content-Type': "multipart/form-data",

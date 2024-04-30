@@ -72,7 +72,7 @@
       </li>
 
       <!-- Projects -->
-      <li v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact'" class="nav-item">
+      <li v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact' && authUser.role !== 'client'" class="nav-item">
         <sidenav-item url="/projects" :class="getRoute() === 'projects' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع' : 'Projects'">
           <template v-slot:icon>
@@ -83,7 +83,7 @@
       </li>
 
       <!--Active Sprints-->
-      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact'">
+      <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact' && authUser.role !== 'client'">
         <sidenav-item url="/active-sprints" :class="getRoute() === 'active-sprints' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Active Sprints'">
           <template v-slot:icon>
