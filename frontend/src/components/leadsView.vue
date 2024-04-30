@@ -222,7 +222,7 @@
                                     </tr>
                                 </thead>
                                 <tbody v-for="(lead, index) in leads" :key="index">
-                                    <tr>
+                                    <tr :style="{backgroundColor:`#${lead.row_color}`}">
                                         <td style="padding-left: 24px;">
                                             <input :disabled="lead.is_assigned" style="width: 15px; height: 15px;"
                                                 type="checkbox" v-model="selectedData" :value="lead.id"

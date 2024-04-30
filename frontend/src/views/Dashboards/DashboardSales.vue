@@ -63,7 +63,7 @@
                         <div class="table-responsive">
                             <table class="table align-items-center">
                                 <tbody>
-                                    <tr v-for="(lead, index) in allLeads" :key="index">
+                                    <tr v-for="(lead, index) in allLeads" :key="index" :style="{backgroundColor: `#${lead.row_color ? lead.row_color : ''}`}">
                                         <td>
                                             <div class="text-center">
                                                 <!-- <div>

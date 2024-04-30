@@ -193,12 +193,15 @@ class LeadView(CsrfExemptMixin, APIView):
                     try:
                         lead_sale = Sale.objects.get(lead=lead.pk)
                         sale_status = lead_sale.sale_status
+                        row_color= lead_sale.row_color
                     except Sale.DoesNotExist:
                         sale_status = None
+                        row_color = None
                     data = {
                         'id': lead.pk,
                         'source': lead.source.name,
                         'status': sale_status,
+                        'row_color':row_color,
                         'client_name': lead.client_name,
                         'email': lead.email,
                         'contact_no': lead.contact_no,
