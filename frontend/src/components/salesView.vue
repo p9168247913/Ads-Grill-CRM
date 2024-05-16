@@ -167,6 +167,11 @@
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
+					        <h6 class="mb-0 text-sm">{{ lead.requirement }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding-left: 25px;">
+                                            <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ formatDate(lead.created_at) }}</h6>
                                             </div>
                                         </td>
@@ -247,7 +252,7 @@ export default {
                 id: '',
                 name: ""
             },
-            headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Date', 'QUOT & REQS', 'Actions'],
+            headers: ['S.No', 'Contact Name ', 'Email', 'Mobile No.', 'Source', 'Requirements', 'Date', 'QUOT & REQS', 'Actions'],
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,

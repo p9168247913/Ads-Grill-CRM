@@ -41,7 +41,7 @@
                                 </button>
                                 <a class="btn btn-sm btn-dark px-3 py-2 h-100" type="button"
                                     style="width: auto; height: 40px !important; padding: none !important; "
-                                    href="http://127.0.0.1:8000/api/leadExcelFormat/" download>
+                                    href="https://crm.adsgrill.com/api/leadExcelFormat/" download>
                                     <i class="fas fa-download text-success text-sm opacity-10"></i>
                                     <span class="d-none d-md-inline">&nbsp;&nbsp;Lead Format</span>
                                 </a>
@@ -261,6 +261,11 @@
                                         </td>
                                         <td style="padding-left: 25px;">
                                             <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ lead.requirement }}</h6>
+                                            </div>
+                                        </td>
+                                        <td style="padding-left: 25px;">
+                                            <div class="d-flex flex-column justify-content-center">
                                                 <h6 class="mb-0 text-sm">{{ formatDate(lead.date) }}</h6>
                                             </div>
                                         </td>
@@ -330,7 +335,7 @@ export default {
                 contact_no: '',
                 source: '',
             },
-            headers: ['S.No', 'Contact Name ', 'Status', 'Email', 'Mobile No.', 'Source', 'Date', 'Assigned', 'Actions'],
+            headers: ['S.No', 'Contact Name ', 'Status', 'Email', 'Mobile No.', 'Source','Requirements', 'Date', 'Assigned', 'Actions'],
             modalOpen: false,
             currentPage: 1,
             itemsPerPage: 5,
