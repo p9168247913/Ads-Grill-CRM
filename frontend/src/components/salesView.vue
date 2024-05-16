@@ -349,9 +349,7 @@ export default {
             }
         },
         editModal(lead) {
-            console.log(lead, 'leadData')
             this.updateLeadData = { ...lead, id: +(lead.id), follow_date: lead?.follow_date, row_color:lead.row_color};
-            console.log(this.updateLeadData, 'updatedLeaddata')
             this.isEditModalOpen = true;
         },
         async updateLead(e, id) {
@@ -588,6 +586,7 @@ export default {
                 })
                 if (response.status === 200) {
                     this.selectedData = [];
+                    this.selectedSales = []
                     this.selectedAssignee = '';
                     this.getLeads();
                     Swal.fire({
