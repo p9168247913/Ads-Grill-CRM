@@ -1104,20 +1104,21 @@ export default {
     },
     addSubModule(moduleName) {
       if (this.newSubModuleName[moduleName].trim() !== '') {
+        
         const newSubModule = {
           key: this.newSubModuleName[moduleName],
           value: this.newSubModuleName[moduleName]
         };
         if (this.subModules[moduleName] === undefined) {
+      
           this.subModules[moduleName] = [newSubModule];
         } else {
+      
           this.subModules[moduleName].push(newSubModule);
         }
         this.newSubModuleName[moduleName] = '';
 
-        if (!this.mainfilled.some(module => module.key === moduleName)) {
-          this.selectedModule.push(moduleName);
-        }
+       
       }
     },
 
