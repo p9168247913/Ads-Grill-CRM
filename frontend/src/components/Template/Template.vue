@@ -116,21 +116,21 @@
         <div class="row">
           <div class="">
             <label for="projectName" class="form-label"> Header Description </label>
-            <QuillEditor required ref="headerDesc"  theme="snow" toolbar="full" />
+            <QuillEditor ref="headerDesc" :modules="modules"  theme="snow" toolbar="full" />
           </div>
         </div>
 
         <div class="row">
           <div class="">
             <label for="projectName" class="form-label"> Body Description </label>
-            <QuillEditor required ref="bodyDesc" theme="snow" toolbar="full" />
+            <QuillEditor required ref="bodyDesc" :modules="modules" theme="snow" toolbar="full" />
           </div>
         </div>
 
         <div class="row">
           <div class="">
             <label for="projectName" class="form-label">Footer Description</label>
-            <QuillEditor required ref="footerDesc" theme="snow" toolbar="full" />
+            <QuillEditor required ref="footerDesc" :modules="modules" theme="snow" toolbar="full" />
           </div>
         </div>
         <div> <button class="form-btn" @click="storeAndClearData()">Submit</button></div>
@@ -232,10 +232,9 @@ export default {
         footer: ''
       },
       showPopup: false,
-
       dataItems: [{ key: '', value: '' }],
       mainfilled: [{
-        key: 'Sales Entery & POS Module ',
+        key: 'Sales Entery & POS Module',
         value: 'Sales Entery & POS Module'
       },
       {
@@ -346,7 +345,8 @@ export default {
         {
           key: "Sales Record",
           value: "Sales Record"
-        }, {
+        }, 
+        {
           key: " Sales Return Record",
           value: "Sales Return Record"
         },
@@ -440,8 +440,9 @@ export default {
         {
           key: "Sales Record",
           value: "Sales Record"
-        }, {
-          key: " Sales Return Record",
+        },
+         {
+          key: "Sales Return Record",
           value: "Sales Return Record"
         },
         {
@@ -514,10 +515,8 @@ export default {
         {
           key: "Purchase Record",
           value: "Purchase Record"
-        }, {
-          key: " Purchase Return Record",
-          value: "Purchase Return Record"
-        }
+        },
+        
 
         ],
         "Manufacturing Module": [
@@ -563,10 +562,7 @@ export default {
             key: "Service Record",
             value: "Service Record"
           },
-          {
-            key: "Service Expense Record",
-            value: "Service Expense Record"
-          }
+          
 
 
         ],
@@ -959,21 +955,21 @@ export default {
 
   methods: {
     abcdCall(){
-      // console.log("abcdCall", this.selectedRoleBasedAccess)
+     
     },
     isChecked(role, value) {
-      // console.log("isChecked",role,value)
+     
     return this.abcdCall[role] && this.selectedRoleBasedAccess[role].includes(value);
   },
   updateRoleBasedAccess(role, value) {
     if (!this.selectedRoleBasedAccess[role]) {
-      this.selectedRoleBasedAccess[role] = []; // Initialize if the role doesn't exist
+      this.selectedRoleBasedAccess[role] = []; 
     }
     const index = this.selectedRoleBasedAccess[role].indexOf(value);
     if (index === -1) {
-      this.selectedRoleBasedAccess[role].push(value); // Add value if it's not already in the array
+      this.selectedRoleBasedAccess[role].push(value); 
     } else {
-      this.selectedRoleBasedAccess[role].splice(index, 1); // Remove value if it already exists
+      this.selectedRoleBasedAccess[role].splice(index, 1); 
     }
   }
 ,
@@ -1063,36 +1059,35 @@ export default {
     ,
     openPopup(subModuleval, subModule) {
       this.currentModule = subModuleval;
-      this.currentSubModule = subModule.key;
-    
-      const moduleIndex = this.allData.findIndex(item => Object.keys(item)[0] === subModule.key);
   
-  if (moduleIndex !== -1) {
-    // Module exists, check if subModule exists
-    const submoduleIndex = this.allData[moduleIndex][subModule.key].findIndex(item => item.key === subModuleval);
-    
-    if (submoduleIndex !== -1) {
-      // Submodule exists, populate popup with existing data
-      const existingData = this.allData[moduleIndex][subModule.key][submoduleIndex].otherData;
-      this.popupData = { ...existingData };
-    } else {
-      // Submodule doesn't exist, open popup with empty fields
-      this.popupData = {
-        header: "",
-        body: "",
-        footer: ""
-      };
-    }
-  } else {
-    // Module doesn't exist, open popup with empty fields
-    this.popupData = {
-      header: "",
-      body: "",
-      footer: ""
-    };
+      this.currentSubModule = subModule.key;
+      let subModuleValue = this.currentSubModule;
+      console.log(subModule.key);
+      let data = this.allData;
+      this.showPopup = true;
+      const moduleIndex = data?.find(item => Object.keys(item)[0] === subModuleval);
+      console.log("moduleIndex", moduleIndex);
+      console.log("data", subModuleValue, subModuleval);
 
-    this.showPopup = true;
-  }
+      // Now find the object where the key matches subModuleValue
+      const subModuleObject = moduleIndex[subModuleval].find(obj => obj.key === subModuleValue);
+
+      console.log("subModuleObject1", subModuleObject?.otherData?.header);
+
+      if ( subModuleObject.otherData.header) {
+      console.log("subModuleObject2", subModuleObject?.otherData?.header);
+
+        const headerEditor = this.$refs.headerDesc;
+       
+      
+        headerEditor.setHTML(subModuleObject.otherData.header);
+  
+      // }
+
+    
+        
+    }
+ 
     },
     closePopup() {
       this.currentModule = "";
