@@ -3,11 +3,14 @@ from django.utils import timezone
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 import os
+import uuid
 # Create your models here.
 class Roles(models.Model):
     name = models.CharField(max_length=50, unique=True, null=False, blank=False)
+
     def __str__(self):
         return self.name
+    
 class Users(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=40, null=True, blank=False)
     email = models.EmailField(unique=True, null=False, blank=True)
@@ -24,8 +27,10 @@ class Users(AbstractBaseUser, PermissionsMixin):
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
     USERNAME_FIELD = 'email'
     objects = UserManager()
+
     def __str__(self):
         return self.email
+    
 class Client(AbstractBaseUser, PermissionsMixin):
     role = models.ForeignKey(Roles, on_delete=models.PROTECT)
     name = models.CharField(max_length=25, null=True, blank=False)
@@ -39,8 +44,10 @@ class Client(AbstractBaseUser, PermissionsMixin):
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
     USERNAME_FIELD = 'email'
     objects = UserManager()
+
     def __str__(self):
         return self.email
+    
 class Access_requests(models.Model):
     sender = models.IntegerField(null=False, blank=False)
     receiver = models.IntegerField(null=False, blank=False)
@@ -49,26 +56,34 @@ class Access_requests(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
+
     def __str__(self):
         return self.feature_requested
+    
 class Source(models.Model):
     name = models.CharField(unique=True, null=False, blank=False, max_length=30)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     def __str__(self):
         return self.name
+    
 class Tag(models.Model):
     name = models.CharField(unique=True, null=False, blank=False, max_length=30)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     def __str__(self):
         return self.name
+    
 class LeadStatus(models.Model):
     name = models.CharField(unique=True, null=False,blank=False, max_length=30)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     def __str__(self):
         return self.name
+    
 class Lead(models.Model):
     sales_man = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False)
     source = models.ForeignKey(Source,on_delete=models.PROTECT, null=True, blank=False, related_name='leadSource')
@@ -85,25 +100,30 @@ class Lead(models.Model):
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
     is_assigned = models.BooleanField(null=False, blank=False, default=False)
+
     def __str__(self):
         return self.client_name
+    
 class Sale(models.Model):
     lead = models.ForeignKey(Lead, on_delete=models.PROTECT, null=True, blank=False)
-    assignee = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False)
+    assignee = models.ManyToManyField(Users, null=True, blank=False, related_name='assigned_sales')
+    is_assigned = models.BooleanField(default=False, null=True, blank=False)
     status = models.ForeignKey(LeadStatus, on_delete=models.PROTECT, null=True, blank=False, related_name="LeadStatus")
     remark=models.CharField(null=True,blank=True)
     row_color = models.CharField(null=True, blank=False)
     sale_status=models.CharField(null=True,blank=False,max_length=30)
     temp_data=models.TextField(null=True,blank=True)
-    quot_data = models.TextField(null=True, blank=True)
     follow_date = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     is_deleted = models.BooleanField(null=False, blank=False, default=False)
+
     def __str__(self):
         return self.lead.client_name
+    
 def default_attachments():
     return []
+
 class Project(models.Model):
     reporter = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index=True, related_name='pro_reporter')
     team_lead = models.ForeignKey(Users, on_delete=models.PROTECT, null=True, blank=False, db_index=True, related_name='pro_team_lead')
@@ -117,8 +137,10 @@ class Project(models.Model):
     tech_stacks = models.TextField(null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     def __str__(self):
         return self.name
+    
 class Sprint(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, db_index=True, null=False, blank=False)
     reporter = models.ForeignKey(Users, on_delete=models.PROTECT, db_index=True, null=True, blank=False)
@@ -134,8 +156,10 @@ class Sprint(models.Model):
     is_started = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     def __str__(self):
         return self.name
+    
 class Issue(models.Model):
     parent_issue = models.ManyToManyField('self', symmetrical=False,db_index=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, db_index=True, null=False, blank=False)
@@ -154,8 +178,10 @@ class Issue(models.Model):
     assignee = models.ForeignKey(Users, db_index=True, on_delete=models.CASCADE, related_name='task_assignee')
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     def __str__(self):
         return self.title
+    
 class LinkedIssue(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
@@ -164,6 +190,7 @@ class LinkedIssue(models.Model):
     type = models.CharField(null=True, blank=False)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
 class WorkLog(models.Model):
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
@@ -175,6 +202,7 @@ class WorkLog(models.Model):
     attachment = ArrayField(models.FileField(), blank=True, default=default_attachments)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
 class Comment(models.Model):
     sprint = models.ForeignKey(Sprint, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
@@ -190,3 +218,49 @@ class ToDo(models.Model):
     author = models.ForeignKey(Users, on_delete=models.PROTECT, null=False, blank=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+class QuotationStatus(models.Model):
+    name = models.CharField(null=True, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+class Desclaimer(models.Model):
+    title = models.CharField(null=True, blank=False)
+    desc = models.CharField(null=True, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+class About_us(models.Model):
+    title = models.CharField(null=True, blank=False)
+    desc = models.CharField(null=True, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+class Nda(models.Model):
+    title = models.CharField(null=True, blank=False)
+    desc = models.CharField(null=True, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+class Quotation(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sale = models.ForeignKey(Sale, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
+    status = models.ForeignKey(QuotationStatus, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
+    project_type = models.CharField(null=True, blank=False)
+    project_name = models.CharField(null=True, blank=False)
+    project_cost = models.JSONField(null=False, blank=False, default=dict)
+    gst_details = models.CharField(null=True, blank=False)
+    milestone = models.JSONField(null=False, blank=False, default=dict)
+    time_frame = models.JSONField(null=False, blank=False, default=dict)
+    project_ref = models.CharField(null=True, blank=False)
+    project_desc = models.TextField(null=True, blank=False)
+    objectives = models.TextField(null=True, blank=False)
+    tech_specs = models.JSONField(null=True, blank=False, default=dict)
+    api_info = models.TextField(null=True, blank=False)
+    desclaimer = models.ForeignKey(Desclaimer, on_delete=models.CASCADE, null=True, blank=False)
+    about_us = models.ForeignKey(About_us, on_delete=models.CASCADE, null=True, blank=False)
+    nda = models.ForeignKey(Nda, on_delete=models.CASCADE, null=True, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=False, blank=False, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+
