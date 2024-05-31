@@ -2,7 +2,8 @@ from django.urls import path, re_path
 from micro_services.users_management import users, roles
 from micro_services.leads import leads
 from micro_services.sales import sales
-from micro_services.development import client, projects, sprints ,issues, comments,worklog, todo
+from micro_services.Scripts import db
+from micro_services.development import client, projects, sprints ,issues, comments,worklog, todo, quotations
 
 
 urlpatterns = [
@@ -32,5 +33,8 @@ urlpatterns = [
     path("development/worklog",worklog.WorklogView.as_view()),
     path("development/worklog/download",worklog.DownloadWorklogAttachments.as_view()),
     path("development/issueMetaData",issues.IssueMetaData.as_view()),
-    path("development/downloadUserWorkReport",issues.downloadUserWorkReport.as_view())
+    path("development/downloadUserWorkReport",issues.downloadUserWorkReport.as_view()),
+    path("development/quotation/status",quotations.QuotStatus.as_view()),
+    path("development/quotation/disclaimer",quotations.DisclaimerView.as_view()),
+    path("Sales/restoreData",db.MasterUpdate.as_view()),
 ]

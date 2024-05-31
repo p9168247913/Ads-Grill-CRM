@@ -38,17 +38,11 @@ class SalesView(CsrfExemptMixin, APIView):
             user_instance=request.user
             if user_instance.role.name == "admin" or user_instance.role.name == "leads":
                 with transaction.atomic():
-                    sales_instance= [Sale(
-                        lead=lead_id,
-                        assignee=assignee_instance
-                    )for lead_id in leads]
-
                     for lead in leads:
+                        sale_instance = Sale.objects.create(lead=lead)
+                        sale_instance.assignee.set([assignee_instance])
                         lead.is_assigned = True
                         lead.save()
-
-                    Sale.objects.bulk_create(sales_instance)
-                    
             else:
                 return JsonResponse({"message":"Sorry! You can not add sale"},status=status.HTTP_401_UNAUTHORIZED)
                 
@@ -147,6 +141,7 @@ class SalesView(CsrfExemptMixin, APIView):
                 'status':sale.sale_status,
                 'remark':sale.remark,
                 'row_color': sale.row_color if sale.row_color else None,
+                'is_assigned':sale.is_assigned,
                 'temp_data':sale.temp_data,
                 'created_at':sale.created_at
                 }
@@ -208,14 +203,15 @@ class SalesView(CsrfExemptMixin, APIView):
     def patch(self, request):
         try:
             requestData = json.loads(request.body)
-            print(requestData)
             salesIds = requestData.get('salesIds', [])
-            saleAssignee = Users.objects.get(pk=requestData.get('saleAssignee'))
-            if salesIds:
-                updateSales = Sale.objects.filter(pk__in=salesIds).order_by('-created_at')
-                for sale in updateSales:
-                    sale.assignee = saleAssignee
-                    sale.save()
+            with transaction.atomic():
+                saleAssignee = Users.objects.get(pk=requestData.get('saleAssignee'))
+                if salesIds:
+                    updateSales = Sale.objects.filter(pk__in=salesIds).order_by('-created_at')
+                    for sale in updateSales:
+                        sale.assignee.add(saleAssignee)
+                        sale.is_assigned = True
+                        sale.save()
 
         except IntegrityError as i:
             return JsonResponse({"message":str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

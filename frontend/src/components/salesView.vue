@@ -105,7 +105,7 @@
                             <input class="form-control" v-model="end_date" :min="start_date" :disabled="!start_date"
                                 type="date" placeholder="End date" />
                         </div>
-                        <div class="col-md-4 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
+                        <div v-if="authUser.role == 'sales' && authUser.designation == 'sales_manager'" class="col-md-4 col-lg-3 col-sm-6 mb-3 d-flex gap-2">
                             <select v-model="selectedAssignee" class="form-select">
                                 <option value="">Sales Assignee</option>
                                 <option v-for="(item, index) in allAssignee" :key="index" :value="item.id"> {{
@@ -124,7 +124,7 @@
                             <table class="table align-items-center mb-0">
                                 <thead style="background-color: white; position: sticky; top: 0;">
                                     <tr>
-                                        <th style="color: #344767 !important;">
+                                        <th v-if="authUser.role=='sales' && authUser.designation=='sales_manager'" style="color: #344767 !important;">
                                             <input style="width: 15px; height: 15px;" type="checkbox"
                                                 v-model="selectAll" @change="selectAllSales">
                                         </th>
@@ -135,7 +135,7 @@
                                 </thead>
                                 <tbody v-for="(lead, index) in leads" :key="index">
                                     <tr :style="{backgroundColor: `#${lead.row_color ? lead.row_color : ''}`}">
-                                        <td style="padding-left: 24px;">
+                                        <td v-if="authUser.role=='sales' && authUser.designation=='sales_manager'" style="padding-left: 24px;">
                                             <input :disabled="lead.is_assigned" style="width: 15px; height: 15px;"
                                                 type="checkbox" v-model="selectedSales" :value="lead.id">
                                         </td>
@@ -570,6 +570,7 @@ export default {
             }
         },
         async assignSales(e) {
+            this.$store.commit('showLoader')
             e.preventDefault();
             let data = {}
             if (this.selectedSales.length > 0 && this.selectedAssignee) {
@@ -593,6 +594,7 @@ export default {
                         title: `${response.data.message}`,
                         icon: 'success',
                     })
+                    this.$store.commit('hideLoader')
                 }
             } catch (error) {
                 new Noty({
@@ -600,7 +602,9 @@ export default {
                     text: error.response.data.message ? error.response.data.message : error.response.data.detail,
                     timeout: 1000,
                 }).show()
+                this.$store.commit('hideLoader')
             }
+            this.$store.commit('hideLoader')
         },
     },
     watch: {
