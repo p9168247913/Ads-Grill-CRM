@@ -34,7 +34,10 @@ urlpatterns = [
     path("development/worklog/download",worklog.DownloadWorklogAttachments.as_view()),
     path("development/issueMetaData",issues.IssueMetaData.as_view()),
     path("development/downloadUserWorkReport",issues.downloadUserWorkReport.as_view()),
-    path("development/quotation/status",quotations.QuotStatus.as_view()),
-    path("development/quotation/disclaimer",quotations.DisclaimerView.as_view()),
+    path("development/proposal/status",quotations.QuotStatus.as_view()),
+    path("development/proposal/disclaimer",quotations.DisclaimerView.as_view()),
+    path("development/proposal/aboutUs",quotations.AboutusView.as_view()),
+    path("development/proposal/nda",quotations.NdaView.as_view()),
+    path("development/proposal",quotations.ProposalView.as_view()),
     path("Sales/restoreData",db.MasterUpdate.as_view()),
 ]

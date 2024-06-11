@@ -80,7 +80,7 @@
           </template>
           <router-link to="/projects">Projects</router-link>
         </sidenav-item>
-      </li>
+      </li>                                                                      
 
       <!--Active Sprints-->
       <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact' && authUser.role !== 'client'">
@@ -112,6 +112,16 @@
             <i class="fas fa-exclamation-circle text-info text-sm opacity-10"></i>
           </template>
           <router-link to="/issues">Issues</router-link>
+        </sidenav-item>
+      </li>
+
+      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'super-admin' && authUser.role !== 'contact'">
+        <sidenav-item url="/proposal" :class="getRoute() === 'issues' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Proposal'">
+          <template v-slot:icon>
+            <!-- <i class="fas fa-pen-nib text-sm opacity-10"></i> -->
+            <i class="fas fa-handshake text-primary text-sm opacity-10"></i>
+          </template>
         </sidenav-item>
       </li>
 

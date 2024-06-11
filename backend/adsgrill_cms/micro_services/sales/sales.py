@@ -131,7 +131,7 @@ class SalesView(CsrfExemptMixin, APIView):
                 'id':sale.pk,
                 'name':sale.lead.client_name,
                 'email':sale.lead.email,
-                'conact_no':sale.lead.contact_no,
+                'contact_no':sale.lead.contact_no,
                 'source':{
                     'id':sale.lead.source.pk,
                     'name':sale.lead.source.name
