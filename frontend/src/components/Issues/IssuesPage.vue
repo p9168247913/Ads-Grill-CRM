@@ -173,11 +173,17 @@
                                     aria-label="Close"></button>
                             </div>
                             <div class="modal-body modalBody" style="padding-bottom: 0;">
-                                <form @submit="editIssue($event), resetValues()">
+                                <form @submit="editIssue($event)">
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
-                                            <input type="text" class="form-control modal-title-input"
+                                            <div v-if="authUser.designation === 'project_manager' || authUser.designation === 'admin'">
+                                                <input type="text" class="form-control modal-title-input"
                                                 v-model="editIssueData.title" @input="generateKey" required>
+                                            </div>
+                                            <div v-else>
+                                                <input type="text" class="form-control modal-title-input"
+                                                v-model="editIssueData.title" @input="generateKey" required readonly>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="row" style="margin-top: -20px;">
@@ -189,7 +195,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="sprint" class="form-label">Sprint</label>
-                                            <select class="form-select" v-model="editIssueData.sprint_id" required>
+                                            <select class="form-select" v-model="editIssueData.sprint_id" required :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                                 <option value="">Select sprint</option>
                                                 <option v-for="(sprint, index) in allSprints" :key="index"
                                                     :value="sprint.id">{{
@@ -198,7 +204,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="reporter" class="form-label">Reporter</label>
-                                            <select class="form-select" v-model="editIssueData.reporter_id" required>
+                                            <select class="form-select" v-model="editIssueData.reporter_id" required :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                                 <option value="">Select Reporter</option>
                                                 <option v-for="(manager, index) in projectManagers" :key="index"
                                                     :value="manager.id">{{
@@ -209,7 +215,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="type" class="form-label">Type</label>
-                                            <select class="form-select" v-model="editIssueData.type" required>
+                                            <select class="form-select" v-model="editIssueData.type" required :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                                 <option value="">Select Type</option>
                                                 <option value="epic">Epic</option>
                                                 <option value="story">Story</option>
@@ -229,11 +235,11 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="expected time" class="form-label">Expected Time</label>
                                             <input type="text" class="form-control" v-model="editIssueData.exp_duration"
-                                                @change="checkDurationValidity" required>
+                                                @change="checkDurationValidity" required :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="Assignee" class="form-label">Assignee</label>
-                                            <select class="form-select" v-model="editIssueData.assignee_id" required>
+                                            <select class="form-select" v-model="editIssueData.assignee_id" required :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                                 <option value="">Select Assignee</option>
                                                 <option v-for="(assignee, index) in assignees" :key="index"
                                                     :value="assignee.id">{{
@@ -244,7 +250,7 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label for="priority" class="form-label">Priority</label>
-                                            <select class="form-select" v-model="editIssueData.priority" required>
+                                            <select class="form-select" v-model="editIssueData.priority" required :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                                 <option value="">Select Priority</option>
                                                 <option value="lowest">Lowest</option>
                                                 <option value="low">Low</option>
@@ -255,7 +261,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label for="team lead" class="form-label">Team Lead</label>
-                                            <select :required="this.authUser.designation === 'project_manager'" class="form-select" v-model="editIssueData.team_lead_id">
+                                            <select :required="this.authUser.designation === 'project_manager'" class="form-select" v-model="editIssueData.team_lead_id" :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                                 <option value="">Select Team Lead</option>
                                                 <option v-for="(lead, index) in teamLead" :key="index" :value="lead.id">
                                                     {{
@@ -277,7 +283,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label for="issueName" class="form-label">Files</label>
                                             <input type="file" accept=".xlsx, .xlx, .pdf, .doc, .ppt"
-                                                class="form-control" multiple @change="handleUpdateFileChange">
+                                                class="form-control" multiple @change="handleUpdateFileChange" :disabled="!(['project_manager', 'admin'].includes(authUser.designation))">
                                         </div>
                                     </div>
                                     <div class="row">
@@ -491,7 +497,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="modal-footer" v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead'"
+                                    <div class="modal-footer" v-if="this.authUser.designation === 'project_manager' || this.authUser.designation === 'team_lead' || this.authUser.designation === 'full_stack_developer' || this.authUser.designation === 'admin'"
                                         style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                                         <button ref="editModal" type="button" class="btn btn-secondary"
                                             data-bs-dismiss="modal" @click="resetValues">Close</button>
@@ -1350,18 +1356,19 @@ export default {
                 if (response.status === 200) {
                     this.$refs.editModal.click()
                     Swal.fire({
-                        title: "Issue updated successfully!",
+                        title: response.data.message,
                         icon: 'success',
                     });
                     this.resetValues();
                     this.getIssue()
-                } else {
-                    new Noty({
-                        type: 'error',
-                        text: response.data.message,
-                        timeout: 1000,
-                    }).show();
-                }
+                } 
+                // else {
+                //     new Noty({
+                //         type: 'error',
+                //         text: response.data.message?response.data.message:response.data.detail,
+                //         timeout: 1000,
+                //     }).show();
+                // }
                 this.$store.commit('hideLoader');
             } catch (error) {
                 new Noty({
