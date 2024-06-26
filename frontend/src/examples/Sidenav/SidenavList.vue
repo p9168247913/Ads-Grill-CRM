@@ -3,7 +3,7 @@
     <ul class="navbar-nav" v-if="authUser.role !== 'client' || authUser.role!=='contact'">
 
       <!--Dashboard-->
-      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'contact'">
+      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'contact'">
         <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
           <template v-slot:icon>
@@ -13,7 +13,7 @@
       </li>
 
       <!-- Employee -->
-      <li v-if="authUser.role!== 'contact'" @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item"
+      <li v-if="authUser.role!== 'contact' && authUser.role!=='client'" @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item"
         :class="{ 'active': isEmployeeActive }">
         <sidenav-item url="" :class="{ 'collapsed': isCollapseShow }"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Employees'" data-toggle="collapse"
@@ -275,9 +275,9 @@ export default {
       if (this.getRoute() === 'development' ||
         this.getRoute() === 'sales' ||
         this.getRoute() === 'hrms') {
-        console.log(true)
+        return true
       } else {
-        console.log(false)
+        return false
       }
     },
     colapseShowTogeller() {

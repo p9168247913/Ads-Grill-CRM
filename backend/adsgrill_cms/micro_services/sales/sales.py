@@ -23,6 +23,7 @@ class CustomSessionAuthentication(SessionAuthentication):
         if user_auth_tuple is None:
             raise AuthenticationFailed('Your session has expired. Please log in again.')
         return user_auth_tuple
+    
 class SalesView(CsrfExemptMixin, APIView):
     authentication_classes = [CsrfExemptSessionAuthentication, CustomSessionAuthentication]
     permission_classes = [IsAuthenticated]

@@ -13,6 +13,43 @@ from django.db import transaction
 from django.core.serializers import serialize
 import json
 
+def generateID():
+        try:
+            obj = Quotation.objects.order_by('-created_at').first()
+            if not obj:
+                id = "PRO00000-1"
+                return id
+            else:
+                idStr = int(obj.id.split("-")[1])
+                id = idStr+1
+                print(id, '')
+                count = countDigits(id)
+                print(count, '----------------')
+                if count == 1:
+                    return f"PRO00000-{id}"
+                elif count == 2:
+                    return f"PRO0000-{id}"
+                elif count == 3:
+                    return f"PRO000-{id}"
+                elif count == 4:
+                    return f"PRO00-{id}"
+                elif count == 5:
+                    return f"PRO0-{id}"
+                elif count == 6:
+                    return f"PRO-{id}"
+                else:
+                    return "max limit exceeds"
+                
+        except Exception as e:
+            raise(str(e))
+    
+def countDigits(id):
+    count = 0
+    while id:
+        id//=10
+        count+=1
+    return count
+
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
         return
@@ -36,8 +73,6 @@ class QuotStatus(CsrfExemptMixin, APIView):
             with transaction.atomic():
                 QuotationStatus.objects.create(name=statusName)
         except Exception as e:
-            import traceback
-            traceback.print_exc()
             return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'message':'Record created successfully'}, status=status.HTTP_201_CREATED)
         
@@ -284,6 +319,7 @@ class ProposalView(CsrfExemptMixin, APIView):
 
             with transaction.atomic():
                 Quotation.objects.create(
+                    id = generateID(),
                     sale = saleIns,
                     status = statusIns,
                     desclaimer = diclaimerIns,
@@ -306,6 +342,8 @@ class ProposalView(CsrfExemptMixin, APIView):
             return JsonResponse({'message':str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             return JsonResponse({'message':str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({"message":"Proposal created successfully"}, status=status.HTTP_201_CREATED)
     
