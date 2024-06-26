@@ -289,7 +289,7 @@ class IssueView(CsrfExemptMixin, APIView):
             total_duration = issue_exp_duration + existing_issue_duration
 
             if total_duration > sprint_exp_duration:
-                return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"})
+                return JsonResponse({"message": "Creating this issue will affect the active sprint's scope, please update sprint duration"}, status=status.HTTP_400_BAD_REQUEST)
             
             if(request.user.designation=="project_manager" and request.user.role.name=="development"):
                 if requestData.get("status")=="done":
@@ -299,7 +299,7 @@ class IssueView(CsrfExemptMixin, APIView):
                         upd_issue.org_duration=total_org_duration
                     else:
                         upd_issue.org_duration=None
-                        return JsonResponse({"message":"No worklogs found for this issue, can't change status to done"})
+                        return JsonResponse({"message":"No worklogs found for this issue, can't change status to done"}, status=status.HTTP_400_BAD_REQUEST)
                     
             with transaction.atomic():
                 upd_issue.sprint=sprint_instance
@@ -318,6 +318,9 @@ class IssueView(CsrfExemptMixin, APIView):
                     upd_issue.parent_issue.clear()     
                     parent_issues = Issue.objects.filter(pk__in=parent_issues)
                     upd_issue.parent_issue.add(*parent_issues)
+                    
+                else:
+                    upd_issue.parent_issue.clear()
 
                 attachment_file_names = []
                 for attachment in attachments:
@@ -336,14 +339,14 @@ class IssueView(CsrfExemptMixin, APIView):
                 upd_issue.attachments.extend(attachment_file_names)
                 upd_issue.save()
         except Project.DoesNotExist:
-            return JsonResponse({"message":"Requested Project not exists"})
+            return JsonResponse({"message":"Requested Project not exists"}, status=status.HTTP_404_NOT_FOUND)
         except Sprint.DoesNotExist:
-            return JsonResponse({"message":"Requested Sprint not exists"})
+            return JsonResponse({"message":"Requested Sprint not exists"}, status=status.HTTP_404_NOT_FOUND)
         except Users.DoesNotExist:
-            return JsonResponse({"message":"Requested User not exists"})
+            return JsonResponse({"message":"Requested User not exists"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return JsonResponse({"message":str(e)})
-        return JsonResponse({"message":"issue Updated successfully"})
+            return JsonResponse({"message":str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message":"issue Updated successfully"}, status=status.HTTP_200_OK)
     
     def delete(self,request):
         try:
