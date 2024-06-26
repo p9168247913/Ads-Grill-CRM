@@ -17,6 +17,7 @@ import ActiveSprint from '../components/ActiveSprint/ActiveSprint.vue'
 import ClientSignin from '.././views/ClientSignin.vue'
 import Template from '../components/Template/Template.vue'
 import Template2 from '../components/BaseTemplates/Template2.vue'
+import Proposal from '../components/proposal.vue'
 
 const routes = [
   {
@@ -114,6 +115,11 @@ const routes = [
     path: "/template2",
     name: 'Template 2',
     component: Template2,
+  },
+  {
+    path: "/proposal",
+    name: 'Proposal',
+    component: Proposal,
   },
 ];
 

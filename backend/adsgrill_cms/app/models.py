@@ -243,7 +243,7 @@ class Nda(models.Model):
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
 class Quotation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.CharField(primary_key=True, unique=True, null=False, blank=False)
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, null=False, blank=False, db_index=True)
     status = models.ForeignKey(QuotationStatus, on_delete=models.CASCADE, null=True, blank=False, db_index=True)
     project_type = models.CharField(null=True, blank=False)
