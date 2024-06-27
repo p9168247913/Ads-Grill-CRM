@@ -661,8 +661,6 @@ export default {
     name: "IssuePage",
     data() {
         return {
-            sendStatus:null,
-            // editModalOpened: false,
             isEditIssueModalVisible: false,
             headers: ['S.No.', 'Title',  'Assignee', 'Assigned On', 'Type', 'Status', 'Sprint', 'Reporting Manager', 'Team Lead',  'Task duration', 'Actual duration', 'Files'],
             allIssues: [],
@@ -710,7 +708,6 @@ export default {
                 exp_duration: '',
                 assignee_id: '',
                 is_started: '',
-                status:'nothing'
             },
             parent_issues: [],
             child_issues: [],
