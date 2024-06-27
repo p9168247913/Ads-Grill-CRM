@@ -511,7 +511,7 @@
                 </div>
 
                 <comments ref="commentsView" />
-                <worklog ref="workLogView" />
+                <worklog ref="workLogView"/>
 
                 <!--Table-->
                 <div v-if="filteredIssues?.length" class="card" style="margin-top: 2rem;">
@@ -617,12 +617,12 @@
                                             <!-- Comment Section Button -->
                                             <i title="Comments" class="fas fa-comment text-info fa-md mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#comments"
-                                                @click="sendDataToComments(issue.id, issue.sprint.id), getDevUsers()"
+                                                @click="sendDataToComments(issue.id, issue.sprint.id, issue.status), getDevUsers()"
                                                 style="cursor: pointer;"></i>
                                             <!-- Worklog Section Button -->
                                             <i title="Worklog" class="fas fa-clock text-success fa-md mx-3 icon"
                                                 data-bs-toggle="modal" data-bs-target="#worklog"
-                                                @click="sendDataToComments(issue.id, issue.sprint.id), getWorkLogs()"
+                                                @click="sendDataToComments(issue.id, issue.sprint.id, issue.status), getWorkLogs()"
                                                 style="cursor: pointer;"></i>
                                         </td>
                                     </tr>
@@ -661,7 +661,8 @@ export default {
     name: "IssuePage",
     data() {
         return {
-            editModalOpened: false,
+            sendStatus:null,
+            // editModalOpened: false,
             isEditIssueModalVisible: false,
             headers: ['S.No.', 'Title',  'Assignee', 'Assigned On', 'Type', 'Status', 'Sprint', 'Reporting Manager', 'Team Lead',  'Task duration', 'Actual duration', 'Files'],
             allIssues: [],
@@ -709,6 +710,7 @@ export default {
                 exp_duration: '',
                 assignee_id: '',
                 is_started: '',
+                status:'nothing'
             },
             parent_issues: [],
             child_issues: [],
@@ -1343,6 +1345,7 @@ export default {
                     }
                 }
                 this.$store.commit('showLoader');
+                
                 const response = await axios.put(`${BASE_URL}api/development/issues`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -1362,13 +1365,6 @@ export default {
                     this.resetValues();
                     this.getIssue()
                 } 
-                // else {
-                //     new Noty({
-                //         type: 'error',
-                //         text: response.data.message?response.data.message:response.data.detail,
-                //         timeout: 1000,
-                //     }).show();
-                // }
                 this.$store.commit('hideLoader');
             } catch (error) {
                 new Noty({
@@ -1516,9 +1512,9 @@ export default {
             this.issueData.key = uniqueKey;
             this.editIssueData.key = uniqueKey2;
         },
-        sendDataToComments(issueID, sprintID) {
+        sendDataToComments(issueID, sprintID, issueStatus) {
             this.$refs.commentsView.getDataFromIssuePage(issueID, sprintID);
-            this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID);
+            this.$refs.workLogView.getDataFromIssuePage(issueID, sprintID, issueStatus);
         },
         getWorkLogs() {
             this.$refs.workLogView.getWorkLogs()
