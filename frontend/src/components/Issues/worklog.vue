@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/noty@3.2.0-beta-deprecated/lib/themes/mint.css">
     </head>
     <!-- Modal for post, read and delete Work log -->
-    <div data-bs-backdrop="static" v-show="!editModalOpen" class="modal fade" ref="createWorklogModal" id="worklog"
+    <div data-bs-backdrop="static" class="modal fade" ref="createWorklogModal" id="worklog"
         tabindex="-1" aria-labelledby="createWorklogLabel" aria-hidden="true" role="dialog" @hidden="removeBackdrop">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="padding-bottom: 0;padding-left: 7px; padding-right: 7px;">
@@ -125,7 +125,7 @@
                             style="z-index: 999; margin-top: 30px; position: sticky; bottom: 0; background-color: white; margin-bottom: -500px;">
                             <button @click="resetValues()" type="button" class="btn btn-secondary"
                                 data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="submit" :disabled="buttonToggler" class="btn btn-primary">Save</button>
                         </div>
                     </form>
                 </div>
@@ -134,7 +134,7 @@
     </div>
 
     <!--Modal for edit work log-->
-    <div data-bs-backdrop="static" v-show="editModalOpen" class="modal fade" ref="editWorklogModal" id="editWorklog"
+    <div data-bs-backdrop="static" class="modal fade" ref="editWorklogModal" id="editWorklog"
         tabindex="-1" aria-labelledby="editWorklogLable" aria-hidden="true" @hidden="removeBackdrop">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -197,6 +197,8 @@ export default {
             workLogs: [],
             updatedLog: [],
             timeTracking: '',
+            issueStatus:'',
+            buttonToggler:false
         }
     },
     computed: {
@@ -311,9 +313,11 @@ export default {
                 }
             }
         },
-        getDataFromIssuePage(issueID, sprintID) {
+        getDataFromIssuePage(issueID, sprintID, status) {
             this.sprintID = sprintID
             this.issueID = issueID
+            this.issueStatus = status
+
         },
         checkDurationValidity() {
             if (this.logTime) {
@@ -378,6 +382,7 @@ export default {
             try {
                 this.$store.commit('showLoader');
                 const quillHtml = this.$refs.editor
+                
                 if (quillHtml) {
                     this.logDescription = quillHtml.getHTML();
                 }
@@ -417,6 +422,15 @@ export default {
         },
         async getWorkLogs() {
             try {
+                if(this.issueStatus !== 'in_progress'){
+                    this.buttonToggler = true
+                    new Noty({
+                        type: 'error',
+                        text: "You can not add logs till status is to do or done",
+                        timeout: 2000,
+                    }).show();
+                    return
+                }
                 this.$store.commit('showLoader');
                 const response = await axios.get(`${BASE_URL}api/development/worklog?issue_id=${this.issueID}`, {
                     headers: {
