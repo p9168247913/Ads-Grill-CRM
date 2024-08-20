@@ -12,43 +12,47 @@ from django.db.models import Q
 from django.db import transaction
 from django.core.serializers import serialize
 import json
+import uuid
 
 def generateID():
-        try:
-            obj = Quotation.objects.order_by('-created_at').first()
-            if not obj:
-                id = "PRO00000-1"
-                return id
-            else:
-                idStr = int(obj.id.split("-")[1])
-                id = idStr+1
-                print(id, '')
-                count = countDigits(id)
-                print(count, '----------------')
-                if count == 1:
-                    return f"PRO00000-{id}"
-                elif count == 2:
-                    return f"PRO0000-{id}"
-                elif count == 3:
-                    return f"PRO000-{id}"
-                elif count == 4:
-                    return f"PRO00-{id}"
-                elif count == 5:
-                    return f"PRO0-{id}"
-                elif count == 6:
-                    return f"PRO-{id}"
-                else:
-                    return "max limit exceeds"
+    return str(uuid.uuid4())
+
+# def generateID():
+#         try:
+#             obj = Quotation.objects.order_by('-created_at').first()
+#             if not obj:
+#                 id = "PRO00000-1"
+#                 return id
+#             else:
+#                 idStr = int(obj.id.split("-")[1])
+#                 id = idStr+1
+#                 print(id, '')
+#                 count = countDigits(id)
+#                 print(count, '----------------')
+#                 if count == 1:
+#                     return f"PRO00000-{id}"
+#                 elif count == 2:
+#                     return f"PRO0000-{id}"
+#                 elif count == 3:
+#                     return f"PRO000-{id}"
+#                 elif count == 4:
+#                     return f"PRO00-{id}"
+#                 elif count == 5:
+#                     return f"PRO0-{id}"
+#                 elif count == 6:
+#                     return f"PRO-{id}"
+#                 else:
+#                     return "max limit exceeds"
                 
-        except Exception as e:
-            raise(str(e))
+#         except Exception as e:
+#             raise(str(e))
     
-def countDigits(id):
-    count = 0
-    while id:
-        id//=10
-        count+=1
-    return count
+# def countDigits(id):
+#     count = 0
+#     while id:
+#         id//=10
+#         count+=1
+#     return count
 
 class CsrfExemptSessionAuthentication(SessionAuthentication):
     def enforce_csrf(self, request):
@@ -147,7 +151,7 @@ class DisclaimerView(CsrfExemptMixin, APIView):
 
     def delete(self, request):
         try:
-            disclaimerID = request.GET.get('disclaimerID')
+            disclaimerID = request.GET.get('id')
             disclaimerInstance = Desclaimer.objects.get(pk=disclaimerID)
             with transaction.atomic():
                 disclaimerInstance.delete()
@@ -161,7 +165,7 @@ class DisclaimerView(CsrfExemptMixin, APIView):
 
     def put(self, request):
         try:    
-            disclaimerID = request.data.get('disclaimerID')
+            disclaimerID = request.data.get('id')
             title = request.data.get('title')
             desc = request.data.get('desc')
             if Desclaimer.objects.filter(title=title).exclude(pk=disclaimerID).exists():
@@ -206,7 +210,7 @@ class AboutusView(CsrfExemptMixin, APIView):
     
     def delete(self, request):
         try:
-            aboutUsId = request.GET.get('aboutUsId')
+            aboutUsId = request.GET.get('id')
             aboutUsInstance = About_us.objects.get(pk=aboutUsId)
             with transaction.atomic():
                 aboutUsInstance.delete()
@@ -219,7 +223,7 @@ class AboutusView(CsrfExemptMixin, APIView):
     
     def put(self, request):
         try:    
-            aboutUsId = request.data.get('aboutUsId')
+            aboutUsId = request.data.get('id')
             title = request.data.get('title')
             desc = request.data.get('desc')
             if About_us.objects.filter(title=title).exclude(pk=aboutUsId).exists():
@@ -265,7 +269,7 @@ class NdaView(CsrfExemptMixin, APIView):
     
     def delete(self, request):
         try:
-            ndaId = request.GET.get('ndaId')
+            ndaId = request.GET.get('id')
             ndaInstance = Nda.objects.get(pk=ndaId)
             with transaction.atomic():
                 ndaInstance.delete()
@@ -278,7 +282,7 @@ class NdaView(CsrfExemptMixin, APIView):
     
     def put(self, request):
         try:    
-            ndaId = request.data.get('ndaId')
+            ndaId = request.data.get('id')
             title = request.data.get('title')
             desc = request.data.get('desc')
             if Nda.objects.filter(title=title).exclude(pk=ndaId).exists():
@@ -398,7 +402,67 @@ class ProposalView(CsrfExemptMixin, APIView):
         
 
         except Exception as e:
-            return JsonResponse({"message":str(e)})
-        return JsonResponse({"message":quotData})
+            return JsonResponse({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message":quotData}, status=status.HTTP_200_OK)
+    
+    def delete(self, request):
+        try:
+            proposalID = request.GET.get('id')
+            proposalInstance = get_object_or_404(Quotation, pk=proposalID)
+            with transaction.atomic():
+                proposalInstance.delete()
 
+        except Exception as e:
+            return JsonResponse({'message': str(e)})
+        return JsonResponse({'message': 'Proposal deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+    def put(self, request):
+        try:
+            reqData = json.loads(request.body)
+            proposalID = reqData.get('id')
+            saleIns = get_object_or_404(Sale, pk=reqData.get('saleID'))
+            statusIns = get_object_or_404(QuotationStatus, pk=reqData.get('statusID'))
+            diclaimerIns = get_object_or_404(Desclaimer, pk=reqData.get('disclaimerID'))
+            aboutIns = get_object_or_404(About_us, pk=reqData.get('aboutID'))
+            ndaIns = get_object_or_404(Nda, pk=reqData.get('nda_id'))
+            project_type = reqData.get("project_type")
+            project_name = reqData.get('project_name')
+            project_cost = reqData.get('project_cost')
+            gst_details = reqData.get('gst_details')
+            milestones = reqData.get('milestones')
+            time_frame = reqData.get('time_frame')
+            project_ref = reqData.get('project_ref')
+            desc = reqData.get('desc')
+            objectives = reqData.get("objectives")
+            tech_specs = reqData.get('tech_specs')
+            api_specs = reqData.get('api_specs')
+
+            with transaction.atomic():
+                instance = get_object_or_404(Quotation, pk=proposalID)
+                instance.sale = saleIns
+                instance.status = statusIns
+                instance.desclaimer = diclaimerIns
+                instance.about_us = aboutIns
+                instance.nda = ndaIns
+                instance.project_type = project_type
+                instance.project_name = project_name
+                instance.project_cost = project_cost
+                instance.gst_details = gst_details
+                instance.milestone = milestones
+                instance.time_frame = time_frame
+                instance.project_ref = project_ref
+                instance.project_desc = desc
+                instance.objectives = objectives
+                instance.tech_specs = tech_specs
+                instance.api_info = api_specs
+                instance.save()
+
+        except IntegrityError as i:
+            return JsonResponse({'message': str(i)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse({"message": "Proposal updated successfully"}, status=status.HTTP_200_OK)
 
