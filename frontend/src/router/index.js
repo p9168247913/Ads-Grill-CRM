@@ -17,6 +17,10 @@ import ActiveSprint from '../components/ActiveSprint/ActiveSprint.vue'
 import ClientSignin from '.././views/ClientSignin.vue'
 import Template from '../components/Template/Template.vue'
 import Template2 from '../components/BaseTemplates/Template2.vue'
+import Proposal from '../components/proposal.vue'
+import Disclaimer from '../components/DisclaimerView.vue'
+import AboutTemplate from '../components/AboutTemplateView.vue'
+import NDATemplate from '../components/NdaTemplateView.vue'
 
 const routes = [
   {
@@ -114,6 +118,26 @@ const routes = [
     path: "/template2",
     name: 'Template 2',
     component: Template2,
+  },
+  {
+    path: "/proposal",
+    name: 'Proposal',
+    component: Proposal,
+  },
+  {
+    path: "/disclaimer",
+    name: 'disclaimerview',
+    component: Disclaimer,
+  },
+  {
+    path: "/abouttemplate",
+    name: 'abouttemplateview',
+    component: AboutTemplate,
+  },
+  {
+    path: "/ndatemplate",
+    name: 'ndatemplateview',
+    component: NDATemplate,
   },
 ];
 

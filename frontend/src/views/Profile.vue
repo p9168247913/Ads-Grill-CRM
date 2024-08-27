@@ -179,7 +179,7 @@ export default {
     ...mapActions(["logout"]),
     getProfilePic(manager) {
       return manager.profile_pic ? `data:image/jpeg;base64,${manager.profile_pic}` : defaultProfilePic;
-    },
+    }, 
     toggleShowClass() {
       this.isshowActivated = !this.isshowActivated;
     },

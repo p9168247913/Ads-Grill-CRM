@@ -66,7 +66,6 @@ class LeadView(CsrfExemptMixin, APIView):
                             email=lead_data.get('email'),
                             requirement=lead_data.get('requirement')
                         )
-                        create_lead.save()
                 except IntegrityError as i:
                     return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
                 return JsonResponse({'message':'Lead created successfully'},status=status.HTTP_201_CREATED)
@@ -124,7 +123,6 @@ class LeadView(CsrfExemptMixin, APIView):
                                         email=xl_email,
                                         requirement=xl_requirement
                                     )
-                                    create_lead.save()
                             database_response = {"message":f"{up_file.name} uploaded successfully", "status":status.HTTP_201_CREATED}
 
                     except IntegrityError as i:
@@ -304,7 +302,6 @@ class LeadInfo(CsrfExemptMixin, APIView):
             try:
                 with transaction.atomic():
                     leadStatusInstance = LeadStatus.objects.create(name=name)
-                    leadStatusInstance.save()
                     return JsonResponse({'message':'Lead status created successfully'}, status=status.HTTP_201_CREATED)
             except IntegrityError as i:
                 return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
@@ -313,7 +310,6 @@ class LeadInfo(CsrfExemptMixin, APIView):
             try:
                 with transaction.atomic():
                     leadTagInstance = Tag.objects.create(name=name)
-                    leadTagInstance.save()
                     return JsonResponse({'message':'Lead Tag Created Successfully'}, status=status.HTTP_201_CREATED)
             except IntegrityError as i:
                 return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)
@@ -322,7 +318,6 @@ class LeadInfo(CsrfExemptMixin, APIView):
             try: 
                 with transaction.atomic():
                     leadSourceInstance = Source.objects.create(name=name)
-                    leadSourceInstance.save()
                     return JsonResponse({'message':'Lead Source Created Successfully'}, status=status.HTTP_201_CREATED)
             except IntegrityError as i:
                 return JsonResponse({'message':str(i)}, status=status.HTTP_400_BAD_REQUEST)

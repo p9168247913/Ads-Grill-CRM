@@ -3,7 +3,7 @@
     <ul class="navbar-nav" v-if="authUser.role !== 'client' || authUser.role!=='contact'">
 
       <!--Dashboard-->
-      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'contact'">
+      <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'contact'">
         <sidenav-item url="/dashboard" :class="getRoute() === 'dashboard' ? 'active' : ''"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Dashboard'">
           <template v-slot:icon>
@@ -13,7 +13,7 @@
       </li>
 
       <!-- Employee -->
-      <li v-if="authUser.role!== 'contact'" @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item"
+      <li v-if="authUser.role!== 'contact' && authUser.role!=='client'" @click="isAreaExpendedTogeller(), colapseShowTogeller(), toggleEmploymentDropdown()" class="nav-item"
         :class="{ 'active': isEmployeeActive }">
         <sidenav-item url="" :class="{ 'collapsed': isCollapseShow }"
           :navText="this.$store.state.isRTL ? 'لوحة القيادة' : 'Employees'" data-toggle="collapse"
@@ -80,7 +80,7 @@
           </template>
           <router-link to="/projects">Projects</router-link>
         </sidenav-item>
-      </li>
+      </li>                                                                      
 
       <!--Active Sprints-->
       <li class="nav-item" v-if="authUser.role !== 'leads' && authUser.role !== 'sales' && authUser.role !== 'contact' && authUser.role !== 'client'">
@@ -112,6 +112,48 @@
             <i class="fas fa-exclamation-circle text-info text-sm opacity-10"></i>
           </template>
           <router-link to="/issues">Issues</router-link>
+        </sidenav-item>
+      </li>
+
+      <!--Proposal-->
+      <!-- <li class="nav-item" v-if="authUser.role !== 'development' && authUser.role !== 'client' && authUser.role !== 'super-admin' && authUser.role !== 'contact'"> -->
+      <li class="nav-item" v-if="authUser.role=='admin' || authUser.designation=='sales_manager' || authUser.designation=='sales_associate' || authUser.role=='super-admin' ">
+        <sidenav-item url="/proposal" :class="getRoute() === 'issues' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Proposal'">
+          <template v-slot:icon>
+            <!-- <i class="fas fa-pen-nib text-sm opacity-10"></i> -->
+            <i class="fas fa-handshake text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
+      <!--Disclaimer View-->
+      <li class="nav-item" v-if="authUser.role=='admin' || authUser.designation=='sales_manager'">
+        <sidenav-item url="/disclaimer" :class="getRoute() === 'issues' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'Disclamer Template'">
+          <template v-slot:icon>
+            <i class="fas fa-pen-nib text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
+      <!--About Template View-->
+      <li class="nav-item" v-if="authUser.role=='admin' || authUser.designation=='sales_manager'">
+        <sidenav-item url="/abouttemplate" :class="getRoute() === 'issues' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'About Template'">
+          <template v-slot:icon>
+            <i class="fas fa-pen-nib text-primary text-sm opacity-10"></i>
+          </template>
+        </sidenav-item>
+      </li>
+
+      <!--NDA Template View-->
+      <li class="nav-item" v-if="authUser.role=='admin' || authUser.designation=='sales_manager'">
+        <sidenav-item url="/ndatemplate" :class="getRoute() === 'issues' ? 'active' : ''"
+          :navText="this.$store.state.isRTL ? 'مشاريع نشطة' : 'NDA Template'">
+          <template v-slot:icon>
+            <i class="fas fa-pen-nib text-primary text-sm opacity-10"></i>
+          </template>
         </sidenav-item>
       </li>
 
@@ -265,9 +307,9 @@ export default {
       if (this.getRoute() === 'development' ||
         this.getRoute() === 'sales' ||
         this.getRoute() === 'hrms') {
-        console.log(true)
+        return true
       } else {
-        console.log(false)
+        return false
       }
     },
     colapseShowTogeller() {
